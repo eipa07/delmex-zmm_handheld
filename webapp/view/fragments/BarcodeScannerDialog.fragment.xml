@@ -1,0 +1,18 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog
+        id="barcodeScannerDialog"
+        title="Escanear Código de Barras"
+        stretchOnPhone="true"
+        contentHeight="350px"
+        afterClose=".onScannerDialogClosed">
+
+        <VBox class="sapUiSmallMargin">
+            <core:HTML id="scannerHtml" afterRendering=".onScannerHtmlRendered"/>
+
+        </VBox>
+
+        <beginButton>
+            <Button text="Cancelar" press=".onCloseScannerDialog" />
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

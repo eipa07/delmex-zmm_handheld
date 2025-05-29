@@ -1,0 +1,40 @@
+<mvc:View controllerName="delmex.zmmhandheld.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:html="http://www.w3.org/1999/xhtml">
+
+    <tnt:ToolHeader>
+        <ToolbarSpacer />
+        <Title
+            titleStyle="H4"
+            text="{i18n>title}"
+            class="sapUiSmallMargin"
+            id="titleText" />
+        <ToolbarSpacer />
+    </tnt:ToolHeader>
+    
+    <IconTabBar>
+        <items>
+            <!-- Sección Cabecera -->
+            <IconTabFilter text="Cabecera">
+                <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.Cabecera" type="XML"/>
+            </IconTabFilter>
+
+            <!-- Sección Datos de posición -->
+            <IconTabFilter text="Datos de posición">
+                <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.DatosDePosicion" type="XML"/>
+            </IconTabFilter>
+
+            <!-- Sección Orden Completa -->
+            <IconTabFilter text="Orden Completa">
+                <VBox>
+                    <Text text="Contenido de Orden Completa"/>
+                </VBox>
+            </IconTabFilter>
+        </items>
+    </IconTabBar>
+
+</mvc:View>

@@ -1,0 +1,14 @@
+<mvc:View
+  controllerName="delmex.zmmhandheld.controller.Detail"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m">
+  <Page title="Detalle"
+        showNavButton="true"
+        navButtonPress="onNavBack">
+    <VBox class="sapUiSmallMargin">
+      <Text text="{Nombre}" class="sapUiTinyMarginBottom"/>
+      <Text text="{Descripcion}" class="sapUiTinyMarginBottom"/>
+      <Text text="{Categoria}" class="sapUiTinyMarginBottom"/>
+    </VBox>
+  </Page>
+</mvc:View>

@@ -1,0 +1,59 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <VBox class="sapUiSmallMargin">
+
+        <VBox>
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Material" class="sapUiSmallMarginEnd"/>
+                <Input id="materialInput" placeholder="Material" class="sapUiTinyMarginBeginEnd" />
+                <Button icon="sap-icon://bar-code" tooltip="Escanear material" press=".onOpenScannerDialog"/>
+
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Cantidad" width="6em"/>
+                <Input placeholder="Cantidad" type="Number" width="10em"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="UM" width="6em"/>
+                <Input placeholder="UM" width="10em"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Lote" width="6em"/>
+                <Input placeholder="Lote" width="10em"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Centro" width="6em"/>
+                <Input placeholder="Centro" width="10em"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Almacén" width="6em"/>
+                <Input placeholder="Almacén" width="10em"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Ceco" width="6em"/>
+                <Input placeholder="Ceco" width="10em"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="Motivo" width="6em"/>
+                <Input placeholder="Motivo" width="10em"/>
+            </HBox>
+        </VBox>
+
+        <!-- Acción de botón -->
+        <Toolbar class="sapUiSmallMarginTop">
+            <Button text="Guardar" type="Accept"/>
+            <Button text="Cancelar" type="Reject"/>
+        </Toolbar>
+        
+    </VBox>
+</core:FragmentDefinition>
+

@@ -1,0 +1,48 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    
+    <VBox class="sapUiSmallMargin">
+        <HBox class="sapUiSmallMarginBottom">
+            <Label text="Salida de mercancía" width="10em"/>
+            <Input placeholder="Reserva" width="15em"/>
+        </HBox>
+        
+        <HBox class="sapUiSmallMarginBottom">
+            <Label text="Clase de Movimiento" width="10em"/>
+            <Select width="15em">
+                <items>
+                    <core:Item key="vacio" text="Vacío" />
+                    <core:Item key="orden" text="Orden" />
+                    <core:Item key="otros" text="Otros" />
+                </items>
+            </Select>
+        </HBox>
+
+        <HBox class="sapUiSmallMarginBottom">
+            <Label text="Fecha Documento" width="10em"/>
+            <DatePicker value="{path: '/currentDate'}" 
+                        valueFormat="yyyy-MM-dd" 
+                        displayFormat="MMM dd, yyyy"
+                        width="15em"/>
+        </HBox>
+
+        <HBox class="sapUiSmallMarginBottom">
+            <Label text="Fecha Contabilización" width="10em"/>
+            <DatePicker value="{path: '/currentDate'}" 
+                        valueFormat="yyyy-MM-dd" 
+                        displayFormat="MMM dd, yyyy"
+                        width="15em"/>
+        </HBox>
+
+        <HBox class="sapUiSmallMarginBottom">
+            <Label text="Referencia" width="10em"/>
+            <Input width="15em"/>
+        </HBox>
+
+        <HBox class="sapUiSmallMarginBottom">
+            <Label text="Texto Cabecera" width="10em"/>
+            <Input width="15em"/>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>
