@@ -1,0 +1,88 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <VBox class="sapUiSmallMargin" id="formVBox_orden">
+
+        <!-- 🧾 Datos generales (requestModel/Header) -->
+        <VBox class="sapUiSmallMarginBottom">
+            <HBox class="sapUiSmallMarginBottom" justifyContent="SpaceBetween">
+                <Label text="{i18n>header.operacion_almacen}" width="10em" />
+                <Text text="{= ${requestModel>/Header/claseMov} === '0' ? '' : ${requestModel>/Header/claseMov} + ' - ' + ${localModel>/selectedKeys/textClaseMov} }" />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom" justifyContent="SpaceBetween">
+                <Label text="{i18n>labelFechaDoc}" width="10em" />
+                <Text text="{requestModel>/Header/fecha_doc}" />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom" justifyContent="SpaceBetween">
+                <Label text="{i18n>labelFechaCont}" width="10em" />
+                <Text text="{requestModel>/Header/fecha_cont}" />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom" justifyContent="SpaceBetween">
+                <Label text="{i18n>labelReferencia}" width="10em" />
+                <Text text="{requestModel>/Header/referencia}" />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom" justifyContent="SpaceBetween">
+                <Label text="{i18n>labelTextoCabecera}" width="10em" />
+                <Text text="{requestModel>/Header/texto_cabecera}" />
+            </HBox>
+        </VBox>
+
+        <!-- 📊 Contador de posiciones -->
+        <Text
+            id="posCountText"
+            text="{localModel>/posicionesTexto}"
+            class="sapUiSmallMarginTop"
+            textAlign="End"
+        />
+
+        <!-- 📋 Tabla de posiciones -->
+        <Table
+            id="tablePositions"
+            items="{
+                path: 'localModel>/Positions'
+            }"
+            inset="false"
+            fixedLayout="false"
+            class="sapUiResponsiveMargin"
+        >
+            <columns>
+                <Column><Text text="{i18n>columnMaterial}" /></Column>
+                <Column><Text text="{i18n>columnCantidad}" /></Column>
+                <Column><Text text="{i18n>columnUM}" /></Column>
+                <Column><Text text="{i18n>columnLote}" /></Column>
+                <Column><Text text="{i18n>columnCentro}" /></Column>
+                <Column><Text text="{i18n>columnAlmacen}" /></Column>
+                <Column><Text text="{i18n>columnCeco}" /></Column>
+                <Column><Text text="{i18n>columnMotivo}" /></Column>
+                <Column><Text text="{i18n>columnEliminar}" /></Column>
+            </columns>
+
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{localModel>material}" />
+                        <Text text="{localModel>cantidad}" />
+                        <Text text="{localModel>um}" />
+                        <Text text="{localModel>lote}" />
+                        <Text text="{localModel>centro}" />
+                        <Text text="{localModel>almacen}" />
+                        <Text text="{localModel>ceco}" />
+                        <Text text="{localModel>motivo}" />
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Reject"
+                            tooltip="{i18n>tooltipEliminar}"
+                            press=".onEliminarPosicion"
+                        />
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+
+    </VBox>
+</core:FragmentDefinition>

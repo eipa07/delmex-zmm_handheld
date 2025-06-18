@@ -1,59 +1,96 @@
 <core:FragmentDefinition
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns:i18n="sap.ui.model.resource.ResourceModel">
 
-    <VBox class="sapUiSmallMargin">
+    <VBox class="sapUiSmallMargin" id="formVBox">
 
         <VBox>
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Material" class="sapUiSmallMarginEnd"/>
-                <Input id="materialInput" placeholder="Material" class="sapUiTinyMarginBeginEnd" />
-                <Button icon="sap-icon://bar-code" tooltip="Escanear material" press=".onOpenScannerDialog"/>
-
+                <Label text="{i18n>position.material}" width="9.5em"/>
+                <Input id="materialInput"
+                       placeholder="{i18n>position.material.placeholder}"
+                       class="sapUiTinyMarginBeginEnd"
+                       value="{localModel>/DataPosition/material}"/>
+                <Button icon="sap-icon://bar-code"
+                        tooltip="{i18n>position.material.tooltip}"
+                        press=".onOpenScannerDialog"
+                        visible="false"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Cantidad" width="6em"/>
-                <Input placeholder="Cantidad" type="Number" width="10em"/>
+                <Label text="{i18n>position.cantidad}" width="10em"/>
+                <Input id="cantidadInput"
+                       placeholder="{i18n>position.cantidad.placeholder}"
+                       type="Number"
+                       width="10em"
+                       value="{localModel>/DataPosition/cantidad}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="UM" width="6em"/>
-                <Input placeholder="UM" width="10em"/>
+                <Label text="{i18n>position.um}" width="10em"/>
+                <Input id="umInput"
+                       placeholder="{i18n>position.um.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/um}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Lote" width="6em"/>
-                <Input placeholder="Lote" width="10em"/>
+                <Label text="{i18n>position.lote}" width="10em"/>
+                <Input id="loteInput"
+                       placeholder="{i18n>position.lote.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/lote}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Centro" width="6em"/>
-                <Input placeholder="Centro" width="10em"/>
+                <Label text="{i18n>position.centro}" width="10em"/>
+                <Input id="centroInput"
+                       placeholder="{i18n>position.centro.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/centro}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Almacén" width="6em"/>
-                <Input placeholder="Almacén" width="10em"/>
+                <Label text="{i18n>position.almacen}" width="10em"/>
+                <Input id="almacenInput"
+                       placeholder="{i18n>position.almacen.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/almacen}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Ceco" width="6em"/>
-                <Input placeholder="Ceco" width="10em"/>
+                <Label text="{i18n>position.ceco}" width="10em"/>
+                <Input id="cecoInput"
+                       placeholder="{i18n>position.ceco.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/ceco}"
+                       editable="{oDisplayModel>/Posiciones/ceco}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="Motivo" width="6em"/>
-                <Input placeholder="Motivo" width="10em"/>
+                <Label text="{i18n>position.motivo}" width="10em"/>
+                <Input id="motivoInput"
+                       placeholder="{i18n>position.motivo.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/motivo}"
+                       editable="{oDisplayModel>/Posiciones/motivo}"/>
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label text="{i18n>position.txt_posicion}" width="10em"/>
+                <TextArea id="txtPosicionInput"
+                       placeholder="{i18n>position.txt_posicion.placeholder}"
+                       width="10em"
+                       value="{localModel>/DataPosition/txt_posicion}"
+                       rows="5"/>
             </HBox>
         </VBox>
 
-        <!-- Acción de botón -->
         <Toolbar class="sapUiSmallMarginTop">
-            <Button text="Guardar" type="Accept"/>
-            <Button text="Cancelar" type="Reject"/>
+            <Button text="{i18n>position.guardar}" type="Accept" press=".onSavePosition"/>
+            <Button text="{i18n>position.cancelar}" type="Reject" press=".onClearPosition"/>
         </Toolbar>
-        
+
     </VBox>
 </core:FragmentDefinition>
-

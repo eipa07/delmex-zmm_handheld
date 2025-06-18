@@ -23,22 +23,22 @@ server:
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-appreload
       configuration:
-        component: delmex.zmmhandheld
-        ui5Theme: sap_horizon
+        flp:
+          theme: sap_fiori_3
     - name: fiori-tools-proxy
       afterMiddleware: compression
       configuration:
         ignoreCertError: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
         backend:
           - path: /sap
-            url: https://my64786668.payroll.hr.cloud.sap
-            destination: PAYROLL
+            url: https://my413406-api.s4hana.cloud.sap
+            destination: HandHeld_dev
     - name: sap-fe-mockserver
       beforeMiddleware: csp
       configuration:
         mountPath: /
         services:
-          - urlPath: /sap/opu/odata/sap/ZBASC_SRV
+          - urlPath: /sap/opu/odata/sap/ZSB_HANDHELD_V2
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
             generateMockData: true

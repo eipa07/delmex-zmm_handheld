@@ -16,9 +16,12 @@ server:
             - /test-resources
           url: https://ui5.sap.com
         backend:
-          - path: /sap
-            url: https://my64786668.payroll.hr.cloud.sap
-            destination: PAYROLL
+          - path: /sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_apiproduct_dev
+          - path: /sap/opu/odata/sap/ZSB_HANDHELD_V2
+            url: https://my413406-api.s4hana.cloud.sap
+            destination: HandHeld_dev
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
@@ -28,5 +31,5 @@ server:
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-appreload
       configuration:
-        component: delmex.zmmhandheld
-        ui5Theme: sap_horizon
+        flp:
+          theme: sap_fiori_3

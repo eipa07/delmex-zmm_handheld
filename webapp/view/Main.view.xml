@@ -30,9 +30,7 @@
 
             <!-- Sección Orden Completa -->
             <IconTabFilter text="Orden Completa">
-                <VBox>
-                    <Text text="Contenido de Orden Completa"/>
-                </VBox>
+                <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.Orden" type="XML"/>
             </IconTabFilter>
         </items>
     </IconTabBar>

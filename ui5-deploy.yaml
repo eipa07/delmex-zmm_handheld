@@ -22,5 +22,6 @@ builder:
       afterTask: generateCachebusterInfo
       configuration:
         archiveName: delmexzmmhandheld
+        relativePaths: true
         additionalFiles:
           - xs-app.json

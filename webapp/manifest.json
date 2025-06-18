@@ -17,12 +17,34 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/sap/opu/odata/sap/ZBASC_SRV/",
+        "uri": "/sap/opu/odata/sap/ZSB_HANDHELD_V2/",
         "type": "OData",
         "settings": {
           "annotations": [],
           "localUri": "localService/mainService/metadata.xml",
           "odataVersion": "2.0"
+        }
+      },
+      "productApi": {
+        "uri": "/sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/productApi/metadata_api_product.xml",
+          "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "handheld-display": {
+          "semanticObject": "handheld",
+          "action": "display",
+          "title": "{{handheld-display.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
         }
       }
     }
@@ -64,10 +86,21 @@
           "bundleName": "delmex.zmmhandheld.i18n.i18n"
         }
       },
-      "": {
+      "ZSB_HANDHELD_V2": {
         "dataSource": "mainService",
         "preload": true,
-        "settings": {}
+        "settings": {
+
+        }
+      },
+      "productApi": {
+        "dataSource": "productApi",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
       }
     },
     "resources": {
@@ -75,7 +108,13 @@
         {
           "uri": "css/style.css"
         }
+      ],
+      "json": [
+        {
+          "uri": "utils/DisplayConfiguration.json"
+        }
       ]
+      
     },
     "routing": {
       "config": {
