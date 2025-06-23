@@ -22,6 +22,12 @@ server:
           - path: /sap/opu/odata/sap/ZSB_HANDHELD_V2
             url: https://my413406-api.s4hana.cloud.sap
             destination: HandHeld_dev
+          - path: /sap/opu/odata/sap/API_BATCH_SRV
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_Batch_dev
+          - path: /sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_orders_dev
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:

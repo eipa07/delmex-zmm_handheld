@@ -6,33 +6,39 @@
     xmlns:core="sap.ui.core"
     xmlns:html="http://www.w3.org/1999/xhtml">
 
-    <tnt:ToolHeader>
-        <ToolbarSpacer />
-        <Title
-            titleStyle="H4"
-            text="{i18n>title}"
-            class="sapUiSmallMargin"
-            id="titleText" />
-        <ToolbarSpacer />
-    </tnt:ToolHeader>
-    
-    <IconTabBar>
-        <items>
-            <!-- Sección Cabecera -->
-            <IconTabFilter text="Cabecera">
-                <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.Cabecera" type="XML"/>
-            </IconTabFilter>
+    <Page id="mainPage" enableScrolling="true" showHeader="false">
+        <subHeader>
+            <tnt:ToolHeader>
+                <ToolbarSpacer />
+                <Title
+                    titleStyle="H4"
+                    text="{i18n>title}"
+                    class="sapUiSmallMargin"
+                    id="titleText" />
+                <ToolbarSpacer />
+            </tnt:ToolHeader>
+        </subHeader>
 
-            <!-- Sección Datos de posición -->
-            <IconTabFilter text="Datos de posición">
-                <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.DatosDePosicion" type="XML"/>
-            </IconTabFilter>
+        <content>
+            <IconTabBar id="mainTabs" expandable="false" class="sapUiResponsiveMargin">
+                <items>
+                    <!-- Sección Cabecera -->
+                    <IconTabFilter text="Cabecera" key="cabecera">
+                        <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.Cabecera" type="XML" />
+                    </IconTabFilter>
 
-            <!-- Sección Orden Completa -->
-            <IconTabFilter text="Orden Completa">
-                <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.Orden" type="XML"/>
-            </IconTabFilter>
-        </items>
-    </IconTabBar>
+                    <!-- Sección Datos de posición -->
+                    <IconTabFilter text="Datos de posición" key="datos">
+                        <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.DatosDePosicion" type="XML" />
+                    </IconTabFilter>
+
+                    <!-- Sección Orden Completa -->
+                    <IconTabFilter text="Orden Completa" key="orden">
+                        <core:Fragment fragmentName="delmex.zmmhandheld.view.fragments.Orden" type="XML" />
+                    </IconTabFilter>
+                </items>
+            </IconTabBar>
+        </content>
+    </Page>
 
 </mvc:View>

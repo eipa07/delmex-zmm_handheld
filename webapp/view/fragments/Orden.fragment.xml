@@ -43,22 +43,23 @@
         <!-- 📋 Tabla de posiciones -->
         <Table
             id="tablePositions"
-            items="{
-                path: 'localModel>/Positions'
-            }"
+            items="{ path: 'localModel>/Positions' }"
             inset="false"
             fixedLayout="false"
-            class="sapUiResponsiveMargin"
+            class="sapUiResponsiveMargin sapUiSizeCompact"
+            growing="true"
+            growingScrollToLoad="true"
         >
             <columns>
                 <Column><Text text="{i18n>columnMaterial}" /></Column>
                 <Column><Text text="{i18n>columnCantidad}" /></Column>
-                <Column><Text text="{i18n>columnUM}" /></Column>
-                <Column><Text text="{i18n>columnLote}" /></Column>
-                <Column><Text text="{i18n>columnCentro}" /></Column>
-                <Column><Text text="{i18n>columnAlmacen}" /></Column>
-                <Column><Text text="{i18n>columnCeco}" /></Column>
-                <Column><Text text="{i18n>columnMotivo}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnUM}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnLote}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCentro}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnAlmacen}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCeco}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnMotivo}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoPosicion}" /></Column>
                 <Column><Text text="{i18n>columnEliminar}" /></Column>
             </columns>
 
@@ -73,16 +74,13 @@
                         <Text text="{localModel>almacen}" />
                         <Text text="{localModel>ceco}" />
                         <Text text="{localModel>motivo}" />
-                        <Button
-                            icon="sap-icon://delete"
-                            type="Reject"
-                            tooltip="{i18n>tooltipEliminar}"
-                            press=".onEliminarPosicion"
-                        />
+                        <Text text="{localModel>txt_posicion}" wrapping="true" />
+                        <Button icon="sap-icon://delete" type="Reject" tooltip="{i18n>tooltipEliminar}" press=".onEliminarPosicion"/>
                     </cells>
                 </ColumnListItem>
             </items>
         </Table>
+
 
     </VBox>
 </core:FragmentDefinition>

@@ -4,8 +4,10 @@ sap.ui.define([
     "sap/ui/core/UIComponent",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, History, UIComponent, MessageToast, MessageBox, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+], function (Controller, History, UIComponent, MessageToast, MessageBox, JSONModel, Filter, FilterOperator) {
     "use strict";
 
     return Controller.extend("delmex.zmmhandheld.controller.BaseController", {
@@ -13,12 +15,6 @@ sap.ui.define([
 
         getLocalModel: function () {
             const oModel = new JSONModel({
-                claseMov: [
-                    { key: "201", value: "Reserva" },
-                    { key: "261", value: "Orden" },
-                    { key: "551", value: "Desguace" }
-                ],
-
                 selectedKeys: {
                     claseMov: "",
                     textClaseMov: ""
@@ -31,14 +27,17 @@ sap.ui.define([
                     centro: "",
                     almacen: "",
                     ceco: "",
-                    motivo: ""
+                    motivo: "",
+                    txt_posicion: "",
+                    txt_posicion_historico: "",
+                    cantidad_disponible: 0
                 },
                 posicionesTexto: "Total: 0 posiciones"
             });
             return oModel;
         },
 
-        getRequestModel(){
+        getRequestModel() {
 
             const oModel = new JSONModel({
                 Header: {
@@ -47,13 +46,14 @@ sap.ui.define([
                     fecha_doc: "",
                     fecha_cont: "",
                     referencia: "",
-                    texto_cabecera: ""
+                    texto_cabecera: "",
+                    cantidad_disponible: ""
                 },
                 Positions: []
-              });
-              return oModel;
+            });
+            return oModel;
         },
-        
+
 
         /**
          * Devuelve el enrutador de la aplicación.
@@ -144,7 +144,191 @@ sap.ui.define([
                 return new sap.ui.model.Filter(sPath, "LE", sHigh);
             }
             return null;
+        },
+
+        /**
+         * Extrae mensaje legible desde el error AJAX (jQuery).
+         *
+         * @param {object} jqXHR - Objeto de error de la petición.
+         * @param {object} oBundle - Bundle i18n para mensajes internacionalizados.
+         * @returns {string} - Mensaje a mostrar al usuario.
+         */
+        _getAjaxErrorMessage: function (jqXHR, oBundle) {
+            try {
+                const oResponse = JSON.parse(jqXHR.responseText);
+                return oResponse.error?.message || oBundle.getText("error.backend");
+            } catch (e) {
+                return oBundle.getText("error.parse");
+            }
+        },
+
+        /**
+         * Muestra un MessageBox de error con un mensaje personalizado.
+         *
+         * @param {string} sMessage - Mensaje a mostrar.
+         * @param {object} oBundle - Recurso i18n para obtener textos internacionalizados.
+         */
+        _showErrorMessage: function (sMessage, oBundle) {
+            sap.m.MessageBox.error(sMessage, {
+                title: oBundle.getText("error.title")
+            });
+        },
+
+
+        /**
+         * Lee todos los registros de una entidad OData V4 en bloques de 5000 registros usando AJAX.
+         * Se basa en $count para saber el total y usa $skip + $top para paginar.
+         *
+         * @param {string} sModelName - Nombre del modelo OData registrado (por ejemplo: "productApi").
+         * @param {string} sEntitySet - Nombre del entity set (por ejemplo: "ProductPlant").
+         * @param {int} [iPageSize=5000] - Tamaño de cada bloque a recuperar.
+         * @returns {Promise<Array>} - Array con todos los registros concatenados.
+         */
+        readAllPagedAjax: async function (sModelName, sEntitySet, iPageSize = 5000) {
+            const oModel = this.getOwnerComponent().getModel(sModelName);
+            const oBundle = this.getResourceBundle();
+
+            if (!oModel) {
+                throw new Error(`Modelo '${sModelName}' no encontrado.`);
+            }
+
+            const sBaseUrl = oModel.sServiceUrl;
+
+            /**
+             * Paso 1: Obtener el total de registros usando $count
+             */
+            const getTotalCount = async () => {
+                const sUrl = `${sBaseUrl}/${sEntitySet}/$count`;
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: sUrl,
+                        method: "GET",
+                        success: (data) => resolve(parseInt(data, 10)),
+                        error: (jqXHR) => {
+                            const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                            this._showErrorMessage(sMessage, oBundle);
+                            reject(jqXHR);
+                        }
+                    });
+                });
+            };
+
+            /**
+             * Paso 2: Obtener un bloque de datos con $skip y $top
+             */
+            const fetchBlock = async (iSkip) => {
+                const sUrl = `${sBaseUrl}/${sEntitySet}?$skip=${iSkip}&$top=${iPageSize}`;
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: sUrl,
+                        method: "GET",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: (oData) => resolve(oData.value || []),
+                        error: (jqXHR) => {
+                            const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                            this._showErrorMessage(sMessage, oBundle);
+                            reject(jqXHR);
+                        }
+                    });
+                });
+            };
+
+            // Paso 3: Loop para obtener todos los bloques
+            try {
+                const iTotal = await getTotalCount();
+                const aResults = [];
+                let iFetched = 0;
+
+                while (iFetched < iTotal) {
+                    const aBlock = await fetchBlock(iFetched);
+                    aResults.push(...aBlock);
+                    iFetched += iPageSize;
+                }
+
+                return aResults;
+            } catch (e) {
+                throw e;
+            }
+        },
+
+
+        /**
+         * Consulta un solo registro de una entidad OData V4 usando AJAX.
+         *
+         * @param {string} sModelName - Nombre del modelo OData registrado (por ejemplo: "productApi").
+         * @param {string} sEntitySet - Nombre del entity set (por ejemplo: "ProductPlant").
+         * @param {string} sKey - Clave del registro a consultar, en formato simple (ej. 'ID001') o compuesto si lo armas tú.
+         * @returns {Promise<Object>} - Objeto con los datos del registro solicitado.
+         */
+        readOneAjax: async function (sModelName, sEntitySet, sKey, sFilter_flag = false) {
+            const oModel = this.getOwnerComponent().getModel(sModelName);
+            const oBundle = this.getResourceBundle();
+
+            if (!oModel) {
+                throw new Error(`Modelo '${sModelName}' no encontrado.`);
+            }
+
+            const sBaseUrl = oModel.sServiceUrl;
+            let sUrl = '';
+            var _filters = [];
+
+            if (!sFilter_flag) {
+                sUrl = `${sBaseUrl}${sEntitySet}('${sKey}')`;
+            } else {
+                
+                _filters = this.getFilters(sKey);
+                sUrl = `${sBaseUrl}/${sEntitySet}/${_filters}`;
+            }
+
+
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: sUrl,
+                    filters: _filters,
+                    method: "GET",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (oData) {
+                        resolve(oData);
+                    },
+                    error: (jqXHR) => {
+                        const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                        this._showErrorMessage(sMessage, oBundle);
+                        reject(jqXHR);
+                    }
+                });
+            });
+        },
+
+        getFilters: function (sKey) {
+
+            let aFilters = [];
+            if (sKey) {
+                aFilters.push(new Filter("ManufacturingOrder", FilterOperator.EQ, sKey));
+            }
+            //return aFilters;
+
+            let sFilterStr = this.buildFilterString(aFilters);
+            let sUrl = `?$filter=${encodeURIComponent(sFilterStr)}`;
+
+            return sUrl;
+
+
+        },
+
+        buildFilterString: function (aFilters) {
+            return aFilters.map(f => `${f.sPath} ${f.sOperator.toLowerCase()} '${f.oValue1}'`).join(" and ");
         }
+
+
+
+
+
+
+
+
+
 
     });
 });

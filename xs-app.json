@@ -8,12 +8,25 @@
         "destination": "HandHeld_apiproduct_dev",
         "authenticationType": "xsuaa",
         "csrfProtection": false
-      }
-      ,
+      },
       {
         "source": "^/sap/opu/odata/sap/ZSB_HANDHELD_V2/(.*)$",
         "target": "/sap/opu/odata/sap/ZSB_HANDHELD_V2/$1",
         "destination": "HandHeld_dev",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
+        "source": "^/sap/opu/odata/sap/API_BATCH_SRV/(.*)$",
+        "target": "/sap/opu/odata/sap/API_BATCH_SRV/$1",
+        "destination": "HandHeld_Batch_dev",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
+        "source": "^/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV/(.*)$",
+        "target": "/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV/$1",
+        "destination": "HandHeld_orders_dev",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },

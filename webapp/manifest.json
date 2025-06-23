@@ -33,6 +33,24 @@
           "localUri": "localService/productApi/metadata_api_product.xml",
           "odataVersion": "4.0"
         }
+      },
+      "batchApi": {
+        "uri": "/sap/opu/odata/sap/API_BATCH_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/productApi/metadata_api_batch.xml",
+          "odataVersion": "4.0"
+        }
+      },
+      "API_PRODUCTION_ORDER_2_SRV": {
+        "uri": "/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/productApi/metadata_API_PRODUCTION_ORDER_2_SRV.xml",
+          "odataVersion": "4.0"
+        }
       }
     },
     "crossNavigation": {
@@ -90,11 +108,29 @@
         "dataSource": "mainService",
         "preload": true,
         "settings": {
-
+          "useBatch": false
         }
       },
       "productApi": {
         "dataSource": "productApi",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "batchApi": {
+        "dataSource": "batchApi",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "API_PRODUCTION_ORDER_2_SRV": {
+        "dataSource": "API_PRODUCTION_ORDER_2_SRV",
         "preload": true,
         "settings": {
           "operationMode": "Server",

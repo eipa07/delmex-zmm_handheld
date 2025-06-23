@@ -41,6 +41,14 @@ sap.ui.define([
                 console.log(odisplayModel);
 
 
+                try {
+                    // 1. Intenta consultar la entidad con una clave de ejemplo
+                    this._loadAllPlantsPaginated();
+                } catch (e) {
+                    // 3. El error ya fue manejado internamente con MessageBox
+                }
+
+
             },
 
             onOpenScannerDialog: function () {
@@ -231,13 +239,13 @@ sap.ui.define([
                 const c_262 = '262';
                 const c_999 = "999"
 
-                if(oSelectedKey === c_601 || oSelectedKey === c_602){
+                if (oSelectedKey === c_601 || oSelectedKey === c_602) {
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", false);
                     this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", true);
                 }
 
-                if(oSelectedKey === c_551 || oSelectedKey === c_552 || oSelectedKey === c_201 || oSelectedKey === c_202 || oSelectedKey === c_999){
+                if (oSelectedKey === c_551 || oSelectedKey === c_552 || oSelectedKey === c_201 || oSelectedKey === c_202 || oSelectedKey === c_999) {
                     this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", false);
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
@@ -248,6 +256,7 @@ sap.ui.define([
 
             onGuardarFormulario: function () {
                 const oView = this.getView();
+                let oCantidad = Fragment.byId("scanner", "cantidadInput").getValue();
 
                 const oData = {
                     material: Fragment.byId("scanner", "materialInput").getValue(),
@@ -308,23 +317,35 @@ sap.ui.define([
 
             onSavePosition: function () {
 
-                let oModel = this.getOwnerComponent().getModel("localModel").getData().DataPosition;
-                let _position = {
-                    material: oModel.material,
-                    cantidad: oModel.cantidad,
-                    um: oModel.um,
-                    lote: oModel.lote,
-                    centro: oModel.centro,
-                    almacen: oModel.almacen,
-                    ceco: oModel.ceco,
-                    motivo: oModel.motivo
+                if(!this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad")){
+                    let oInputCantidad = this.getView().byId("cantidadInput").getValue();
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", oInputCantidad);
                 }
-                oPositions.push(_position);
-                let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                oLocalModel.setProperty("/Positions", oPositions);
-                this._actualizarContadorPosiciones();
 
-                console.log(oLocalModel.getProperty("/Positions"));
+                let oModel = this.getOwnerComponent().getModel("localModel").getData().DataPosition;
+                
+                let flagCantidad = this.validarCantidad(parseFloat(oModel.cantidad), parseFloat(oModel.cantidad_disponible));
+
+                if (flagCantidad) {
+                    let _position = {
+                        material: oModel.material,
+                        cantidad: oModel.cantidad,
+                        um: oModel.um,
+                        lote: oModel.lote,
+                        centro: oModel.centro,
+                        almacen: oModel.almacen,
+                        ceco: oModel.ceco,
+                        motivo: oModel.motivo,
+                        txt_posicion: oModel.txt_posicion
+                    }
+                    oPositions.push(_position);
+                    let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                    oLocalModel.setProperty("/Positions", oPositions);
+                    this._actualizarContadorPosiciones();
+
+                    console.log(oLocalModel.getProperty("/Positions"));
+                }
+
 
 
             },
@@ -386,7 +407,132 @@ sap.ui.define([
                 this.getView().byId("header_input_fecha_cont").setValue();
                 this.getView().byId("header_input_fecha_referencia").setValue();
                 this.getView().byId("header_input_fecha_texto_cabecera").setValue();
+            },
+
+            /**
+             * Carga datos desde AJAX y los imprime (o enlaza a modelo).
+             */
+            _loadAllPlantsPaginated: async function () {
+                try {
+                    const aPlants = await this.readAllPagedAjax();
+                    console.log("Total cargado:", aPlants.length);
+                    this.getView().getModel("localModel").setProperty("/productPlants", aPlants);
+                } catch (e) {
+                    // Ya está manejado visualmente
+                }
+            },
+
+            onBuscarDetalle: async function () {
+
+                const oModelName = "API_PRODUCTION_ORDER_2_SRV";
+                const oEntity = "A_ProductionOrder_2";
+                let oHeaderModel = this.getOwnerComponent().getModel("requestModel").getData();
+                let sKey = oHeaderModel.Header.referencia; //"1000004";
+                //sKey.padStart(12, '0');
+
+                try {
+                    let sOrderDetail = await this.readOneAjax(oModelName, oEntity, sKey);
+                    console.log("API_PRODUCTION_ORDER_2_SRV:", sOrderDetail);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", sOrderDetail.d.ProductionUnit);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", sOrderDetail.d.ProductionPlant);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", sOrderDetail.d.StorageLocation);
+                    let oDetailText = this.onGetDetailText(sKey);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", oDetailText);
+                    let oCant_disponible = parseFloat(sOrderDetail.d.TotalQuantity) - parseFloat(sOrderDetail.d.MfgOrderConfirmedYieldQty);
+                    console.log("cantidad disponible: oCant_disponible: " + oCant_disponible);
+                    if (oCant_disponible > 0) {
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", oCant_disponible);
+                    } else {
+                        const oBundle = this.getResourceBundle();
+                        let sTexto = oBundle.getText("error.cantidad_no_disponible", [oCant_disponible]);
+                    }
+
+                    let oCantidad = parseFloat(this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad"));
+                    this.validarCantidad(oCantidad, oCant_disponible);
+
+                } catch (e) {
+                    // Ya está manejado visualmente
+                }
+
+            },
+
+            onGetDetailText: async function (sKey) {
+
+                const oModelName = "ZSB_HANDHELD_V2";
+                const oEntity = "OrderItemsText";
+                //sKey = sKey.padStart(12, '0');; //"1000004";
+                const sFilter_flag = true;
+                //sKey.padStart(12, '0');
+
+                try {
+                    let oDetailText = await this.readOneAjax(oModelName, oEntity, sKey, sFilter_flag);
+                    console.log("OrderItemsText:", oDetailText);
+
+                    const aResults = oDetailText.d.results;
+
+                    // Convertimos cada posición a una línea de texto
+                    const sTextoFinal = aResults
+                        .map(obj => {
+                            const sConf = obj.MfgOrderConfirmation;
+                            const sTexto = obj.DetailText || "";
+                            return `#${sConf}: ${sTexto}`;
+                        })
+                        .join("\n");
+
+                    // Regresamos el texto formateado para guardarlo en el modelo local para el TextArea
+
+                    return sTextoFinal;
+                } catch (e) {
+                    // Ya está manejado visualmente
+                }
+
+            },
+
+
+            guardarTextoEditado: function () {
+                const oLocalModel = this.getView().getModel("localModel");
+                const sTexto = oLocalModel.getProperty("/DataPosition/txt_posicion");
+
+                // Separamos por línea y convertimos en array de objetos
+                const aPosiciones = sTexto.split("\n").map(linea => {
+                    const match = linea.match(/^#(\d+):\s?(.*)$/); // patrón tipo "#2: texto"
+                    return {
+                        MfgOrderConfirmation: match ? match[1] : "",
+                        DetailText: match ? match[2] : ""
+                    };
+                });
+
+                console.log("Texto convertido a array:", aPosiciones);
+
+                // Aquí podrías hacer un loop para actualizar cada posición por separado en el backend
+            },
+
+            validarCantidad: function (iCantidad, iDisponible) {
+                if (!iDisponible) {
+                    iDisponible = this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad_disponible");
+                }
+
+                let oReturn = false;
+
+
+
+
+                if (!iCantidad) {
+                    const oBundle = this.getResourceBundle();
+                    let sTexto = oBundle.getText("error.cantidad_no_valida", [iDisponible]);
+                    MessageBox.warning(sTexto);
+
+                } else if (iCantidad > iDisponible) {
+                    const oBundle = this.getResourceBundle();
+                    let sTexto = oBundle.getText("error.cantidad_no_disponible", [iDisponible]);
+                    MessageBox.warning(sTexto);
+                } else {
+                    oReturn = true;
+                }
+
+                return oReturn;
             }
+
 
 
 
