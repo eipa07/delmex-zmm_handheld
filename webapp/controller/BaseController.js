@@ -6,7 +6,7 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator",
+    "sap/ui/model/FilterOperator"
 ], function (Controller, History, UIComponent, MessageToast, MessageBox, JSONModel, Filter, FilterOperator) {
     "use strict";
 
@@ -15,23 +15,31 @@ sap.ui.define([
 
         getLocalModel: function () {
             const oModel = new JSONModel({
-                selectedKeys: {
+                Header: {
                     claseMov: "",
-                    textClaseMov: ""
+                    textClaseMov: "",
+                    fecha_doc: "",
+                    fecha_cont: "",
+                    referencia: "",
+                    texto_cabecera: "",
+                    cantidad_disponible: ""
                 },
                 DataPosition: {
                     material: "",
                     cantidad: "",
                     um: "",
-                    lote: "",
-                    centro: "",
+                    lote: "", // Batch
+                    centro: "", //Planta
                     almacen: "",
                     ceco: "",
                     motivo: "",
                     txt_posicion: "",
                     txt_posicion_historico: "",
-                    cantidad_disponible: 0
+                    cantidad_disponible: 0,
+                    PurchaseOrderItem: 0,
+                    GoodsMovementRefDocType: ""
                 },
+                Positions: [],
                 posicionesTexto: "Total: 0 posiciones"
             });
             return oModel;
@@ -156,7 +164,7 @@ sap.ui.define([
         _getAjaxErrorMessage: function (jqXHR, oBundle) {
             try {
                 const oResponse = JSON.parse(jqXHR.responseText);
-                return oResponse.error?.message || oBundle.getText("error.backend");
+                return oResponse.error?.message?.value || oBundle.getText("error.backend");
             } catch (e) {
                 return oBundle.getText("error.parse");
             }
@@ -226,6 +234,7 @@ sap.ui.define([
                         dataType: "json",
                         success: (oData) => resolve(oData.value || []),
                         error: (jqXHR) => {
+                            console.log("fetchBlock: ", jqXHR);
                             const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
                             this._showErrorMessage(sMessage, oBundle);
                             reject(jqXHR);
@@ -261,7 +270,7 @@ sap.ui.define([
          * @param {string} sKey - Clave del registro a consultar, en formato simple (ej. 'ID001') o compuesto si lo armas tú.
          * @returns {Promise<Object>} - Objeto con los datos del registro solicitado.
          */
-        readOneAjax: async function (sModelName, sEntitySet, sKey, sFilter_flag = false) {
+        readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag = false) {
             const oModel = this.getOwnerComponent().getModel(sModelName);
             const oBundle = this.getResourceBundle();
 
@@ -271,25 +280,196 @@ sap.ui.define([
 
             const sBaseUrl = oModel.sServiceUrl;
             let sUrl = '';
-            var _filters = [];
+            var oFilters = [];
+            const oEmpty = '';
 
             if (!sFilter_flag) {
                 sUrl = `${sBaseUrl}${sEntitySet}('${sKey}')`;
             } else {
-                
-                _filters = this.getFilters(sKey);
-                sUrl = `${sBaseUrl}/${sEntitySet}/${_filters}`;
+
+                if (sEntitySet === "A_MaterialDocumentItem" || sEntitySet === 'A_ProductionOrder_2') {
+                    oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation);
+                    sUrl = `${sBaseUrl}${sEntitySet}/${oFilters}`; // &$top=1
+                } else if (sEntitySet === 'OrderItemsText') {
+                    oFilters = this.getFilters(sEntitySet, sKey, oEmpty, oEmpty, sPlant, sLocation);
+                    sUrl = `${sBaseUrl}/${sEntitySet}/${oFilters}`;
+                }
+
+
             }
 
 
             return new Promise((resolve, reject) => {
                 $.ajax({
                     url: sUrl,
-                    filters: _filters,
+                    filters: oFilters,
                     method: "GET",
                     contentType: "application/json",
                     dataType: "json",
                     success: function (oData) {
+
+                        console.log(sEntitySet, oData);
+                        resolve(oData);
+                    },
+                    error: (jqXHR) => {
+                        console.log("Error: " + sEntitySet + ":", jqXHR);
+                        const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                        this._showErrorMessage(sMessage, oBundle);
+                        reject(jqXHR);
+                    }
+                });
+            });
+        },
+
+        /**
+ * Genera la cadena de filtros OData para distintas entidades.
+ *
+ * - OrderItemsText: Filtra por ManufacturingOrder.
+ * - A_MaterialDocumentItem: Filtra por ManufacturingOrder, Material y Batch.
+ * - A_ProductionOrder_2: Filtro compuesto con Material, Batch y GoodsMovementType con condición OR.
+ *
+ * @param {string} sEntitySet - Nombre de la entidad OData.
+ * @param {string} sKey - Clave de búsqueda (ManufacturingOrder).
+ * @param {string} sMaterial - Material a filtrar.
+ * @param {string} sBatch - Batch a filtrar.
+ * @returns {string} - String de filtro OData, con orden y top si aplica.
+ */
+        getFilters: function (sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation) {
+            let aFilters = [];
+            let sFilterStr = "";
+            let sUrl = "";
+
+            if (sEntitySet === 'OrderItemsText') {
+                if (sKey && (oTipoMov === '601' || oTipoMov === '602' || oTipoMov === '261' || oTipoMov === '261')) {
+                    sFilterStr = `ManufacturingOrder eq '${sKey}'`;
+                    sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
+                    
+                    //aFilters.push(new Filter("ManufacturingOrder", FilterOperator.EQ, sKey));
+                }
+            } else if (sEntitySet === "A_MaterialDocumentItem") {
+                // 🔥 Aquí armamos filtro manual para el caso especial con OR
+                if (sMaterial && sBatch) {
+                    sFilterStr = `Material eq '${sMaterial}' and Batch eq '${sBatch}' and (GoodsMovementType eq '101' or GoodsMovementType eq '501')`;
+                    sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$orderby=MaterialDocument desc&$top=1`;
+                }
+            } else if (sEntitySet === 'A_ProductionOrder_2') {
+                sFilterStr = `Material eq '${sMaterial}' and ProductionPlant eq '${sPlant}' and StorageLocation eq '${sLocation}'`;
+                sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$orderby=ManufacturingOrder desc&$top=1`;
+            }
+
+            // Para entidades normales, construir con Filter UI5
+            /* if (aFilters.length > 0) {
+                sFilterStr = this.buildFilterString(aFilters);
+                sUrl = `?$filter=${encodeURIComponent(sFilterStr)}`;
+            } */
+
+            return sUrl;
+        },
+
+
+        /* buildFilterString: function (aFilters) {
+            return aFilters.map(f => `${f.sPath} ${f.sOperator.toLowerCase()} '${f.oValue1}'`).join(" and ");
+        }, */
+
+        /**
+         * 
+         * @param {string} iMovementType 
+         * @returns {Promise<Object>} - GoodsMovementCode.
+         * 03 - Goods Issue
+         */
+
+        getGoodMovement: function (iMovementType) {
+
+            const c_601 = '601'; // Orden de venta
+            const c_602 = '602'; // Anulación orden de venta
+            const c_551 = '551'; // desguace
+            const c_552 = '552'; // Anulación desguace
+            const c_201 = '201'; // salida de mercancia cargo ceco
+            const c_202 = '202'; // Anulación salida de mercancia cargo ceco
+            const c_261 = '261'; // Orden de producción
+            const c_262 = '262'; // Anulación Orden de producción
+            const c_999 = '999'; // Entrada manual de movimiento
+
+            const oBundle = this.getResourceBundle();
+            let msg = oBundle.getText("error.tipoMov");
+
+            let oMovType = "";
+
+
+            switch (iMovementType) {
+                case c_601:
+                    oMovType = "00";
+                    break;
+                case c_602:
+                    oMovType = "00";
+                    break;
+                case c_551:
+                    oMovType = "03";
+                    break;
+                case c_552:
+                    oMovType = "00";
+                    break;
+                case c_201:
+                    oMovType = "03";
+                    break;
+                case c_202:
+                    oMovType = "00";
+                    break;
+                case c_261:
+                    oMovType = "03";
+                    break;
+                case c_262:
+                    oMovType = "00";
+                    break;
+                case c_999:
+                    oMovType = "00";
+                    break;
+                default:
+                    oMovType = false;
+                    break;
+            }
+
+            if (!oMovType) {
+                oMovType = false;
+                MessageBox.error(msg);
+            }
+
+            return oMovType;
+
+        },
+
+
+        /**
+         * Envía un POST a una entidad OData V2 usando AJAX y CSRF Token.
+         * 
+         * @param {string} sModelName - Nombre del modelo registrado (ej. "API_MATERIAL_DOCUMENT_SRV").
+         * @param {string} sEntitySet - Entity set de destino (ej. "A_MaterialDocumentHeader").
+         * @param {Object} oPayload - Objeto JSON con los datos a enviar.
+         * @param {string} sToken - Token CSRF válido obtenido previamente.
+         * @returns {Promise<Object>} - Promesa que resuelve con la respuesta del backend.
+         */
+        postEntityAjax: async function (sModelName, sEntitySet, oPayload, sToken) {
+            const oBundle = this.getResourceBundle();
+            const oModel = this.getOwnerComponent().getModel(sModelName);
+
+            if (!oModel) {
+                throw new Error(`Modelo '${sModelName}' no encontrado.`);
+            }
+
+            const sBaseUrl = oModel.sServiceUrl;
+            const sUrl = `${sBaseUrl}${sEntitySet}?`;
+
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: sUrl,
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-Token": sToken
+                    },
+                    contentType: "application/json",
+                    dataType: "json",
+                    data: JSON.stringify(oPayload),
+                    success: (oData) => {
                         resolve(oData);
                     },
                     error: (jqXHR) => {
@@ -301,25 +481,45 @@ sap.ui.define([
             });
         },
 
-        getFilters: function (sKey) {
+        /**
+        * Obtiene dinámicamente el token CSRF para un modelo OData V2.
+        * 
+        * @param {string} sModelName - Nombre del modelo registrado en manifest.json (ej. "API_MATERIAL_DOCUMENT_SRV").
+        * @param {string} sEntitySet - Nombre del entity set principal (ej. "A_MaterialDocumentHeader").
+        * @returns {Promise<string>} - Promesa que resuelve con el token CSRF.
+        */
+        fetchCsrfToken: async function (sModelName, sEntitySet) {
+            const oBundle = this.getResourceBundle();
+            const oModel = this.getOwnerComponent().getModel(sModelName);
 
-            let aFilters = [];
-            if (sKey) {
-                aFilters.push(new Filter("ManufacturingOrder", FilterOperator.EQ, sKey));
+            if (!oModel) {
+                throw new Error(`Modelo '${sModelName}' no encontrado.`);
             }
-            //return aFilters;
 
-            let sFilterStr = this.buildFilterString(aFilters);
-            let sUrl = `?$filter=${encodeURIComponent(sFilterStr)}`;
+            const sBaseUrl = oModel.sServiceUrl;
+            const sUrl = `${sBaseUrl}${sEntitySet}`;
 
-            return sUrl;
-
-
-        },
-
-        buildFilterString: function (aFilters) {
-            return aFilters.map(f => `${f.sPath} ${f.sOperator.toLowerCase()} '${f.oValue1}'`).join(" and ");
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: sUrl,
+                    method: "GET",
+                    headers: {
+                        "X-CSRF-Token": "fetch"
+                    },
+                    success: (data, textStatus, jqXHR) => {
+                        const sToken = jqXHR.getResponseHeader("X-CSRF-Token");
+                        resolve(sToken);
+                    },
+                    error: (jqXHR) => {
+                        const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                        this._showErrorMessage(sMessage, oBundle);
+                        reject(jqXHR);
+                    }
+                });
+            });
         }
+
+
 
 
 

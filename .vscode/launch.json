@@ -23,7 +23,7 @@
       "outputCapture": "std",
       "env": {
         "run.config": "{\"handlerId\":\"fiori_tools\",\"runnableId\":\"/home/user/projects/zmm_handheld_old\"}",
-        "FIORI_TOOLS_BACKEND_CONFIG": "[{\"path\":\"/sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_apiproduct_dev\"},{\"path\":\"/sap/opu/odata/sap/ZSB_HANDHELD_V2\",\"url\":\"https://my413406-api.s4hana.cloud.sap\",\"destination\":\"HandHeld_dev\"},{\"path\":\"/sap/opu/odata/sap/API_BATCH_SRV\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_Batch_dev\"},{\"path\":\"/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_orders_dev\"}]",
+        "FIORI_TOOLS_BACKEND_CONFIG": "[{\"path\":\"/sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_apiproduct_dev\"},{\"path\":\"/sap/opu/odata/sap/ZSB_HANDHELD_V2\",\"url\":\"https://my413406-api.s4hana.cloud.sap\",\"destination\":\"HandHeld_dev\"},{\"path\":\"/sap/opu/odata/sap/API_BATCH_SRV\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_Batch_dev\"},{\"path\":\"/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_orders_dev\"},{\"path\":\"/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV\",\"url\":\"https://my413406.s4hana.cloud.sap\",\"destination\":\"HandHeld_movmat\"}]",
         "FIORI_TOOLS_URL_PARAMS": "sap-ui-xx-viewCache=false"
       }
     }

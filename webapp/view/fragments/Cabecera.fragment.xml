@@ -12,10 +12,10 @@
             <Select
                 width="15em"
                 items="{ path: 'ZSB_HANDHELD_V2>/ClaseMov' }"
-                selectedKey="{requestModel>/Header/claseMov}"
+                selectedKey="{localModel>/Header/claseMov}"
                 change="onClaseMovChange"
                 editable="{oDisplayModel>/Header/operacion_almacen}"
-                tooltip="{requestModel>/Header/claseMov} - {localModel>/selectedKeys/textClaseMov}"
+                tooltip="{localModel>/Header/claseMov} - {localModel>/selectedKeys/textClaseMov}"
             >
                 <core:Item
                     key="{ZSB_HANDHELD_V2>ClaseMovimiento}"
@@ -34,8 +34,8 @@
                 placeholder="{i18n>header.clase_movimiento_placeholder}"
                 width="15em"
                 editable="{oDisplayModel>/Header/claseMov}"
-                value="{= ${requestModel>/Header/claseMov} === '0' ? '' : ${requestModel>/Header/claseMov} + ' - ' + ${localModel>/selectedKeys/textClaseMov} }"
-                tooltip="{= ${requestModel>/Header/claseMov} === '0' ? '' : ${requestModel>/Header/claseMov} + ' - ' + ${localModel>/selectedKeys/textClaseMov} }"
+                value="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
+                tooltip="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
             />
         </HBox>
 
@@ -46,7 +46,7 @@
             />
             <DatePicker
                 id="header_input_fecha_doc"
-                value="{path: 'requestModel>/Header/fecha_doc'}"
+                value="{path: 'localModel>/Header/fecha_doc'}"
                 valueFormat="yyyy-MM-dd"
                 displayFormat="MMM dd, yyyy"
                 width="15em"
@@ -61,7 +61,7 @@
             />
             <DatePicker
                 id="header_input_fecha_cont"
-                value="{path: 'requestModel>/Header/fecha_cont'}"
+                value="{path: 'localModel>/Header/fecha_cont'}"
                 valueFormat="yyyy-MM-dd"
                 displayFormat="MMM dd, yyyy"
                 width="15em"
@@ -77,7 +77,7 @@
             <Input
                 id="header_input_fecha_referencia"
                 width="15em"
-                value="{requestModel>/Header/referencia}"
+                value="{localModel>/Header/referencia}"
                 editable="{oDisplayModel>/Header/referencia}"
             />
         </HBox>
@@ -90,7 +90,7 @@
             <TextArea
                 id="header_input_fecha_texto_cabecera"
                 width="15em"
-                value="{requestModel>/Header/texto_cabecera}"
+                value="{localModel>/Header/texto_cabecera}"
                 editable="{oDisplayModel>/Header/texto_cabecera}"
                 rows="5"
             />

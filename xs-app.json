@@ -31,6 +31,13 @@
         "csrfProtection": false
       },
       {
+        "source": "^/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/(.*)$",
+        "target": "/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/$1",
+        "destination": "HandHeld_movmat",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
         "source": "^/resources/(.*)$",
         "target": "/resources/$1",
         "authenticationType": "none",

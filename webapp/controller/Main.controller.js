@@ -224,8 +224,8 @@ sap.ui.define([
             onClaseMovChange: function (oEvent) {
                 let sSelectedKey = oEvent.getParameter("selectedItem").getKey();
                 let sSelectext = oEvent.getParameter("selectedItem").getText();
-                this.getOwnerComponent().getModel("localModel").setProperty("/selectedKeys/claseMov", sSelectedKey);
-                this.getOwnerComponent().getModel("localModel").setProperty("/selectedKeys/textClaseMov", sSelectext);
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/claseMov", sSelectedKey);
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/textClaseMov", sSelectext);
 
                 // Deshabilitar elementos dependiendo de la seleccion
                 let oSelectedKey = oEvent.getSource().getSelectedKey();
@@ -254,7 +254,7 @@ sap.ui.define([
 
             },
 
-            onGuardarFormulario: function () {
+            /* onGuardarFormulario: function () {
                 const oView = this.getView();
                 let oCantidad = Fragment.byId("scanner", "cantidadInput").getValue();
 
@@ -282,7 +282,7 @@ sap.ui.define([
 
                 // Limpiar campos
                 this._limpiarCamposFormulario();
-            },
+            }, */
 
             onCancelarFormulario: function () {
                 this._limpiarCamposFormulario();
@@ -310,22 +310,22 @@ sap.ui.define([
             },
 
             onSaveHeader: function () {
-                let oModel = this.getOwnerComponent().getModel("requestModel").getData();
+                let oModel = this.getOwnerComponent().getModel("localModel").getData();
                 console.log(oModel);
             },
 
 
             onSavePosition: function () {
 
-                if(!this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad")){
+                if (!this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad")) {
                     let oInputCantidad = this.getView().byId("cantidadInput").getValue();
                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", oInputCantidad);
                 }
 
                 let oModel = this.getOwnerComponent().getModel("localModel").getData().DataPosition;
-                
-                let flagCantidad = this.validarCantidad(parseFloat(oModel.cantidad), parseFloat(oModel.cantidad_disponible));
 
+                //let flagCantidad = this.validarCantidad(parseFloat(oModel.cantidad), parseFloat(oModel.cantidad_disponible));
+                let flagCantidad = true;
                 if (flagCantidad) {
                     let _position = {
                         material: oModel.material,
@@ -424,31 +424,61 @@ sap.ui.define([
 
             onBuscarDetalle: async function () {
 
-                const oModelName = "API_PRODUCTION_ORDER_2_SRV";
-                const oEntity = "A_ProductionOrder_2";
-                let oHeaderModel = this.getOwnerComponent().getModel("requestModel").getData();
-                let sKey = oHeaderModel.Header.referencia; //"1000004";
+                let oModelName = "API_MATERIAL_DOCUMENT_SRV";
+                let oEntity = "A_MaterialDocumentItem";
+                let olocalModel = this.getOwnerComponent().getModel("localModel").getData();
+                let sKey = olocalModel.Header.referencia; //"1000004";
+                let sMaterial = olocalModel.DataPosition.material;
+                let sBatch = olocalModel.DataPosition.lote;
+                let sPlant = '';
+                let sLocation = '';
+                let sFilter_flag = true;
                 //sKey.padStart(12, '0');
 
+                /*
+                "https://my413406-api.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+                /A_MaterialDocumentItem(
+                    MaterialDocumentYear='2025',
+                    MaterialDocument='4900000203',
+                    MaterialDocumentItem='1')",
+
+                */
+
                 try {
-                    let sOrderDetail = await this.readOneAjax(oModelName, oEntity, sKey);
-                    console.log("API_PRODUCTION_ORDER_2_SRV:", sOrderDetail);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", sOrderDetail.d.ProductionUnit);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", sOrderDetail.d.ProductionPlant);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", sOrderDetail.d.StorageLocation);
-                    let oDetailText = this.onGetDetailText(sKey);
+                    let sOrderDetail = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag);
+                    //console.log("API_MATERIAL_DOCUMENT_SRV:", sOrderDetail);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", sOrderDetail.d.results[0].EntryUnit);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", sOrderDetail.d.results[0].Plant);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", sOrderDetail.d.results[0].StorageLocation);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", sOrderDetail.d.results[0].Batch);
+                    let oDetailText = this.onGetDetailText(sKey, sMaterial, sBatch);
                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", oDetailText);
-                    let oCant_disponible = parseFloat(sOrderDetail.d.TotalQuantity) - parseFloat(sOrderDetail.d.MfgOrderConfirmedYieldQty);
+
+
+                    // Header tab Texto cabecera
+                    //this.getOwnerComponent().getModel("localModel").setProperty("/Header/texto_cabecera", sOrderDetail.d.results[0].MaterialDocumentItemText);
+
+                    // Cantidad Disponible
+                    let oModel_MatDoc = "API_PRODUCTION_ORDER_2_SRV";
+                    let oEntity_MatDoc = "A_ProductionOrder_2";
+                    sPlant = sOrderDetail.d.results[0].Plant;
+                    sLocation = sOrderDetail.d.results[0].StorageLocation;
+                    let sQuantityDetail = await this.readOneAjax(oModel_MatDoc, oEntity_MatDoc, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag);
+
+
+                    let oCant_disponible = parseFloat(sQuantityDetail.d.results[0].TotalQuantity) - parseFloat(sQuantityDetail.d.results[0].MfgOrderConfirmedYieldQty);
                     console.log("cantidad disponible: oCant_disponible: " + oCant_disponible);
-                    if (oCant_disponible > 0) {
+                    /* if (oCant_disponible > 0) {
                         this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", oCant_disponible);
                     } else {
                         const oBundle = this.getResourceBundle();
                         let sTexto = oBundle.getText("error.cantidad_no_disponible", [oCant_disponible]);
-                    }
+                    } */
 
                     let oCantidad = parseFloat(this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad"));
-                    this.validarCantidad(oCantidad, oCant_disponible);
+                    //this.validarCantidad(oCantidad, oCant_disponible);
+
+
 
                 } catch (e) {
                     // Ya está manejado visualmente
@@ -456,17 +486,16 @@ sap.ui.define([
 
             },
 
-            onGetDetailText: async function (sKey) {
+            onGetDetailText: async function (sKey, sMaterial, sBatch) {
 
                 const oModelName = "ZSB_HANDHELD_V2";
                 const oEntity = "OrderItemsText";
+                let sPlant = '';
                 //sKey = sKey.padStart(12, '0');; //"1000004";
                 const sFilter_flag = true;
-                //sKey.padStart(12, '0');
 
                 try {
-                    let oDetailText = await this.readOneAjax(oModelName, oEntity, sKey, sFilter_flag);
-                    console.log("OrderItemsText:", oDetailText);
+                    let oDetailText = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag);
 
                     const aResults = oDetailText.d.results;
 
@@ -517,7 +546,7 @@ sap.ui.define([
 
 
 
-                if (!iCantidad) {
+                /* if (!iCantidad) {
                     const oBundle = this.getResourceBundle();
                     let sTexto = oBundle.getText("error.cantidad_no_valida", [iDisponible]);
                     MessageBox.warning(sTexto);
@@ -528,10 +557,103 @@ sap.ui.define([
                     MessageBox.warning(sTexto);
                 } else {
                     oReturn = true;
-                }
+                } */
+
+                oReturn = true;
 
                 return oReturn;
+            },
+
+            /**
+             * Evento principal para crear movimiento de mercancía.
+             * Construye el payload JSON con la cabecera y todos los ítems seleccionados,
+             * y ejecuta la petición de creación contra el servicio OData.
+             *
+             * @param {sap.ui.base.Event} oEvent - Evento de UI5 (botón u otro disparador).
+             */
+            onCreateMov: async function () {
+
+                try {
+                    // 1️⃣ Obtener datos locales del modelo local
+                    let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+                    let sModelName = "API_MATERIAL_DOCUMENT_SRV";
+                    let sEntitySet = "A_MaterialDocumentHeader";
+
+                    // 2️⃣ Formatear la fecha de contabilización (ISO con hora 00:00:00)
+                    let oDate = oLocalModel.Header.fecha_cont + "T00:00:00";
+
+                    // 3️⃣ Obtener la clave del movimiento de mercancía según la lógica de negocio
+                    let oGoodMovement = this.getGoodMovement(oLocalModel.Header.claseMov);
+
+                    // 4️⃣ Validar que exista código válido
+                    if (!oGoodMovement) {
+                        sap.m.MessageBox.error(this.getResourceBundle().getText("error.missingMovement"));
+                        return;
+                    }
+
+                    // 5️⃣ Inicializar el objeto JSON con cabecera y array vacío de ítems
+                    let oRequestJson = {
+                        PostingDate: oDate,
+                        GoodsMovementCode: oGoodMovement,
+                        MaterialDocumentHeaderText: oLocalModel.Header.texto_cabecera,
+                        to_MaterialDocumentItem: [] // Lista de posiciones
+                    };
+
+                    // 6️⃣ Recorrer todos los ítems seleccionados y agregarlos al array
+                    oLocalModel.Positions.forEach((element) => {
+                        oRequestJson.to_MaterialDocumentItem.push({
+                            Material: element.material,                           // Código de material
+                            Plant: element.centro,                                // Planta / Centro
+                            Batch: element.lote,                                  // Lote, valor default si no viene
+                            StorageLocation: element.almacen,                     // Almacén
+                            GoodsMovementType: oLocalModel.Header.claseMov,       // Clase de movimiento
+                            MaterialDocumentItemText: element.texto || "Rollo",   // Texto de posición
+                            ManufacturingOrder: oLocalModel.Header.referencia,       // Orden de fabricación
+                            IsCompletelyDelivered: false,                         // Indicador de entrega
+                            QuantityInEntryUnit: element.cantidad,                // Cantidad
+                            CostCenter: element.ceco                              // Centro de costo
+                        });
+                    });
+
+                    // 7️⃣ Mostrar payload final en consola para validación (opcional)
+                    let oRequestJson_2 = {
+                        "PostingDate": "2025-02-03T15:00:00",
+                        "GoodsMovementCode": "03",
+                        "MaterialDocumentHeaderText": "Cabecera HandHeld",
+                        "to_MaterialDocumentItem": [
+                          {
+                          "Material": "MP50002T",
+                          "Plant": "1000",
+                          "Batch": "TEST1",
+                          "StorageLocation": "1000",
+                          "GoodsMovementType": "201",
+                          "MaterialDocumentItemText": "Rollo",
+                          "ManufacturingOrder": "1000140",
+                          "IsCompletelyDelivered" : false,
+                          "QuantityInEntryUnit": "1",
+                          "CostCenter": "5110101208"
+                          }
+                        ]
+                      };
+                    console.log("Payload final:", oRequestJson_2);
+
+
+                    // Paso 8️⃣ Obtener CSRF Token usando helper del BaseController
+                    const sToken = await this.fetchCsrfToken(sModelName, sEntitySet);
+                    console.log("CSRF Token obtenido:", sToken);
+
+                    // Paso 9 Ejecutar POST usando helper del BaseController
+                    const oResponse = await this.postEntityAjax(sModelName, sEntitySet, oRequestJson, sToken);
+
+                    sap.m.MessageToast.show(oBundle.getText("success.movCreated"));
+                    console.log("Respuesta del POST:", oResponse);
+
+                } catch (e) {
+                    console.error("Error en onCreateMov:", e);
+                    this._showErrorMessage(oBundle.getText("error.unexpected"), oBundle);
+                }
             }
+
 
 
 
