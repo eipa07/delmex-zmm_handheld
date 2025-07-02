@@ -12,11 +12,14 @@
                        placeholder="{i18n>position.material.placeholder}"
                        class="sapUiTinyMarginBeginEnd"
                        value="{localModel>/DataPosition/material}"
-                       width="15em"/>
+                       width="15em"
+                       submit="onBuscarDetalle"
+                       liveChange="onBuscarDetalle"/>
                 <Button icon="sap-icon://bar-code"
                         tooltip="{i18n>position.material.tooltip}"
                         press=".onOpenScannerDialog"
-                        visible="false"/>
+                        visible="false"
+                        />
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -41,7 +44,9 @@
                 <Input id="loteInput"
                        placeholder="{i18n>position.lote.placeholder}"
                        width="15em"
-                       value="{localModel>/DataPosition/lote}"/>
+                       value="{localModel>/DataPosition/lote}"
+                       submit="onBuscarDetalle"
+                       liveChange="onBuscarDetalle"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -100,7 +105,8 @@
         </VBox>
 
         <Toolbar class="sapUiSmallMarginTop">
-            <Button text="{i18n>position.guardar}" type="Accept" press=".onSavePosition"/>
+           <!--  <Button text="{i18n>position.contabilizar}" type="Accept" press=".onSavePosition"/> -->
+            <Button text="{i18n>position.contabilizar}" type="Accept" press=".onCreateMov"/>
             <Button text="{i18n>position.cancelar}" type="Reject" press=".onClearPosition"/>
             <Button text="buscar detalle" type="Reject" press=".onBuscarDetalle"/>
         </Toolbar>

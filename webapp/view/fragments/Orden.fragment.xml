@@ -56,6 +56,7 @@
         >
             <columns>
                 <Column><Text text="{i18n>columnMaterial}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoMaterial}" /></Column>
                 <Column><Text text="{i18n>columnCantidad}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnUM}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnLote}" /></Column>
@@ -64,6 +65,8 @@
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCeco}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnMotivo}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoPosicion}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnNumDocto}" /></Column>
+                
                 <Column><Text text="{i18n>columnEliminar}" /></Column>
             </columns>
 
@@ -71,6 +74,7 @@
                 <ColumnListItem>
                     <cells>
                         <Text text="{localModel>material}" />
+                        <Text text="{localModel>txt_material}" />
                         <Text text="{localModel>cantidad}" />
                         <Text text="{localModel>um}" />
                         <Text text="{localModel>lote}" />
@@ -79,7 +83,8 @@
                         <Text text="{localModel>ceco}" />
                         <Text text="{localModel>motivo}" />
                         <Text text="{localModel>txt_posicion}" wrapping="true" />
-                        <Button icon="sap-icon://delete" type="Reject" tooltip="{i18n>tooltipEliminar}" press=".onEliminarPosicion"/>
+                        <Text text="{localModel>MaterialDocument}" />
+                        <!-- <Button icon="sap-icon://delete" type="Reject" tooltip="{i18n>tooltipEliminar}" press=".onEliminarPosicion"/> -->
                     </cells>
                 </ColumnListItem>
             </items>

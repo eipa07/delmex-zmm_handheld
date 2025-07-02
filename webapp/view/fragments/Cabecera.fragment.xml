@@ -4,27 +4,31 @@
     xmlns:i18n="sap.ui.model.resource.ResourceModel"
 >
     <VBox class="sapUiSmallMargin">
-        <HBox class="sapUiSmallMarginBottom" >
+        <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.operacion_almacen}"
-                width="12em" 
+                width="12em"
             />
             <Select
+            id="header_select_clasemov"
                 width="15em"
                 items="{ path: 'ZSB_HANDHELD_V2>/ClaseMov' }"
                 selectedKey="{localModel>/Header/claseMov}"
                 change="onClaseMovChange"
                 editable="{oDisplayModel>/Header/operacion_almacen}"
                 tooltip="{localModel>/Header/claseMov} - {localModel>/selectedKeys/textClaseMov}"
+                required="true"
             >
                 <core:Item
                     key="{ZSB_HANDHELD_V2>ClaseMovimiento}"
                     text="{ZSB_HANDHELD_V2>Descripcion}"
                 />
             </Select>
+
+
         </HBox>
 
-        <HBox class="sapUiSmallMarginBottom" >
+        <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.clase_movimiento}"
                 width="12em"
@@ -39,7 +43,7 @@
             />
         </HBox>
 
-        <HBox class="sapUiSmallMarginBottom" >
+        <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.fecha_documento}"
                 width="12em"
@@ -54,7 +58,7 @@
             />
         </HBox>
 
-        <HBox class="sapUiSmallMarginBottom" >
+        <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.fecha_contabilizacion}"
                 width="12em"
@@ -69,7 +73,7 @@
             />
         </HBox>
 
-        <HBox class="sapUiSmallMarginBottom" >
+        <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.referencia}"
                 width="12em"
@@ -82,7 +86,7 @@
             />
         </HBox>
 
-        <HBox class="sapUiSmallMarginBottom" >
+        <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.texto_cabecera}"
                 width="12em"
@@ -94,13 +98,19 @@
                 editable="{oDisplayModel>/Header/texto_cabecera}"
                 rows="5"
             />
-
-           
         </HBox>
     </VBox>
 
     <Toolbar class="sapUiSmallMarginTop">
-        <Button text="{i18n>header.guardar}" type="Accept" press=".onSaveHeader"/>
-        <Button text="{i18n>header.cancelar}" type="Reject" press=".onCleanHeader"/>
+        <Button
+            text="{i18n>header.continuar}"
+            type="Accept"
+            press=".onContinueHeader"
+        />
+        <Button
+            text="{i18n>header.cancelar}"
+            type="Reject"
+            press=".onCleanHeader"
+        />
     </Toolbar>
 </core:FragmentDefinition>

@@ -1,59 +1,16 @@
-DataPosition: [
-    {
-        material: "",
-        cantidad: "",
-        um: "",
-        lote: "",
-        centro: "",
-        almacen: "",
-        ceco: "",
-        motivo: ""
-    }, {
-        material: "",
-        cantidad: "",
-        um: "",
-        lote: "",
-        centro: "",
-        almacen: "",
-        ceco: "",
-        motivo: ""
-    }, {
-        material: "",
-        cantidad: "",
-        um: "",
-        lote: "",
-        centro: "",
-        almacen: "",
-        ceco: "",
-        motivo: ""
-    }
-]
-
-
-
-
-{
-    ManufacturingObject:"OR000001000004"
-    ManufacturingOrder:"1000081"
-
-    Material:"PT40001"
-
-    MfgOrderActualReleaseDate:"/Date(1728086400000)/"
-
-    MfgOrderConfirmedYieldQty:"901.000" - cantidad confirmada usada
-   
-    Plant:"1000" - Planta - localModel>/DataPosition/planta
-
-
-    ProductionPlant:"1000" - localModel>/DataPosition/centro
-
-    
-    ProductionUnit:"KG" - UM - localModel>/DataPosition/um
-    
-    StorageLocation:"2000" - Almacen - localModel>/DataPosition/almacen
-    TotalQuantity:"1000.000" - Total
-   
+oResponse.d = {
+    CreatedByUser: "CC0000000009"
+    CreationDate: "/Date(1751414400000)/"
+    CreationTime: "PT08H12M31S"
+    CtrlPostgForExtWhseMgmtSyst: ""
+    DocumentDate: "/Date(1738540800000)/"
+    GoodsMovementCode: "03"
+    InventoryTransactionType: "WA"
+    ManualPrintIsTriggered: ""
+    MaterialDocument: "4900000216"
+    MaterialDocumentHeaderText: ""
+    MaterialDocumentYear: "2025"
+    PostingDate: "/Date(1738540800000)/"
+    ReferenceDocument: ""
+    VersionForPrintingSlip: "2"
 }
-
-
-I_MfgOrderConfirmation-ConfirmationText => texto detalle

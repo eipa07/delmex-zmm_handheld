@@ -20,7 +20,7 @@
         </subHeader>
 
         <content>
-            <IconTabBar id="mainTabs" expandable="false" class="sapUiResponsiveMargin">
+            <IconTabBar id="mainTabs" expandable="false" class="sapUiResponsiveMargin" select=".onTabChanged">
                 <items>
                     <!-- Sección Cabecera -->
                     <IconTabFilter text="Cabecera" key="cabecera">

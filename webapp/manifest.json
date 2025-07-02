@@ -34,7 +34,7 @@
           "odataVersion": "4.0"
         }
       },
-      "batchApi": {
+      "apiBatch": {
         "uri": "/sap/opu/odata/sap/API_BATCH_SRV/",
         "type": "OData",
         "settings": {
@@ -68,13 +68,16 @@
           "semanticObject": "handheld",
           "action": "display",
           "title": "{{handheld-display.flpTitle}}",
+          "subTitle": "Operaciones de almacen",
+          "icon": "sap-icon://shipping-status",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
           }
         }
       }
-    }
+    },
+    "navigationMode": "newWindow"
   },
   "sap.ui": {
     "technology": "UI5",
@@ -129,8 +132,8 @@
           "earlyRequests": true
         }
       },
-      "batchApi": {
-        "dataSource": "batchApi",
+      "apiBatch": {
+        "dataSource": "apiBatch",
         "preload": true,
         "settings": {
           "operationMode": "Server",

@@ -26,6 +26,7 @@ sap.ui.define([
                 },
                 DataPosition: {
                     material: "",
+                    txt_material: "",
                     cantidad: "",
                     um: "",
                     lote: "", // Batch
@@ -37,10 +38,14 @@ sap.ui.define([
                     txt_posicion_historico: "",
                     cantidad_disponible: 0,
                     PurchaseOrderItem: 0,
-                    GoodsMovementRefDocType: ""
+                    GoodsMovementRefDocType: "",
+                    numero_documento: "",
+                    isBatchRequired: true // true requiere lote | false no requiere lote
                 },
                 Positions: [],
-                posicionesTexto: "Total: 0 posiciones"
+                posicionesTexto: "Total: 0 posiciones",
+                ReferenceItems: [],
+                ReferenceItemSelected: []
             });
             return oModel;
         },
@@ -192,7 +197,7 @@ sap.ui.define([
          * @param {int} [iPageSize=5000] - Tamaño de cada bloque a recuperar.
          * @returns {Promise<Array>} - Array con todos los registros concatenados.
          */
-        readAllPagedAjax: async function (sModelName, sEntitySet, iPageSize = 5000) {
+        readAllPagedAjax: async function (sModelName, sEntitySet, iPageSize = 5000, sKey = '') {
             const oModel = this.getOwnerComponent().getModel(sModelName);
             const oBundle = this.getResourceBundle();
 
@@ -202,11 +207,19 @@ sap.ui.define([
 
             const sBaseUrl = oModel.sServiceUrl;
 
+            
+
             /**
              * Paso 1: Obtener el total de registros usando $count
              */
-            const getTotalCount = async () => {
-                const sUrl = `${sBaseUrl}/${sEntitySet}/$count`;
+             const getTotalCount = async () => {
+                let sUrl = `${sBaseUrl}${sEntitySet}/$count`;
+                if(sKey){
+                    if(sEntitySet === "A_ProductionOrderComponent_4"){
+                        sUrl = sUrl + `?$filter=ManufacturingOrder eq '${sKey}'`;
+                    }
+                    
+                }
                 return new Promise((resolve, reject) => {
                     $.ajax({
                         url: sUrl,
@@ -219,20 +232,26 @@ sap.ui.define([
                         }
                     });
                 });
-            };
+            }; 
 
             /**
              * Paso 2: Obtener un bloque de datos con $skip y $top
              */
-            const fetchBlock = async (iSkip) => {
-                const sUrl = `${sBaseUrl}/${sEntitySet}?$skip=${iSkip}&$top=${iPageSize}`;
+            const fetchBlock = async () => {
+                let sUrl = `${sBaseUrl}${sEntitySet}?$filter=ManufacturingOrder eq '${sKey}'`;
+                if(sKey){
+                    if(sEntitySet === "A_ProductionOrderComponent_4"){
+                        
+                    }
+                    
+                }
                 return new Promise((resolve, reject) => {
                     $.ajax({
                         url: sUrl,
                         method: "GET",
                         contentType: "application/json",
                         dataType: "json",
-                        success: (oData) => resolve(oData.value || []),
+                        success: (oData) => resolve(oData || []),
                         error: (jqXHR) => {
                             console.log("fetchBlock: ", jqXHR);
                             const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
@@ -248,14 +267,16 @@ sap.ui.define([
                 const iTotal = await getTotalCount();
                 const aResults = [];
                 let iFetched = 0;
+                let aBlock = await fetchBlock();
+                return aBlock;
 
-                while (iFetched < iTotal) {
+               /*  while (iFetched < iTotal) {
                     const aBlock = await fetchBlock(iFetched);
                     aResults.push(...aBlock);
                     iFetched += iPageSize;
-                }
+                } */
 
-                return aResults;
+                //return aResults;
             } catch (e) {
                 throw e;
             }
@@ -270,7 +291,45 @@ sap.ui.define([
          * @param {string} sKey - Clave del registro a consultar, en formato simple (ej. 'ID001') o compuesto si lo armas tú.
          * @returns {Promise<Object>} - Objeto con los datos del registro solicitado.
          */
-        readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag = false) {
+        readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov) {
+            const oModel = this.getOwnerComponent().getModel(sModelName);
+            const oBundle = this.getResourceBundle();
+        
+            if (!oModel) {
+                // Usa texto i18n
+                const sMessage = oBundle.getText("error_model_not_found", [sModelName]);
+                throw new Error(sMessage);
+            }
+        
+            const sBaseUrl = oModel.sServiceUrl;
+            const oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov);
+            const sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`;
+        
+            try {
+                const oData = await $.ajax({
+                    url: sUrl,
+                    method: "GET",
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+        
+                if (sEntitySet === 'A_MaterialDocumentItem' && oData?.d?.results?.length === 0) {
+                    // Devuelve null para que el Controller decida qué mostrar
+                    return null;
+                }
+        
+                console.log(sEntitySet, oData);
+                return oData;
+        
+            } catch (jqXHR) {
+                console.log(`Error en ${sEntitySet}:`, jqXHR);
+                const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle) || oBundle.getText("error_ajax_generic");
+                this._showErrorMessage(sMessage, oBundle);
+                throw jqXHR;
+            }
+        },
+        
+       /*  readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation) {
             const oModel = this.getOwnerComponent().getModel(sModelName);
             const oBundle = this.getResourceBundle();
 
@@ -281,33 +340,21 @@ sap.ui.define([
             const sBaseUrl = oModel.sServiceUrl;
             let sUrl = '';
             var oFilters = [];
-            const oEmpty = '';
 
-            if (!sFilter_flag) {
-                sUrl = `${sBaseUrl}${sEntitySet}('${sKey}')`;
-            } else {
-
-                if (sEntitySet === "A_MaterialDocumentItem" || sEntitySet === 'A_ProductionOrder_2') {
-                    oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation);
-                    sUrl = `${sBaseUrl}${sEntitySet}/${oFilters}`; // &$top=1
-                } else if (sEntitySet === 'OrderItemsText') {
-                    oFilters = this.getFilters(sEntitySet, sKey, oEmpty, oEmpty, sPlant, sLocation);
-                    sUrl = `${sBaseUrl}/${sEntitySet}/${oFilters}`;
-                }
-
-
-            }
+            oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation);
+            sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`; // &$top=1
 
 
             return new Promise((resolve, reject) => {
                 $.ajax({
                     url: sUrl,
-                    filters: oFilters,
                     method: "GET",
                     contentType: "application/json",
                     dataType: "json",
                     success: function (oData) {
-
+                        if(sEntitySet === 'A_MaterialDocumentItem' && oData.d.results.length === 0){
+                            MessageBox.error('Combinacion Material Lote no existe');
+                        }
                         console.log(sEntitySet, oData);
                         resolve(oData);
                     },
@@ -319,14 +366,14 @@ sap.ui.define([
                     }
                 });
             });
-        },
+        }, */
 
         /**
  * Genera la cadena de filtros OData para distintas entidades.
  *
  * - OrderItemsText: Filtra por ManufacturingOrder.
  * - A_MaterialDocumentItem: Filtra por ManufacturingOrder, Material y Batch.
- * - A_ProductionOrder_2: Filtro compuesto con Material, Batch y GoodsMovementType con condición OR.
+ * - A_ProductionOrderComponent_4: Filtro compuesto con Material, Batch y GoodsMovementType con condición OR.
  *
  * @param {string} sEntitySet - Nombre de la entidad OData.
  * @param {string} sKey - Clave de búsqueda (ManufacturingOrder).
@@ -334,16 +381,16 @@ sap.ui.define([
  * @param {string} sBatch - Batch a filtrar.
  * @returns {string} - String de filtro OData, con orden y top si aplica.
  */
-        getFilters: function (sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation) {
+        getFilters: function (sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov) {
             let aFilters = [];
             let sFilterStr = "";
             let sUrl = "";
 
             if (sEntitySet === 'OrderItemsText') {
-                if (sKey && (oTipoMov === '601' || oTipoMov === '602' || oTipoMov === '261' || oTipoMov === '261')) {
+                if (sKey && (oClaseMov === '601' || oClaseMov === '602' || oClaseMov === '261' || oClaseMov === '261')) {
                     sFilterStr = `ManufacturingOrder eq '${sKey}'`;
                     sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
-                    
+
                     //aFilters.push(new Filter("ManufacturingOrder", FilterOperator.EQ, sKey));
                 }
             } else if (sEntitySet === "A_MaterialDocumentItem") {
@@ -352,9 +399,19 @@ sap.ui.define([
                     sFilterStr = `Material eq '${sMaterial}' and Batch eq '${sBatch}' and (GoodsMovementType eq '101' or GoodsMovementType eq '501')`;
                     sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$orderby=MaterialDocument desc&$top=1`;
                 }
-            } else if (sEntitySet === 'A_ProductionOrder_2') {
+            } else if (sEntitySet === 'A_ProductionOrderComponent_4') {
                 sFilterStr = `Material eq '${sMaterial}' and ProductionPlant eq '${sPlant}' and StorageLocation eq '${sLocation}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$orderby=ManufacturingOrder desc&$top=1`;
+            } else if (sEntitySet === 'ProductDescription') {
+                let sLang = this.getLanguageISO();
+                sFilterStr = `Product eq '${sMaterial}' and Language eq '${sLang}'`;
+                sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$top=1`;
+            }else if(sEntitySet === 'Product'){
+                sFilterStr = `Product eq '${sMaterial}'`;
+                sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$top=1`;
+            }else if(sEntitySet === 'Batch'){
+                sFilterStr = `Material eq '${sMaterial}'`;
+                sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
             }
 
             // Para entidades normales, construir con Filter UI5
@@ -517,7 +574,19 @@ sap.ui.define([
                     }
                 });
             });
+        },
+
+        /**
+         * Obtiene el idioma abreviado (2 letras) en mayúsculas para OData.
+         * Soporta locales extendidos (es-ES, en-US, pt-BR).
+         *
+         * @returns {string} Código de idioma ISO (ej: 'ES').
+         */
+        getLanguageISO: function () {
+            const sLangFull = sap.ui.getCore().getConfiguration().getLanguage();
+            return sLangFull.split("-")[0].toUpperCase();
         }
+
 
 
 

@@ -21,7 +21,7 @@ sap.ui.define([
 
         return BaseController.extend("delmex.zmmhandheld.controller.Main", {
             onInit: function () {
-                const oModel = new JSONModel({
+                let oModel = new JSONModel({
                     currentDate: new Date().toISOString().split('T')[0]
                 });
                 this.setModel(oModel); // usando BaseController
@@ -51,176 +51,6 @@ sap.ui.define([
 
             },
 
-            onOpenScannerDialog: function () {
-                const oView = this.getView();
-                const _this = this;
-
-                function waitForElement(id, timeout = 3000) {
-                    return new Promise((resolve, reject) => {
-                        const interval = 100;
-                        let elapsed = 0;
-
-                        const check = () => {
-                            const el = document.getElementById(id);
-                            if (el) {
-                                resolve(el);
-                            } else {
-                                elapsed += interval;
-                                if (elapsed >= timeout) {
-                                    reject("No se encontró el contenedor QR en el tiempo esperado.");
-                                } else {
-                                    setTimeout(check, interval);
-                                }
-                            }
-                        };
-
-                        check();
-                    });
-                }
-
-                if (!this.pScannerDialog) {
-                    this.pScannerDialog = Fragment.load({
-                        id: "scanner",
-                        name: "delmex.zmmhandheld.view.fragments.BarcodeScannerDialog",
-                        controller: this
-                    }).then(function (oDialog) {
-                        oView.addDependent(oDialog);
-                        return oDialog;
-                    });
-                }
-
-                this.pScannerDialog.then(function (oDialog) {
-                    oDialog.open();
-
-                    setTimeout(() => {
-                        const oScannerHtml = _this.byId("scannerHtml");
-                        if (oScannerHtml) {
-                            oScannerHtml.setContent("<div id='qr-reader' style='width:100%;'></div>");
-                        }
-
-                        waitForElement("qr-reader", 3000).then(() => {
-                            const html5QrCode = new Html5Qrcode("qr-reader");
-                            _this._html5QrCode = html5QrCode;
-
-                            html5QrCode.start(
-                                { facingMode: "environment" },
-                                {
-                                    fps: 10,
-                                    qrbox: { width: 350, height: 100 },
-                                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-                                },
-                                (decodedText) => {
-                                    html5QrCode.stop().then(() => {
-                                        html5QrCode.clear();
-                                        _this._html5QrCode = null;
-
-                                        sap.ui.getCore().byId("materialInput").setValue(decodedText);
-                                        sap.ui.getCore().byId("materialInput").focus();
-
-                                        _this.showMessage("Código leído: " + decodedText);
-                                        oDialog.close();
-                                    });
-                                },
-                                (errorMsg) => {
-                                    // error de escaneo
-                                }
-                            ).catch((err) => {
-                                _this.showError("Error al iniciar la cámara: " + err);
-                                oDialog.close();
-                            });
-                        }).catch((err) => {
-                            _this.showError(err);
-                            oDialog.close();
-                        });
-                    }, 200);
-                });
-            },
-
-            onCloseScannerDialog: function () {
-                const oDialog = Fragment.byId("scanner", "barcodeScannerDialog");
-                if (!oDialog) {
-                    this.showMessage("No se pudo cerrar el diálogo: no encontrado.");
-                    return;
-                }
-
-                if (this._html5QrCode) {
-                    this._html5QrCode.stop().then(() => {
-                        this._html5QrCode.clear();
-                        this._html5QrCode = null;
-                        oDialog.close();
-                    });
-                } else {
-                    oDialog.close();
-                }
-            },
-
-            onScannerDialogClosed: function () {
-                if (this._html5QrCode) {
-                    this._html5QrCode.clear();
-                    this._html5QrCode = null;
-                }
-            },
-
-            onScannerHtmlRendered: function () {
-                const _this = this;
-
-                const el = document.getElementById("qr-reader");
-                if (!el) {
-                    const oScannerHtml = Fragment.byId("scanner", "scannerHtml");
-                    oScannerHtml.setContent(/* HTML omitido para brevedad */);
-                }
-
-                setTimeout(() => {
-                    const elFinal = document.getElementById("qr-reader");
-                    if (!elFinal) {
-                        _this.showMessage("No se pudo encontrar el contenedor QR.");
-                        return;
-                    }
-
-                    const html5QrCode = new Html5QrCode("qr-reader");
-                    _this._html5QrCode = html5QrCode;
-
-                    html5QrCode.start(
-                        { facingMode: "environment" },
-                        {
-                            fps: 10,
-                            qrbox: { width: 350, height: 100 },
-                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-                            formatsToSupport: [
-                                Html5QrcodeSupportedFormats.CODE_128,
-                                Html5QrcodeSupportedFormats.EAN_13,
-                                Html5QrcodeSupportedFormats.UPC_A,
-                                Html5QrcodeSupportedFormats.UPC_E,
-                                Html5QrcodeSupportedFormats.CODE_39,
-                                Html5QrcodeSupportedFormats.CODE_93,
-                                Html5QrcodeSupportedFormats.CODABAR,
-                                Html5QrcodeSupportedFormats.ITF,
-                                Html5QrcodeSupportedFormats.AZTEC,
-                                Html5QrcodeSupportedFormats.DATA_MATRIX
-                            ]
-                        },
-                        (decodedText) => {
-                            html5QrCode.stop().then(() => {
-                                html5QrCode.clear();
-                                _this._html5QrCode = null;
-
-                                sap.ui.getCore().byId("materialInput").setValue(decodedText);
-                                sap.ui.getCore().byId("materialInput").focus();
-
-                                _this.showMessage("Código leído: " + decodedText);
-                                Fragment.byId("scanner", "barcodeScannerDialog").close();
-                            });
-                        },
-                        (errorMsg) => {
-                            // error escaneando
-                        }
-                    ).catch((err) => {
-                        _this.showError("Error al iniciar la cámara: " + err);
-                        Fragment.byId("scanner", "barcodeScannerDialog").close();
-                    });
-                }, 200);
-            },
-
             onClaseMovChange: function (oEvent) {
                 let sSelectedKey = oEvent.getParameter("selectedItem").getKey();
                 let sSelectext = oEvent.getParameter("selectedItem").getText();
@@ -239,7 +69,7 @@ sap.ui.define([
                 const c_262 = '262';
                 const c_999 = "999"
 
-                if (oSelectedKey === c_601 || oSelectedKey === c_602) {
+                if (oSelectedKey === c_601 || oSelectedKey === c_602 || oSelectedKey === c_261 || oSelectedKey === c_262) {
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", false);
                     this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", true);
@@ -249,6 +79,13 @@ sap.ui.define([
                     this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", false);
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
                     this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
+                }
+
+                if (oSelectedKey === c_999) {
+                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
+                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
+                    this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+
                 }
 
 
@@ -290,7 +127,7 @@ sap.ui.define([
             },
 
             _limpiarCamposFormulario: function () {
-                const aIds = [
+                let aIds = [
                     "materialInput",
                     "cantidadInput",
                     "umInput",
@@ -302,17 +139,182 @@ sap.ui.define([
                 ];
 
                 aIds.forEach((sId) => {
-                    const oInput = Fragment.byId("scanner", sId);
+                    let oInput = Fragment.byId("scanner", sId);
                     if (oInput) {
                         oInput.setValue("");
                     }
                 });
             },
 
-            onSaveHeader: function () {
+            onContinueHeader: async function () {
+
+                this.getView().setBusy(true);
+
+                let bValid = this.validateHeaderFields();
+                if (!bValid) {
+                    return; // Detén si no es válido
+                }
+
                 let oModel = this.getOwnerComponent().getModel("localModel").getData();
                 console.log(oModel);
+                let oView = this.getView();
+
+                // Validar si material requiere batch y agregarlo al array
+                let sKey = oModel.Header.referencia
+                let iPageSize = '5000';
+                let oBundle = this.getResourceBundle();
+                const const_si = oBundle.getText("yes");
+                const const_no = oBundle.getText("no");
+
+
+                let oModel_RefDetail = "API_PRODUCTION_ORDER_2_SRV";
+                let oEntity_RefDetail = "A_ProductionOrderComponent_4";
+                //let oReferenceDetail = await this.readOneAjax(oModel_RefDetail, oEntity_RefDetail, sKey, '', '', '', '');
+                let oReference = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, sKey);
+                let oRefItems = oReference.d.results;
+                console.log("A_ProductionOrderComponent_4", oRefItems);
+
+                // Validar si material requiere batch y agregarlo al array
+                let oItems = await Promise.all(
+                    oRefItems.map(async (element) => {
+                        let oCant_disponible = parseFloat(element.RequiredQuantity) - parseFloat(element.WithdrawnQuantity);
+                        let isBatchRequired = await this.searchBatchRequired(element);
+                        let sMaterialText = await this.onSearchMaterialText(element);
+                        return {
+                            material: element.Material,
+                            txt_material: sMaterialText,
+                            cantidad: oCant_disponible,
+                            um: element.BaseUnitSAPCode,
+                            centro: element.Plant,
+                            almacen: element.StorageLocation,
+                            isBatchRequired: isBatchRequired ? const_si : const_no
+                        };
+                    })
+                );
+
+                let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                oLocalModel.setProperty("/ReferenceItems", oItems);
+
+
+
+
+
+                // Verifica si Ya existe
+                if (!this.oItemsDialog) {
+                    this.oItemsDialog = Fragment.load({
+                        id: oView.getId(), // Usa el ID de la vista como scope
+                        name: "delmex.zmmhandheld.view.fragments.ReferenceItemsDialog",
+                        controller: this
+                    }).then(function (oDialog) {
+                        oView.addDependent(oDialog);
+                        oDialog.open(); // <<< Abre el Dialog aquí!
+                        oView.setBusy(false);
+                        return oDialog;
+                    });
+                } else {
+                    // Si ya existe, recuerda que es una Promise, así que espera
+                    this.oItemsDialog.then(function (oDialog) {
+                        oDialog.open();
+                        oView.setBusy(false);
+                    });
+                }
             },
+
+            searchBatchRequired: async function (element) {
+
+
+                // Buscar si el Material requiere Batch para ser procesado
+                let oModel_BatchRequired = "productApi";
+                let oEntity_BatchRequired = "Product";
+                let sMaterialBatch = await this.readOneAjax(oModel_BatchRequired, oEntity_BatchRequired, element.ManufacturingOrder, element.Material, '', '', '', '');
+                let isBatchRequired = sMaterialBatch.value[0].IsBatchManagementRequired;
+                return isBatchRequired;
+
+
+            },
+
+            onSearchMaterialText: async function (element) {
+                // Texto de material
+                let oModel_MatText = "productApi";
+                let oEntity_MatText = "ProductDescription";
+                let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, element.ManufacturingOrder, element.Material, '', '', '', '');
+                console.log("sMaterialText", sMaterialData);
+                let sMaterialText = sMaterialData.value[0].ProductDescription;
+                return sMaterialText;
+            },
+
+            onCloseItemsDialog: function () {
+                if (this.oItemsDialog) {
+                    this.oItemsDialog.then(function (oDialog) {
+                        oDialog.close();
+                    });
+                }
+            },
+
+            onSearchBatchList: async function (element) {
+                // Texto de material
+                let oModel = "apiBatch";
+                let oEntity = "Batch";
+
+                let sList = await this.readOneAjax(oModel, oEntity, '', element.material, '', '', '', '');
+                let sBatchList = sList.d.results;
+
+                var oBatchModel = new sap.ui.model.json.JSONModel();
+                oBatchModel.setData(sBatchList);
+                this.getView().setModel(oBatchModel, "BatchList");
+                console.log(sBatchList);
+
+                return sBatchList;
+            },
+
+            onProcesarItem: function (oEvent) {
+
+                let oModel = this.getModel("localModel");
+                let sPath = oEvent.getSource().getBindingContext("localModel").getPath(); // ej: /Positions/2
+                let aPositions = oModel.getProperty("/ReferenceItems");
+                let iIndex = parseInt(sPath.split("/")[2], 10);
+
+                console.log(iIndex);
+
+                if (!isNaN(iIndex) && iIndex >= 0 && iIndex < aPositions.length) {
+                    this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected", aPositions[iIndex]);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected/index", iIndex);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", aPositions[iIndex].material);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", aPositions[iIndex].lote);
+
+                    this.onSearchBatchList(aPositions[iIndex]);
+
+                    // Paso 1: Obtener IconTabBar por ID
+                    let oIconTabBar = this.byId("mainTabs");
+
+                    // Paso 2: Cambiar la pestaña activa por su key
+                    oIconTabBar.setSelectedKey("datos");
+
+                    /* let oDataPosition = {
+                        material: aPositions[iIndex].Material,
+                        txt_material: aPositions[iIndex].txt_material,
+                        cantidad: aPositions[iIndex].cantidad,
+                        um: aPositions[iIndex].um,
+                        lote: aPositions[iIndex].lote, // Batch
+                        centro: aPositions[iIndex].centro, //Planta
+                        almacen: aPositions[iIndex].almacen,
+                        ceco: aPositions[iIndex].ceco,
+                        motivo: aPositions[iIndex].motivo,
+                        txt_posicion: aPositions[iIndex].txt_posicion,
+                        txt_posicion_historico: aPositions[iIndex].txt_posicion_historico,
+                        cantidad_disponible: aPositions[iIndex].cantidad_disponible,
+                        PurchaseOrderItem: aPositions[iIndex].PurchaseOrderItem,
+                        GoodsMovementRefDocType: aPositions[iIndex].GoodsMovementRefDocType,
+                        numero_documento: aPositions[iIndex].numero_documento,
+                        isBatchRequired: aPositions[iIndex].isBatchRequired, // true requiere lote | false no requiere lote
+                    } */
+                }
+
+                this.onCloseItemsDialog();
+
+            },
+
+
 
 
             onSavePosition: function () {
@@ -336,7 +338,9 @@ sap.ui.define([
                         almacen: oModel.almacen,
                         ceco: oModel.ceco,
                         motivo: oModel.motivo,
-                        txt_posicion: oModel.txt_posicion
+                        txt_posicion: oModel.txt_posicion,
+                        txt_material: oModel.txt_material,
+                        isBatchRequired: oModel.isBatchRequired
                     }
                     oPositions.push(_position);
                     let oLocalModel = this.getOwnerComponent().getModel("localModel");
@@ -362,12 +366,12 @@ sap.ui.define([
             },
 
             onEliminarPosicion: function (oEvent) {
-                const oModel = this.getModel("localModel");
-                const oBundle = this.getResourceBundle();
+                let oModel = this.getModel("localModel");
+                let oBundle = this.getResourceBundle();
 
-                const sPath = oEvent.getSource().getBindingContext("localModel").getPath(); // ej: /Positions/2
-                const aPositions = oModel.getProperty("/Positions");
-                const iIndex = parseInt(sPath.split("/")[2], 10);
+                let sPath = oEvent.getSource().getBindingContext("localModel").getPath(); // ej: /Positions/2
+                let aPositions = oModel.getProperty("/Positions");
+                let iIndex = parseInt(sPath.split("/")[2], 10);
 
                 if (!isNaN(iIndex) && iIndex >= 0 && iIndex < aPositions.length) {
                     MessageBox.confirm(oBundle.getText("mensajeConfirmacionEliminar"), {
@@ -376,7 +380,7 @@ sap.ui.define([
                         emphasizedAction: MessageBox.Action.OK,
                         onClose: (sAction) => {
                             if (sAction === MessageBox.Action.OK) {
-                                const sMaterial = aPositions[iIndex].material || "";
+                                let sMaterial = aPositions[iIndex].material || "";
                                 aPositions.splice(iIndex, 1);
                                 oModel.setProperty("/Positions", aPositions);
                                 this._actualizarContadorPosiciones();
@@ -391,12 +395,13 @@ sap.ui.define([
             },
 
             _actualizarContadorPosiciones: function () {
-                const oModel = this.getModel("localModel");
-                const aPos = oModel.getProperty("/Positions") || [];
-                const iCantidad = aPos.length;
+                let oModel = this.getModel("localModel");
+                let aPos = oModel.getProperty("/Positions") || [];
+                let iCantidad = aPos.length;
+                let oEmpty = '';
 
-                const oBundle = this.getResourceBundle();
-                const sTexto = oBundle.getText("contadorPosiciones", [iCantidad]);
+                let oBundle = this.getResourceBundle();
+                let sTexto = oBundle.getText("contadorPosiciones", [iCantidad]);
 
                 oModel.setProperty("/posicionesTexto", sTexto);
             },
@@ -414,7 +419,7 @@ sap.ui.define([
              */
             _loadAllPlantsPaginated: async function () {
                 try {
-                    const aPlants = await this.readAllPagedAjax();
+                    let aPlants = await this.readAllPagedAjax();
                     console.log("Total cargado:", aPlants.length);
                     this.getView().getModel("localModel").setProperty("/productPlants", aPlants);
                 } catch (e) {
@@ -423,108 +428,170 @@ sap.ui.define([
             },
 
             onBuscarDetalle: async function () {
+                let oView = this.getView();
+                let oLocalModelData = this.getOwnerComponent().getModel("localModel").getData();
+                let oBatchListModel = oView.getModel("BatchList");
+                let oBundle = this.getResourceBundle();
 
-                let oModelName = "API_MATERIAL_DOCUMENT_SRV";
-                let oEntity = "A_MaterialDocumentItem";
-                let olocalModel = this.getOwnerComponent().getModel("localModel").getData();
-                let sKey = olocalModel.Header.referencia; //"1000004";
-                let sMaterial = olocalModel.DataPosition.material;
-                let sBatch = olocalModel.DataPosition.lote;
-                let sPlant = '';
-                let sLocation = '';
-                let sFilter_flag = true;
-                //sKey.padStart(12, '0');
+                console.log("ReferenceItemSelected", oLocalModelData.ReferenceItemSelected);
 
-                /*
-                "https://my413406-api.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
-                /A_MaterialDocumentItem(
-                    MaterialDocumentYear='2025',
-                    MaterialDocument='4900000203',
-                    MaterialDocumentItem='1')",
+                // 1️⃣ Tomar valores de Inputs
+                let sMaterial = oView.byId("materialInput").getValue()?.trim().toUpperCase();
+                let sBatch = oView.byId("loteInput").getValue()?.trim().toUpperCase();
 
-                */
-
-                try {
-                    let sOrderDetail = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag);
-                    //console.log("API_MATERIAL_DOCUMENT_SRV:", sOrderDetail);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", sOrderDetail.d.results[0].EntryUnit);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", sOrderDetail.d.results[0].Plant);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", sOrderDetail.d.results[0].StorageLocation);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", sOrderDetail.d.results[0].Batch);
-                    let oDetailText = this.onGetDetailText(sKey, sMaterial, sBatch);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", oDetailText);
-
-
-                    // Header tab Texto cabecera
-                    //this.getOwnerComponent().getModel("localModel").setProperty("/Header/texto_cabecera", sOrderDetail.d.results[0].MaterialDocumentItemText);
-
-                    // Cantidad Disponible
-                    let oModel_MatDoc = "API_PRODUCTION_ORDER_2_SRV";
-                    let oEntity_MatDoc = "A_ProductionOrder_2";
-                    sPlant = sOrderDetail.d.results[0].Plant;
-                    sLocation = sOrderDetail.d.results[0].StorageLocation;
-                    let sQuantityDetail = await this.readOneAjax(oModel_MatDoc, oEntity_MatDoc, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag);
-
-
-                    let oCant_disponible = parseFloat(sQuantityDetail.d.results[0].TotalQuantity) - parseFloat(sQuantityDetail.d.results[0].MfgOrderConfirmedYieldQty);
-                    console.log("cantidad disponible: oCant_disponible: " + oCant_disponible);
-                    /* if (oCant_disponible > 0) {
-                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", oCant_disponible);
-                    } else {
-                        const oBundle = this.getResourceBundle();
-                        let sTexto = oBundle.getText("error.cantidad_no_disponible", [oCant_disponible]);
-                    } */
-
-                    let oCantidad = parseFloat(this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad"));
-                    //this.validarCantidad(oCantidad, oCant_disponible);
-
-
-
-                } catch (e) {
-                    // Ya está manejado visualmente
+                // 2️⃣ Validar campos obligatorios
+                if (!sMaterial || !sBatch) {
+                    MessageToast.show(oBundle.getText("position.missingFields"));
+                    return;
                 }
 
+                // 3️⃣ Obtener datos del modelo BatchList
+                let aBatchData = oBatchListModel.getData() || [];
+
+                // 4️⃣ Buscar combinación material-lote
+                let oMatch = aBatchData.find(item =>
+                    item.Material === sMaterial && item.Batch === sBatch
+                );
+
+                if (oMatch) {
+                    MessageToast.show(oBundle.getText("position.batchFound"));
+
+                    // 5️⃣ Actualizar datos fijos de la selección
+                    let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                    oLocalModel.setProperty("/DataPosition/cantidad", oLocalModelData.ReferenceItemSelected.cantidad);
+                    oLocalModel.setProperty("/DataPosition/um", oLocalModelData.ReferenceItemSelected.um);
+                    oLocalModel.setProperty("/DataPosition/centro", oLocalModelData.ReferenceItemSelected.centro);
+                    oLocalModel.setProperty("/DataPosition/almacen", oLocalModelData.ReferenceItemSelected.almacen);
+                    oLocalModel.setProperty("/DataPosition/txt_material", oLocalModelData.ReferenceItemSelected.txt_material);
+
+                    // 6️⃣ Esperar texto de detalle (ahora usando await)
+                    let sKey = oLocalModelData.Header.referencia;
+                    let oClaseMov = oLocalModelData.Header.claseMov;
+                    let sDetailText = await this.onGetDetailText(sKey, sMaterial, sBatch, oClaseMov);
+
+                    // 7️⃣ Guardar el texto final en el modelo
+                    oLocalModel.setProperty("/DataPosition/txt_posicion_historico", sDetailText);
+
+                } else {
+                    // Si no hay match y el batch es requerido: mostrar mensaje
+                    if (oLocalModelData.ReferenceItemSelected.isBatchRequired) {
+                        MessageToast.show(oBundle.getText("position.batchNotFound"));
+                    }
+                }
             },
 
-            onGetDetailText: async function (sKey, sMaterial, sBatch) {
 
-                const oModelName = "ZSB_HANDHELD_V2";
-                const oEntity = "OrderItemsText";
-                let sPlant = '';
-                //sKey = sKey.padStart(12, '0');; //"1000004";
-                const sFilter_flag = true;
+            /*  onBuscarDetalle: async function () {
+ 
+                 let oModelName = "API_MATERIAL_DOCUMENT_SRV";
+                 let oEntity = "A_MaterialDocumentItem";
+                 let olocalModel = this.getOwnerComponent().getModel("localModel").getData();
+                 let sKey = olocalModel.Header.referencia; //"1000004";
+                 let sMaterial = olocalModel.DataPosition.material;
+                 let sBatch = olocalModel.DataPosition.lote;
+                 let sPlant = '';
+                 let sLocation = '';
+               
+ 
+                 try {
+                     let sOrderDetail = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation);
+                     //console.log("API_MATERIAL_DOCUMENT_SRV:", sOrderDetail);
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", sOrderDetail.d.results[0].EntryUnit);
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", sOrderDetail.d.results[0].Plant);
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", sOrderDetail.d.results[0].StorageLocation);
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", sOrderDetail.d.results[0].Batch);
+                     let oDetailText = this.onGetDetailText(sKey, sMaterial, sBatch);
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", oDetailText);
+ 
+ 
+                     // Header tab Texto cabecera
+                     //this.getOwnerComponent().getModel("localModel").setProperty("/Header/texto_cabecera", sOrderDetail.d.results[0].MaterialDocumentItemText);
+ 
+                     // Cantidad Disponible
+                     let oModel_MatDoc = "API_PRODUCTION_ORDER_2_SRV";
+                     //let oEntity_MatDoc = "A_ProductionOrder_2";
+                     let oEntity_MatDoc = "A_ProductionOrderComponent_4";
+                     sPlant = sOrderDetail.d.results[0].Plant;
+                     sLocation = sOrderDetail.d.results[0].StorageLocation;
+                     let sQuantityDetail = await this.readOneAjax(oModel_MatDoc, oEntity_MatDoc, sKey, sMaterial, sBatch, sPlant, sLocation);
+ 
+ 
+                     let oCant_disponible = parseFloat(sQuantityDetail.d.results[0].RequiredQuantity) - parseFloat(sQuantityDetail.d.results[0].WithdrawnQuantity);
+                     console.log("cantidad disponible: oCant_disponible: " + oCant_disponible);
+                     if (oCant_disponible > 0) {
+                         this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", oCant_disponible);
+                         this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", oCant_disponible);
+                     } else {
+                         const oBundle = this.getResourceBundle();
+                         let sTexto = oBundle.getText("error.cantidad_no_disponible", [oCant_disponible]);
+                         MessageBox.error(sTexto);
+                     }
+ 
+ 
+                     // Texto de material
+                     let oModel_MatText = "productApi";
+                     let oEntity_MatText = "ProductDescription";
+                     //let sMaterialText = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, sMaterial, oEmpty, oEmpty, oEmpty);
+                     let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, sKey, sMaterial, sBatch, sPlant, sLocation);
+                     console.log("sMaterialText", sMaterialData);
+                     let sMaterialText = sMaterialData.value[0].ProductDescription;
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", sMaterialText);
+ 
+ 
+                     // Material requiere Batch para ser procesado
+                     let oModel_BatchRequired = "productApi";
+                     let oEntity_BatchRequired = "Product";
+                     //let sMaterialText = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, sMaterial, oEmpty, oEmpty, oEmpty);
+                     let sMaterialBatch = await this.readOneAjax(oModel_BatchRequired, oEntity_BatchRequired, sKey, sMaterial, sBatch, sPlant, sLocation);
+                     let isBatchRequired = sMaterialBatch.value[0].IsBatchManagementRequired;
+                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", isBatchRequired);
+ 
+                 } catch (e) {
+                     // Ya está manejado visualmente
+                 }
+ 
+             }, */
+
+            onGetDetailText: async function (sKey, sMaterial, sBatch, oClaseMov) {
+                let oModelName = "ZSB_HANDHELD_V2";
+                let oEntity = "/OrderItemsText";
+                let sPlant = "";
+                let sLocation = "";
 
                 try {
-                    let oDetailText = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation, sFilter_flag);
+                    // 1️⃣ Llamar a la lectura Ajax y esperar respuesta
+                    let oDetailText = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov);
 
-                    const aResults = oDetailText.d.results;
+                    // 2️⃣ Tomar resultados
+                    let aResults = oDetailText.d.results;
 
-                    // Convertimos cada posición a una línea de texto
-                    const sTextoFinal = aResults
+                    // 3️⃣ Convertir a texto formateado
+                    let sTextoFinal = aResults
                         .map(obj => {
-                            const sConf = obj.MfgOrderConfirmation;
-                            const sTexto = obj.DetailText || "";
+                            let sConf = obj.MfgOrderConfirmation;
+                            let sTexto = obj.DetailText || "";
                             return `#${sConf}: ${sTexto}`;
                         })
                         .join("\n");
 
-                    // Regresamos el texto formateado para guardarlo en el modelo local para el TextArea
-
+                    // 4️⃣ Devolver el texto formateado
                     return sTextoFinal;
-                } catch (e) {
-                    // Ya está manejado visualmente
-                }
 
+                } catch (e) {
+                    console.error("Error onGetDetailText:", e);
+                    return ""; // Devuelve string vacío si hay error
+                }
             },
 
 
+
             guardarTextoEditado: function () {
-                const oLocalModel = this.getView().getModel("localModel");
-                const sTexto = oLocalModel.getProperty("/DataPosition/txt_posicion");
+                let oLocalModel = this.getView().getModel("localModel");
+                let sTexto = oLocalModel.getProperty("/DataPosition/txt_posicion");
 
                 // Separamos por línea y convertimos en array de objetos
-                const aPosiciones = sTexto.split("\n").map(linea => {
-                    const match = linea.match(/^#(\d+):\s?(.*)$/); // patrón tipo "#2: texto"
+                let aPosiciones = sTexto.split("\n").map(linea => {
+                    let match = linea.match(/^#(\d+):\s?(.*)$/); // patrón tipo "#2: texto"
                     return {
                         MfgOrderConfirmation: match ? match[1] : "",
                         DetailText: match ? match[2] : ""
@@ -578,6 +645,7 @@ sap.ui.define([
                     let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
                     let sModelName = "API_MATERIAL_DOCUMENT_SRV";
                     let sEntitySet = "A_MaterialDocumentHeader";
+                    let oBundle = this.getResourceBundle();
 
                     // 2️⃣ Formatear la fecha de contabilización (ISO con hora 00:00:00)
                     let oDate = oLocalModel.Header.fecha_cont + "T00:00:00";
@@ -600,7 +668,7 @@ sap.ui.define([
                     };
 
                     // 6️⃣ Recorrer todos los ítems seleccionados y agregarlos al array
-                    oLocalModel.Positions.forEach((element) => {
+                    /* oLocalModel.Positions.forEach((element) => {
                         oRequestJson.to_MaterialDocumentItem.push({
                             Material: element.material,                           // Código de material
                             Plant: element.centro,                                // Planta / Centro
@@ -608,11 +676,26 @@ sap.ui.define([
                             StorageLocation: element.almacen,                     // Almacén
                             GoodsMovementType: oLocalModel.Header.claseMov,       // Clase de movimiento
                             MaterialDocumentItemText: element.texto || "Rollo",   // Texto de posición
-                            ManufacturingOrder: oLocalModel.Header.referencia,       // Orden de fabricación
+                            ManufacturingOrder: oLocalModel.Header.referencia,    // Orden de fabricación
                             IsCompletelyDelivered: false,                         // Indicador de entrega
                             QuantityInEntryUnit: element.cantidad,                // Cantidad
-                            CostCenter: element.ceco                              // Centro de costo
+                            CostCenter: element.ceco,                             // Centro de costo
+                            MaterialDocumentItemText: element.txt_material
                         });
+                    }); */
+
+                    oRequestJson.to_MaterialDocumentItem.push({
+                        Material: oLocalModel.DataPosition.material,                           // Código de material
+                        Plant: oLocalModel.DataPosition.centro,                                // Planta / Centro
+                        Batch: oLocalModel.DataPosition.lote,                                  // Lote, valor default si no viene
+                        StorageLocation: oLocalModel.DataPosition.almacen,                     // Almacén
+                        GoodsMovementType: oLocalModel.Header.claseMov,       // Clase de movimiento
+                        MaterialDocumentItemText: oLocalModel.DataPosition.texto || "Rollo",   // Texto de posición
+                        ManufacturingOrder: oLocalModel.Header.referencia,    // Orden de fabricación
+                        IsCompletelyDelivered: false,                         // Indicador de entrega
+                        QuantityInEntryUnit: oLocalModel.DataPosition.cantidad,                // Cantidad
+                        CostCenter: oLocalModel.DataPosition.ceco,                             // Centro de costo
+                        MaterialDocumentItemText: oLocalModel.DataPosition.txt_material
                     });
 
                     // 7️⃣ Mostrar payload final en consola para validación (opcional)
@@ -621,41 +704,153 @@ sap.ui.define([
                         "GoodsMovementCode": "03",
                         "MaterialDocumentHeaderText": "Cabecera HandHeld",
                         "to_MaterialDocumentItem": [
-                          {
-                          "Material": "MP50002T",
-                          "Plant": "1000",
-                          "Batch": "TEST1",
-                          "StorageLocation": "1000",
-                          "GoodsMovementType": "201",
-                          "MaterialDocumentItemText": "Rollo",
-                          "ManufacturingOrder": "1000140",
-                          "IsCompletelyDelivered" : false,
-                          "QuantityInEntryUnit": "1",
-                          "CostCenter": "5110101208"
-                          }
+                            {
+                                "Material": "MP50002T",
+                                "Plant": "1000",
+                                "Batch": "TEST1",
+                                "StorageLocation": "1000",
+                                "GoodsMovementType": "201",
+                                "MaterialDocumentItemText": "Rollo",
+                                "ManufacturingOrder": "1000140",
+                                "IsCompletelyDelivered": false,
+                                "QuantityInEntryUnit": "1",
+                                "CostCenter": "5110101208"
+                            }
                         ]
-                      };
+                    };
                     console.log("Payload final:", oRequestJson_2);
 
 
                     // Paso 8️⃣ Obtener CSRF Token usando helper del BaseController
-                    const sToken = await this.fetchCsrfToken(sModelName, sEntitySet);
+                    let sToken = await this.fetchCsrfToken(sModelName, sEntitySet);
                     console.log("CSRF Token obtenido:", sToken);
 
                     // Paso 9 Ejecutar POST usando helper del BaseController
-                    const oResponse = await this.postEntityAjax(sModelName, sEntitySet, oRequestJson, sToken);
+                    let oResponse = await this.postEntityAjax(sModelName, sEntitySet, oRequestJson, sToken);
 
                     sap.m.MessageToast.show(oBundle.getText("success.movCreated"));
                     console.log("Respuesta del POST:", oResponse);
+                    this.PopulatePositions(oResponse.d);
 
                 } catch (e) {
                     console.error("Error en onCreateMov:", e);
                     this._showErrorMessage(oBundle.getText("error.unexpected"), oBundle);
                 }
+            },
+
+            validateHeaderFields: function () {
+                let oView = this.getView();
+                let oBundle = this.getResourceBundle();
+                let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                let bValid = true;
+                let aMissingFields = [];
+            
+                // 🚩 Campos a validar
+                let aFields = [
+                    {
+                        id: "header_select_clasemov",
+                        prop: "Header/claseMov",
+                        label: oBundle.getText("header.operacion_almacen")
+                    },
+                    {
+                        id: "header_input_fecha_doc",
+                        prop: "Header/fecha_doc",
+                        label: oBundle.getText("header.fecha_documento")
+                    },
+                    {
+                        id: "header_input_fecha_cont",
+                        prop: "Header/fecha_cont",
+                        label: oBundle.getText("header.fecha_contabilizacion")
+                    },
+                    {
+                        id: "header_input_fecha_referencia",
+                        prop: "Header/referencia",
+                        label: oBundle.getText("header.referencia")
+                    }
+                ];
+            
+                aFields.forEach(oField => {
+                    let oControl = oView.byId(oField.id);
+                    let sValue = oLocalModel.getProperty("/" + oField.prop);
+            
+                    // 🚩 Para el Select reforzamos que '0' cuente como vacío
+                    let bIsEmpty = !sValue || sValue.trim() === "";
+            
+                    if (oField.id === "header_select_clasemov") {
+                        let sSelectedKey = oControl.getSelectedKey();
+            
+                        // Si el modelo trae '0' o el key real es '0' => inválido
+                        if (!sSelectedKey || sSelectedKey.trim() === "" || sSelectedKey === "0" || sValue === "0") {
+                            bIsEmpty = true;
+                        }
+                    }
+            
+                    if (bIsEmpty) {
+                        bValid = false;
+                        aMissingFields.push(oField.label);
+            
+                        oControl.setValueState("Error");
+                        oControl.setValueStateText(oBundle.getText("validation.fieldRequired", [oField.label]));
+                    } else {
+                        oControl.setValueState("None");
+                    }
+                });
+            
+                if (!bValid) {
+                    MessageBox.error(
+                        oBundle.getText("validation.missingFields", [aMissingFields.join(", ")])
+                    );
+                }
+            
+                return bValid;
+            },
+            
+
+
+            onTabChanged: function (oEvent) {
+                let sKey = oEvent.getParameter("key");
+                if (sKey !== "cabecera") {
+                    let bValid = this.validateHeaderFields();
+                    if (!bValid) {
+                        // 🚩 Si no es válido, forza volver al tab Cabecera
+                        this.byId("mainTabs").setSelectedKey("cabecera");
+                    }
+                }
+            },
+
+
+            resetHeaderValidation: function () {
+                let oView = this.getView();
+                ["header_input_clasemov", "header_input_fecha_doc", "header_input_fecha_cont", "header_input_fecha_referencia"]
+                    .forEach(id => oView.byId(id).setValueState("None"));
+            },
+
+
+            PopulatePositions: function(oResponse){
+
+                let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                let oDataPosition = oLocalModel.getData().DataPosition;
+
+                if(oResponse.MaterialDocument){
+                    let _position = {
+                        material: oDataPosition.material,
+                        txt_material: oDataPosition.txt_material,
+                        cantidad: oDataPosition.cantidad,
+                        um: oDataPosition.um,
+                        lote: oDataPosition.lote,
+                        centro: oDataPosition.centro,
+                        almacen: oDataPosition.almacen,
+                        ceco: oDataPosition.ceco,
+                        motivo: oDataPosition.motivo,
+                        txt_posicion: oDataPosition.txt_posicion,
+                        MaterialDocument: oResponse.MaterialDocument
+                    }
+                    oPositions.push(_position);
+                    oLocalModel.setProperty("/Positions", oPositions);
+                    this._actualizarContadorPosiciones();
+                }
+
             }
-
-
-
 
 
 
