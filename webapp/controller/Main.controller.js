@@ -88,6 +88,16 @@ sap.ui.define([
 
                 }
 
+                const oToday = new Date();
+                const sYear = oToday.getFullYear();
+                const sMonth = String(oToday.getMonth() + 1).padStart(2, "0");
+                const sDay = String(oToday.getDate()).padStart(2, "0");
+                const sToday = `${sYear}-${sMonth}-${sDay}`;
+
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/fecha_doc", sToday);
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/fecha_cont", sToday);
+
+
 
             },
 
@@ -148,6 +158,8 @@ sap.ui.define([
 
             onContinueHeader: async function () {
 
+                this.onClearPosition();
+
                 this.getView().setBusy(true);
 
                 let bValid = this.validateHeaderFields();
@@ -155,8 +167,14 @@ sap.ui.define([
                     return; // Detén si no es válido
                 }
 
+                let oDisplayModel = this.getView().getModel("oDisplayModel").getData();
+                if (!oDisplayModel.Header.referencia) {
+                    this.onNavToIconTabBar("datos");
+                    this.getView().setBusy(false);
+                    return;
+                }
+
                 let oModel = this.getOwnerComponent().getModel("localModel").getData();
-                console.log(oModel);
                 let oView = this.getView();
 
                 // Validar si material requiere batch y agregarlo al array
@@ -187,7 +205,9 @@ sap.ui.define([
                             um: element.BaseUnitSAPCode,
                             centro: element.Plant,
                             almacen: element.StorageLocation,
-                            isBatchRequired: isBatchRequired ? const_si : const_no
+                            isBatchRequired_txt: isBatchRequired ? const_si : const_no,
+                            GoodsMovementType: element.GoodsMovementType,
+                            isBatchRequired: isBatchRequired
                         };
                     })
                 );
@@ -269,6 +289,7 @@ sap.ui.define([
 
             onProcesarItem: function (oEvent) {
 
+
                 let oModel = this.getModel("localModel");
                 let sPath = oEvent.getSource().getBindingContext("localModel").getPath(); // ej: /Positions/2
                 let aPositions = oModel.getProperty("/ReferenceItems");
@@ -279,16 +300,14 @@ sap.ui.define([
                 if (!isNaN(iIndex) && iIndex >= 0 && iIndex < aPositions.length) {
                     this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected", aPositions[iIndex]);
                     this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected/index", iIndex);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", aPositions[iIndex].material);
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", aPositions[iIndex].lote);
+                    //this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", aPositions[iIndex].material);
+                    //this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", aPositions[iIndex].lote);
 
                     this.onSearchBatchList(aPositions[iIndex]);
 
-                    // Paso 1: Obtener IconTabBar por ID
-                    let oIconTabBar = this.byId("mainTabs");
 
                     // Paso 2: Cambiar la pestaña activa por su key
-                    oIconTabBar.setSelectedKey("datos");
+                    this.onNavToIconTabBar("datos");
 
                     /* let oDataPosition = {
                         material: aPositions[iIndex].Material,
@@ -354,8 +373,12 @@ sap.ui.define([
 
             },
 
-            onClearPosition: function () {
-                this.getView().byId("materialInput").setValue();
+            onClearPosition: function (oMaterial_Flag = true) {
+
+                if (oMaterial_Flag) {
+                    this.getView().byId("materialInput").setValue();
+                }
+
                 this.getView().byId("cantidadInput").setValue();
                 this.getView().byId("umInput").setValue();
                 this.getView().byId("loteInput").setValue();
@@ -363,9 +386,29 @@ sap.ui.define([
                 this.getView().byId("almacenInput").setValue();
                 this.getView().byId("cecoInput").setValue();
                 this.getView().byId("motivoInput").setValue();
+                this.getView().byId("txtPosicionArea").setValue();
+                this.getView().byId("txtPosicionArea_historico").setValue();
             },
 
-            onEliminarPosicion: function (oEvent) {
+            onClearHeader: function () {
+                this.getView().byId("header_select_clasemov").setSelectedKey("0");
+                this.getView().byId("header_input_clasemov").setValue();
+                this.getView().byId("header_input_fecha_doc").setValue();
+                this.getView().byId("header_input_fecha_cont").setValue();
+                this.getView().byId("header_input_referencia").setValue();
+                this.getView().byId("header_input_fecha_texto_cabecera").setValue();
+
+            },
+
+            onRestartProcess: function () {
+                this.onClearPosition();
+                this.onClearHeader();
+
+                this.onNavToIconTabBar("cabecera");
+
+            },
+
+            /* onEliminarPosicion: function (oEvent) {
                 let oModel = this.getModel("localModel");
                 let oBundle = this.getResourceBundle();
 
@@ -392,7 +435,7 @@ sap.ui.define([
                 } else {
                     this.showError(oBundle.getText("errorIndiceInvalidoEliminar"));
                 }
-            },
+            }, */
 
             _actualizarContadorPosiciones: function () {
                 let oModel = this.getModel("localModel");
@@ -406,13 +449,13 @@ sap.ui.define([
                 oModel.setProperty("/posicionesTexto", sTexto);
             },
 
-            onCleanHeader: function () {
+           /*  onCleanHeader: function () {
                 this.getView().byId("header_input_clasemov").setValue();
                 this.getView().byId("header_input_fecha_doc").setValue();
                 this.getView().byId("header_input_fecha_cont").setValue();
-                this.getView().byId("header_input_fecha_referencia").setValue();
+                this.getView().byId("header_input_referencia").setValue();
                 this.getView().byId("header_input_fecha_texto_cabecera").setValue();
-            },
+            }, */
 
             /**
              * Carga datos desde AJAX y los imprime (o enlaza a modelo).
@@ -432,52 +475,119 @@ sap.ui.define([
                 let oLocalModelData = this.getOwnerComponent().getModel("localModel").getData();
                 let oBatchListModel = oView.getModel("BatchList");
                 let oBundle = this.getResourceBundle();
+                let isBatchRequired = oLocalModelData.ReferenceItemSelected.isBatchRequired;
+                this.getView().getModel("oDisplayModel").setProperty("/Posiciones/lote", isBatchRequired);
 
                 console.log("ReferenceItemSelected", oLocalModelData.ReferenceItemSelected);
 
-                // 1️⃣ Tomar valores de Inputs
-                let sMaterial = oView.byId("materialInput").getValue()?.trim().toUpperCase();
-                let sBatch = oView.byId("loteInput").getValue()?.trim().toUpperCase();
 
-                // 2️⃣ Validar campos obligatorios
-                if (!sMaterial || !sBatch) {
-                    MessageToast.show(oBundle.getText("position.missingFields"));
+                // ✅ Tomar partes
+                let sMaterial = this.getView().byId("materialInput").getValue();
+                let sBatch = this.getView().byId("loteInput").getValue();
+
+
+                let componentMaterial = oLocalModelData.ReferenceItemSelected.material;
+                if (sMaterial !== componentMaterial) {
+                    let sMessage = oBundle.getText("position.noMatch", [
+                        sMaterial,
+                        componentMaterial
+                    ]);
+                    MessageBox.alert(sMessage);
                     return;
                 }
 
-                // 3️⃣ Obtener datos del modelo BatchList
-                let aBatchData = oBatchListModel.getData() || [];
+                if (isBatchRequired) {
 
-                // 4️⃣ Buscar combinación material-lote
-                let oMatch = aBatchData.find(item =>
-                    item.Material === sMaterial && item.Batch === sBatch
-                );
+                    // 2️⃣ Validar campos obligatorios
+                    if (!sMaterial || !sBatch) {
+                        MessageToast.show(oBundle.getText("position.missingFields"));
 
-                if (oMatch) {
-                    MessageToast.show(oBundle.getText("position.batchFound"));
-
-                    // 5️⃣ Actualizar datos fijos de la selección
-                    let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                    oLocalModel.setProperty("/DataPosition/cantidad", oLocalModelData.ReferenceItemSelected.cantidad);
-                    oLocalModel.setProperty("/DataPosition/um", oLocalModelData.ReferenceItemSelected.um);
-                    oLocalModel.setProperty("/DataPosition/centro", oLocalModelData.ReferenceItemSelected.centro);
-                    oLocalModel.setProperty("/DataPosition/almacen", oLocalModelData.ReferenceItemSelected.almacen);
-                    oLocalModel.setProperty("/DataPosition/txt_material", oLocalModelData.ReferenceItemSelected.txt_material);
-
-                    // 6️⃣ Esperar texto de detalle (ahora usando await)
-                    let sKey = oLocalModelData.Header.referencia;
-                    let oClaseMov = oLocalModelData.Header.claseMov;
-                    let sDetailText = await this.onGetDetailText(sKey, sMaterial, sBatch, oClaseMov);
-
-                    // 7️⃣ Guardar el texto final en el modelo
-                    oLocalModel.setProperty("/DataPosition/txt_posicion_historico", sDetailText);
-
-                } else {
-                    // Si no hay match y el batch es requerido: mostrar mensaje
-                    if (oLocalModelData.ReferenceItemSelected.isBatchRequired) {
-                        MessageToast.show(oBundle.getText("position.batchNotFound"));
+                        if (!sBatch) {
+                            this.getView().byId("loteInput").focus();
+                        }
+                        return;
                     }
+
+                    // 3️⃣ Obtener datos del modelo BatchList
+                    let aBatchData = oBatchListModel.getData() || [];
+
+                    // 4️⃣ Buscar combinación material-lote
+                    let oMatch = aBatchData.find(item =>
+                        item.Material === sMaterial && item.Batch === sBatch
+                    );
+
+                    if (oMatch) {
+                        MessageToast.show(oBundle.getText("position.batchFound"));
+
+
+                        /**
+                         * 5️⃣ Actualizar datos fijos de la selección
+                         * 6️⃣ Esperar texto de detalle (ahora usando await)
+                         * 7️⃣ Guardar el texto final en el modelo
+                         */
+
+                        await this.setPositionValue();
+
+
+                    } else {
+                        // Si no hay match y el batch es requerido: mostrar mensaje
+                        if (oLocalModelData.ReferenceItemSelected.isBatchRequired) {
+                            let oMessage = oBundle.getText("position.batchNotFound");
+                            MessageToast.show(oMessage, {
+                                duration: 8000 // milisegundos (8 segundos)
+                            });
+                            let oMatrial_flag = false;
+                            this.onClearPosition(oMatrial_flag);
+
+                        }
+                    }
+                } else {
+                    console.log("dataposition => " + oLocalModelData.DataPosition.material);
+                    console.log("escaneado => " + this.getView().byId("materialInput").getValue());
+
+                    const sInputValue = this.getView().byId("materialInput").getValue().trim();
+                    const sModelValue = oLocalModelData.DataPosition.material?.trim();
+
+                    // 📌 Comparar usando includes()
+                    if (sInputValue.toUpperCase().includes(sModelValue.toUpperCase())) {
+                        console.log("✅ El valor del modelo SÍ se encuentra dentro del input");
+                        /**
+                         * 5️⃣ Actualizar datos fijos de la selección
+                         * 6️⃣ Esperar texto de detalle (ahora usando await)
+                         * 7️⃣ Guardar el texto final en el modelo
+                         */
+
+                        await this.setPositionValue();
+                    } else {
+                        console.log("❌ El valor del modelo NO se encuentra dentro del input");
+                    }
+
+
                 }
+            },
+
+            setPositionValue: async function () {
+
+                // 5️⃣ Actualizar datos fijos de la selección
+                let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                let oLocalModelData = oLocalModel.getData();
+                oLocalModel.setProperty("/DataPosition/cantidad", oLocalModelData.ReferenceItemSelected.cantidad);
+                oLocalModel.setProperty("/DataPosition/um", oLocalModelData.ReferenceItemSelected.um);
+                oLocalModel.setProperty("/DataPosition/centro", oLocalModelData.ReferenceItemSelected.centro);
+                oLocalModel.setProperty("/DataPosition/almacen", oLocalModelData.ReferenceItemSelected.almacen);
+                oLocalModel.setProperty("/DataPosition/txt_material", oLocalModelData.ReferenceItemSelected.txt_material);
+
+                // 6️⃣ Esperar texto de detalle (ahora usando await)
+                let sKey = oLocalModelData.Header.referencia;
+                let oClaseMov = oLocalModelData.Header.claseMov;
+                let sMaterial = oLocalModelData.ReferenceItemSelected.material;
+                let sBatch = oLocalModelData.ReferenceItemSelected.lote;
+                let sDetailText = await this.onGetDetailText(sKey, sMaterial, sBatch, oClaseMov);
+
+                // 7️⃣ Guardar el texto final en el modelo
+                oLocalModel.setProperty("/DataPosition/txt_posicion_historico", sDetailText);
+
+
             },
 
 
@@ -640,6 +750,8 @@ sap.ui.define([
              */
             onCreateMov: async function () {
 
+                this.getView().setBusy(true);
+
                 try {
                     // 1️⃣ Obtener datos locales del modelo local
                     let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
@@ -656,6 +768,7 @@ sap.ui.define([
                     // 4️⃣ Validar que exista código válido
                     if (!oGoodMovement) {
                         sap.m.MessageBox.error(this.getResourceBundle().getText("error.missingMovement"));
+                        this.getView().setBusy(false);
                         return;
                     }
 
@@ -689,13 +802,14 @@ sap.ui.define([
                         Plant: oLocalModel.DataPosition.centro,                                // Planta / Centro
                         Batch: oLocalModel.DataPosition.lote,                                  // Lote, valor default si no viene
                         StorageLocation: oLocalModel.DataPosition.almacen,                     // Almacén
-                        GoodsMovementType: oLocalModel.Header.claseMov,       // Clase de movimiento
+                        GoodsMovementType: oLocalModel.ReferenceItemSelected.GoodsMovementType,       // Clase de movimiento
                         MaterialDocumentItemText: oLocalModel.DataPosition.texto || "Rollo",   // Texto de posición
                         ManufacturingOrder: oLocalModel.Header.referencia,    // Orden de fabricación
                         IsCompletelyDelivered: false,                         // Indicador de entrega
                         QuantityInEntryUnit: oLocalModel.DataPosition.cantidad,                // Cantidad
                         CostCenter: oLocalModel.DataPosition.ceco,                             // Centro de costo
-                        MaterialDocumentItemText: oLocalModel.DataPosition.txt_material
+                        MaterialDocumentItemText: oLocalModel.DataPosition.txt_material,
+                        InventoryTransactionType: "WA"
                     });
 
                     // 7️⃣ Mostrar payload final en consola para validación (opcional)
@@ -732,19 +846,25 @@ sap.ui.define([
                     console.log("Respuesta del POST:", oResponse);
                     this.PopulatePositions(oResponse.d);
 
+                    this.getView().setBusy(false);
+
                 } catch (e) {
                     console.error("Error en onCreateMov:", e);
                     this._showErrorMessage(oBundle.getText("error.unexpected"), oBundle);
+                    this.getView().setBusy(false);
                 }
+
+                this.getView().setBusy(false);
             },
 
             validateHeaderFields: function () {
                 let oView = this.getView();
                 let oBundle = this.getResourceBundle();
                 let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                let oDisplayModel = this.getView().getModel("oDisplayModel").getData();
                 let bValid = true;
                 let aMissingFields = [];
-            
+
                 // 🚩 Campos a validar
                 let aFields = [
                     {
@@ -763,48 +883,54 @@ sap.ui.define([
                         label: oBundle.getText("header.fecha_contabilizacion")
                     },
                     {
-                        id: "header_input_fecha_referencia",
+                        id: "header_input_referencia",
                         prop: "Header/referencia",
                         label: oBundle.getText("header.referencia")
                     }
                 ];
-            
+
                 aFields.forEach(oField => {
                     let oControl = oView.byId(oField.id);
                     let sValue = oLocalModel.getProperty("/" + oField.prop);
-            
+
                     // 🚩 Para el Select reforzamos que '0' cuente como vacío
                     let bIsEmpty = !sValue || sValue.trim() === "";
-            
+
                     if (oField.id === "header_select_clasemov") {
                         let sSelectedKey = oControl.getSelectedKey();
-            
+
                         // Si el modelo trae '0' o el key real es '0' => inválido
                         if (!sSelectedKey || sSelectedKey.trim() === "" || sSelectedKey === "0" || sValue === "0") {
                             bIsEmpty = true;
                         }
                     }
-            
+
+                    if (oField.id === "header_input_referencia") {
+                        if (!oDisplayModel.Header.referencia);
+                        bIsEmpty = false;
+                    }
+
                     if (bIsEmpty) {
                         bValid = false;
                         aMissingFields.push(oField.label);
-            
+
                         oControl.setValueState("Error");
                         oControl.setValueStateText(oBundle.getText("validation.fieldRequired", [oField.label]));
                     } else {
                         oControl.setValueState("None");
                     }
                 });
-            
+
                 if (!bValid) {
                     MessageBox.error(
                         oBundle.getText("validation.missingFields", [aMissingFields.join(", ")])
                     );
+                    oView.setBusy(false);
                 }
-            
+
                 return bValid;
             },
-            
+
 
 
             onTabChanged: function (oEvent) {
@@ -821,17 +947,17 @@ sap.ui.define([
 
             resetHeaderValidation: function () {
                 let oView = this.getView();
-                ["header_input_clasemov", "header_input_fecha_doc", "header_input_fecha_cont", "header_input_fecha_referencia"]
+                ["header_input_clasemov", "header_input_fecha_doc", "header_input_fecha_cont", "header_input_referencia"]
                     .forEach(id => oView.byId(id).setValueState("None"));
             },
 
 
-            PopulatePositions: function(oResponse){
+            PopulatePositions: function (oResponse) {
 
                 let oLocalModel = this.getOwnerComponent().getModel("localModel");
                 let oDataPosition = oLocalModel.getData().DataPosition;
 
-                if(oResponse.MaterialDocument){
+                if (oResponse.MaterialDocument) {
                     let _position = {
                         material: oDataPosition.material,
                         txt_material: oDataPosition.txt_material,
@@ -850,7 +976,24 @@ sap.ui.define([
                     this._actualizarContadorPosiciones();
                 }
 
+                // Paso 2: Cambiar la pestaña activa por su key
+                this.onNavToIconTabBar("orden");
+
+            },
+
+            onLiveChangeMaterial: function (oEvent) {
+                this.onLiveChangeUpper(oEvent, "/DataPosition/material");
+            },
+
+            onLiveChangeLote: function (oEvent) {
+                this.onLiveChangeUpper(oEvent, "/DataPosition/lote");
+            },
+
+            inputSubmit: function () {
+                console.log("inputSubmit");
             }
+
+
 
 
 

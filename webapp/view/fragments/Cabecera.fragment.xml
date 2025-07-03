@@ -79,10 +79,11 @@
                 width="12em"
             />
             <Input
-                id="header_input_fecha_referencia"
+                id="header_input_referencia"
                 width="15em"
                 value="{localModel>/Header/referencia}"
                 editable="{oDisplayModel>/Header/referencia}"
+                submit="onContinueHeader"
             />
         </HBox>
 
@@ -110,7 +111,7 @@
         <Button
             text="{i18n>header.cancelar}"
             type="Reject"
-            press=".onCleanHeader"
+            press=".onRestartProcess"
         />
     </Toolbar>
 </core:FragmentDefinition>

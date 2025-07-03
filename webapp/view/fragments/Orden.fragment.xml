@@ -33,7 +33,8 @@
         </VBox>
 
          <Toolbar class="sapUiSmallMarginTop">
-            <Button text="{i18n>order.crearmovimientos}" type="Accept" press=".onCreateMov"/>
+            <Button text="{i18n>order.agregarcomponente}" type="Accept" press=".onContinueHeader"/>
+            <Button text="{i18n>order.reiniciarProceso}" type="Accept" press=".onRestartProcess"/>
         </Toolbar>
 
         <!-- 📊 Contador de posiciones -->
@@ -66,8 +67,6 @@
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnMotivo}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoPosicion}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnNumDocto}" /></Column>
-                
-                <Column><Text text="{i18n>columnEliminar}" /></Column>
             </columns>
 
             <items>

@@ -36,7 +36,7 @@
                         <Text text="{localModel>txt_material}" width="100px"/>
                         <Text text="{localModel>cantidad}" width="70px"/>
                         <Text text="{localModel>um}" width="30px"/>
-                        <Text text="{localModel>isBatchRequired}" width="30px" />
+                        <Text text="{localModel>isBatchRequired_txt}" width="30px" />
                         <Text text="{localModel>centro}" width="50px"/>
                         <Text text="{localModel>almacen}" width="50px"/>
                         <Button icon="sap-icon://touch" type="Reject" tooltip="{i18n>columnProcesar}" press=".onProcesarItem"/> 

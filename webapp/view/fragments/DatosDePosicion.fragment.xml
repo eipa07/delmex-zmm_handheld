@@ -14,12 +14,17 @@
                        value="{localModel>/DataPosition/material}"
                        width="15em"
                        submit="onBuscarDetalle"
-                       liveChange="onBuscarDetalle"/>
+                       liveChange="onLiveChangeMaterial"/>
                 <Button icon="sap-icon://bar-code"
                         tooltip="{i18n>position.material.tooltip}"
                         press=".onOpenScannerDialog"
                         visible="false"
                         />
+                        <Button
+                        icon="sap-icon://bar-code"
+                        type="Accept"
+                        press=".onContinueHeader"
+        />
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -46,7 +51,8 @@
                        width="15em"
                        value="{localModel>/DataPosition/lote}"
                        submit="onBuscarDetalle"
-                       liveChange="onBuscarDetalle"/>
+                       liveChange="onLiveChangeLote"
+                       editable="{oDisplayModel>/Posiciones/lote}"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">

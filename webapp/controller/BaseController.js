@@ -40,7 +40,9 @@ sap.ui.define([
                     PurchaseOrderItem: 0,
                     GoodsMovementRefDocType: "",
                     numero_documento: "",
-                    isBatchRequired: true // true requiere lote | false no requiere lote
+                    isBatchRequired: true, // true requiere lote | false no requiere lote
+                    isBatchRequired_txt: '',
+                    GoodsMovementType: '' // del material
                 },
                 Positions: [],
                 posicionesTexto: "Total: 0 posiciones",
@@ -207,18 +209,18 @@ sap.ui.define([
 
             const sBaseUrl = oModel.sServiceUrl;
 
-            
+
 
             /**
              * Paso 1: Obtener el total de registros usando $count
              */
-             const getTotalCount = async () => {
+            const getTotalCount = async () => {
                 let sUrl = `${sBaseUrl}${sEntitySet}/$count`;
-                if(sKey){
-                    if(sEntitySet === "A_ProductionOrderComponent_4"){
+                if (sKey) {
+                    if (sEntitySet === "A_ProductionOrderComponent_4") {
                         sUrl = sUrl + `?$filter=ManufacturingOrder eq '${sKey}'`;
                     }
-                    
+
                 }
                 return new Promise((resolve, reject) => {
                     $.ajax({
@@ -232,18 +234,18 @@ sap.ui.define([
                         }
                     });
                 });
-            }; 
+            };
 
             /**
              * Paso 2: Obtener un bloque de datos con $skip y $top
              */
             const fetchBlock = async () => {
                 let sUrl = `${sBaseUrl}${sEntitySet}?$filter=ManufacturingOrder eq '${sKey}'`;
-                if(sKey){
-                    if(sEntitySet === "A_ProductionOrderComponent_4"){
-                        
+                if (sKey) {
+                    if (sEntitySet === "A_ProductionOrderComponent_4") {
+
                     }
-                    
+
                 }
                 return new Promise((resolve, reject) => {
                     $.ajax({
@@ -270,11 +272,11 @@ sap.ui.define([
                 let aBlock = await fetchBlock();
                 return aBlock;
 
-               /*  while (iFetched < iTotal) {
-                    const aBlock = await fetchBlock(iFetched);
-                    aResults.push(...aBlock);
-                    iFetched += iPageSize;
-                } */
+                /*  while (iFetched < iTotal) {
+                     const aBlock = await fetchBlock(iFetched);
+                     aResults.push(...aBlock);
+                     iFetched += iPageSize;
+                 } */
 
                 //return aResults;
             } catch (e) {
@@ -294,17 +296,17 @@ sap.ui.define([
         readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov) {
             const oModel = this.getOwnerComponent().getModel(sModelName);
             const oBundle = this.getResourceBundle();
-        
+
             if (!oModel) {
                 // Usa texto i18n
                 const sMessage = oBundle.getText("error_model_not_found", [sModelName]);
                 throw new Error(sMessage);
             }
-        
+
             const sBaseUrl = oModel.sServiceUrl;
             const oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov);
             const sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`;
-        
+
             try {
                 const oData = await $.ajax({
                     url: sUrl,
@@ -312,15 +314,15 @@ sap.ui.define([
                     contentType: "application/json",
                     dataType: "json"
                 });
-        
+
                 if (sEntitySet === 'A_MaterialDocumentItem' && oData?.d?.results?.length === 0) {
                     // Devuelve null para que el Controller decida qué mostrar
                     return null;
                 }
-        
+
                 console.log(sEntitySet, oData);
                 return oData;
-        
+
             } catch (jqXHR) {
                 console.log(`Error en ${sEntitySet}:`, jqXHR);
                 const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle) || oBundle.getText("error_ajax_generic");
@@ -328,45 +330,45 @@ sap.ui.define([
                 throw jqXHR;
             }
         },
-        
-       /*  readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation) {
-            const oModel = this.getOwnerComponent().getModel(sModelName);
-            const oBundle = this.getResourceBundle();
 
-            if (!oModel) {
-                throw new Error(`Modelo '${sModelName}' no encontrado.`);
-            }
-
-            const sBaseUrl = oModel.sServiceUrl;
-            let sUrl = '';
-            var oFilters = [];
-
-            oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation);
-            sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`; // &$top=1
-
-
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: sUrl,
-                    method: "GET",
-                    contentType: "application/json",
-                    dataType: "json",
-                    success: function (oData) {
-                        if(sEntitySet === 'A_MaterialDocumentItem' && oData.d.results.length === 0){
-                            MessageBox.error('Combinacion Material Lote no existe');
-                        }
-                        console.log(sEntitySet, oData);
-                        resolve(oData);
-                    },
-                    error: (jqXHR) => {
-                        console.log("Error: " + sEntitySet + ":", jqXHR);
-                        const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
-                        this._showErrorMessage(sMessage, oBundle);
-                        reject(jqXHR);
-                    }
-                });
-            });
-        }, */
+        /*  readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation) {
+             const oModel = this.getOwnerComponent().getModel(sModelName);
+             const oBundle = this.getResourceBundle();
+ 
+             if (!oModel) {
+                 throw new Error(`Modelo '${sModelName}' no encontrado.`);
+             }
+ 
+             const sBaseUrl = oModel.sServiceUrl;
+             let sUrl = '';
+             var oFilters = [];
+ 
+             oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation);
+             sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`; // &$top=1
+ 
+ 
+             return new Promise((resolve, reject) => {
+                 $.ajax({
+                     url: sUrl,
+                     method: "GET",
+                     contentType: "application/json",
+                     dataType: "json",
+                     success: function (oData) {
+                         if(sEntitySet === 'A_MaterialDocumentItem' && oData.d.results.length === 0){
+                             MessageBox.error('Combinacion Material Lote no existe');
+                         }
+                         console.log(sEntitySet, oData);
+                         resolve(oData);
+                     },
+                     error: (jqXHR) => {
+                         console.log("Error: " + sEntitySet + ":", jqXHR);
+                         const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                         this._showErrorMessage(sMessage, oBundle);
+                         reject(jqXHR);
+                     }
+                 });
+             });
+         }, */
 
         /**
  * Genera la cadena de filtros OData para distintas entidades.
@@ -406,10 +408,10 @@ sap.ui.define([
                 let sLang = this.getLanguageISO();
                 sFilterStr = `Product eq '${sMaterial}' and Language eq '${sLang}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$top=1`;
-            }else if(sEntitySet === 'Product'){
+            } else if (sEntitySet === 'Product') {
                 sFilterStr = `Product eq '${sMaterial}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$top=1`;
-            }else if(sEntitySet === 'Batch'){
+            } else if (sEntitySet === 'Batch') {
                 sFilterStr = `Material eq '${sMaterial}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
             }
@@ -528,10 +530,12 @@ sap.ui.define([
                     data: JSON.stringify(oPayload),
                     success: (oData) => {
                         resolve(oData);
+                        this.getView().setBusy(false);
                     },
                     error: (jqXHR) => {
                         const sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
                         this._showErrorMessage(sMessage, oBundle);
+                        this.getView().setBusy(false);
                         reject(jqXHR);
                     }
                 });
@@ -585,9 +589,47 @@ sap.ui.define([
         getLanguageISO: function () {
             const sLangFull = sap.ui.getCore().getConfiguration().getLanguage();
             return sLangFull.split("-")[0].toUpperCase();
-        }
+        },
+
+        /**
+         * Convierte el valor ingresado en un Input a MAYÚSCULAS
+         * y lo guarda en el path del modelo local.
+         * 
+         * @param {sap.ui.base.Event} oEvent - Evento liveChange del Input
+         * @param {string} sPath - Path en el modelo local (ej: "/DataPosition/material")
+         */
+        onLiveChangeUpper: function (oEvent, sPath) {
+            // 1️⃣ Tomar valor ingresado
+            let sValue = oEvent.getParameter("value") || "";
+
+            // 2️⃣ Convertir a mayúsculas
+            let sUpper = sValue.toUpperCase();
+
+            // 3️⃣ Actualizar visualmente el Input para evitar parpadeo
+            oEvent.getSource().setValue(sUpper);
+
+            // 4️⃣ Actualizar modelo local
+            this.getOwnerComponent().getModel("localModel").setProperty(sPath, sUpper);
+        },
+
+        /**
+         * 
+         * @param {cabecera} sTabId 
+         * @param {datos} sTabId 
+         * @param {orden} sTabId 
+         */
+        onNavToIconTabBar: function(sTabId){
+            // Paso 1: Obtener IconTabBar por ID
+            let oIconTabBar = this.byId("mainTabs");
+
+            // Paso 2: Cambiar la pestaña activa por su key
+            oIconTabBar.setSelectedKey(sTabId);
+        },
+
+        
 
 
+        
 
 
 
