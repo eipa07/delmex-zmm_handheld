@@ -9,7 +9,7 @@
             <HBox class="sapUiSmallMarginBottom">
                 <Label text="{i18n>position.material}" width="9.5em"/>
                 <Input id="materialInput"
-                       placeholder="{i18n>position.material.placeholder}"
+                       placeholder="{= ${localModel>/ReferenceItemSelected/material} ? ${localModel>/ReferenceItemSelected/material} : ${i18n>position.material.placeholder}}"
                        class="sapUiTinyMarginBeginEnd"
                        value="{localModel>/DataPosition/material}"
                        width="15em"
@@ -41,7 +41,8 @@
                 <Input id="umInput"
                        placeholder="{i18n>position.um.placeholder}"
                        width="15em"
-                       value="{localModel>/DataPosition/um}"/>
+                       value="{localModel>/DataPosition/um}"
+                       liveChange="onLiveChangeUM"/>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -82,11 +83,27 @@
 
             <HBox class="sapUiSmallMarginBottom">
                 <Label text="{i18n>position.motivo}" width="10em"/>
-                <Input id="motivoInput"
+                <Select
+                id="motivoInput"
+                width="15em"
+                items="{MotivoList>/}"
+                selectedKey="{localModel>/DataPosition/motivo}"
+                change="onMotivoChange"
+                beforeOpen="onGetMotivoList"
+                editable="{oDisplayModel>/Posiciones/motivo}"
+                tooltip="{localModel>/DataPosition/motivo} - {localModel>/DataPosition/desc_motivo}"
+                required="true"
+            >
+                <core:Item
+                    key="{MotivoList>Motivo}"
+                    text="{MotivoList>DescMotivo}"
+                />
+            </Select>
+               <!--  <Input id="motivoInput"
                        placeholder="{i18n>position.motivo.placeholder}"
                        width="15em"
                        value="{localModel>/DataPosition/motivo}"
-                       editable="{oDisplayModel>/Posiciones/motivo}"/>
+                       editable="{oDisplayModel>/Posiciones/motivo}"/> -->
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -95,7 +112,7 @@
                        placeholder="{i18n>position.txt_posicion.historial.placeholder}"
                        width="15em"
                        value="{localModel>/DataPosition/txt_posicion_historico}"
-                       rows="5"
+                       rows="3"
                        editable="false"/>
             </HBox>
             <HBox class="sapUiSmallMarginBottom">
@@ -104,7 +121,7 @@
                        placeholder="{i18n>position.txt_posicion.placeholder}"
                        width="15em"
                        value="{localModel>/DataPosition/txt_posicion}"
-                       rows="5"
+                       rows="3"
                        editable="true"
                        maxLength="40"/>
             </HBox>
@@ -112,9 +129,22 @@
 
         <Toolbar class="sapUiSmallMarginTop">
            <!--  <Button text="{i18n>position.contabilizar}" type="Accept" press=".onSavePosition"/> -->
-            <Button text="{i18n>position.contabilizar}" type="Accept" press=".onCreateMov"/>
+            <!-- <Button id="btnContabilizar" text="{i18n>position.contabilizar}" type="Accept" press=".onCreateMov" visible="{= ${localModel>/Header/esAnulacion} === true ? false : true}"/>-->            
+            <!-- <Button id="btnPicking" text="{i18n>position.picking}" type="Accept" press=".onPicking" visible="{oDisplayModel>/Header/picking}"/> -->
+            <Button id="btnContabilizar"
+                text="{i18n>position.contabilizar}"
+                type="Accept"
+                press=".onCreateMov"
+                visible="{oDisplayModel>/Header/btnContabilizar}"/>
+
+            <Button id="btnPicking"
+                text="{i18n>position.picking}"
+                type="Accept"
+                press=".onPicking"
+                visible="{oDisplayModel>/Header/btnPicking}"/>
+
             <Button text="{i18n>position.cancelar}" type="Reject" press=".onClearPosition"/>
-            <Button text="buscar detalle" type="Reject" press=".onBuscarDetalle"/>
+            <!-- <Button text="buscar detalle" type="Reject" press=".onBuscarDetalle"/> Borrar 21 julio 2925--> 
         </Toolbar>
 
     </VBox>

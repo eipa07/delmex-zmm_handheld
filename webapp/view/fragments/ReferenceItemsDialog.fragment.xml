@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <Dialog
         id="ReferenceItemsDialog"
-        title="{i18n>referenceItemsDialogTitle}"
+        title="Mat. Doc. {localModel>/Header/referencia}"
         contentHeight="auto"
         contentWidth="auto"
         afterClose=".onScannerDialogClosed">
@@ -19,27 +19,37 @@
             width="50%"
         >
             <columns>
+                <Column><Text text="{i18n>columnItem}" width="40px"/></Column>
                 <Column><Text text="{i18n>columnMaterial}" width="40px"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoMaterial}" width="50px" wrapping="true"/></Column>
                 <Column><Text text="{i18n>columnCantidad}" width="50px"/></Column>
+                <Column><Text text="{i18n>columnCantidadPicking}" width="50px" visible="{localModel>/Header/esEntrega}"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnUM}" width="30px"/></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnLote}" width="30px"/></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnLote}" visible="{oDisplayModel>/TablaReferenciaItems/columnLote}" width="40px"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCentro}" width="50px"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnAlmacen}" width="50px"/></Column>
-                <Column><Text text="{i18n>columnProcesar}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnPickingStatus}" width="50px"/></Column>
+                <Column><Text text="{i18n>columnProcesar}" visible="{oDisplayModel>/TablaReferenciaItems/columnProcesar}"/></Column>
+                <Column><Text text="{i18n>columnMotivo}" visible="{oDisplayModel>/Columna/motivo}" width="30px"/></Column>
+                <Column><Text text="{i18n>columnTextoPosicion}" visible="{localModel>/Header/esAnulacion}"/></Column>
             </columns>
 
             <items>
                 <ColumnListItem>
                     <cells>
+                        <Text text="{localModel>Item}" width="70px"/>
                         <Text text="{localModel>material}" width="70px"/>
                         <Text text="{localModel>txt_material}" width="100px"/>
-                        <Text text="{localModel>cantidad}" width="70px"/>
+                        <Text text="{localModel>cantidad}"  width="70px"/>
+                        <Text text="{localModel>ActualDeliveryQuantity}" visible="{localModel>/Header/esEntrega}" width="70px"/>
                         <Text text="{localModel>um}" width="30px"/>
-                        <Text text="{localModel>isBatchRequired_txt}" width="30px" />
+                        <Text text="{= ${localModel>/Header/esAnulacion} === true ? ${localModel>lote} : ${localModel>isBatchRequired_txt} }" visible="{oDisplayModel>/TablaReferenciaItems/columnLote}" width="65px" />
                         <Text text="{localModel>centro}" width="50px"/>
                         <Text text="{localModel>almacen}" width="50px"/>
-                        <Button icon="sap-icon://touch" type="Reject" tooltip="{i18n>columnProcesar}" press=".onProcesarItem"/> 
+                        <Text text="{localModel>PickingStatus_desc}" width="50px"/>
+                        <Button icon="sap-icon://touch" type="Reject" tooltip="{i18n>columnProcesar}" press=".onProcesarItem" visible="{oDisplayModel>/TablaReferenciaItems/columnProcesar}"/>
+                        <Text text="{localModel>GoodsMovementReasonCode}" width="50px" visible="{oDisplayModel>/Columna/motivo}"/> <!-- Motivo -->
+                        <Text text="{localModel>MaterialDocumentItemText}" width="50px"/> 
                     </cells>
                 </ColumnListItem>
             </items>
@@ -47,8 +57,35 @@
 
         </VBox>
 
+        <VBox visible="false" class="sapUiSmallMargin">
+            <HBox class="sapUiResponsiveMargin sapUiSizeCompact"> 
+                <Label text="{i18n>position.motivo}" width="10em"/>
+                <Input id="motivoInput_Ref"
+                       placeholder="{i18n>position.motivo.placeholder}"
+                       width="15em"
+                       value="{localModel>/DataPosition/motivo}"
+                       editable="{oDisplayModel>/Posiciones/motivo}"/>
+
+                      
+            </HBox>
+
+            <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
+                 <Label text="{i18n>position.txt_posicion}" width="10em"/>
+                <Input id="input_txtPos_Ref"
+                       placeholder="{i18n>position.txt_posicion.placeholder}"
+                       width="15em"
+                       value="{localModel>/DataPosition/txt_posicion}"/>
+            </HBox>
+        </VBox>
+
         <beginButton>
-           <Button text="{i18n>referenceItemsDialogClose}" press=".onCloseItemsDialog"/>
+
+           <Button  text="{i18n>anularItemsDialog}" press=".onCreateMov" type="Accept" visible="{localModel>/Header/esAnulacion}"/>
         </beginButton>
+        <endButton>
+           <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseItemsDialog"/>
+
+        </endButton>
+
     </Dialog>
 </core:FragmentDefinition>

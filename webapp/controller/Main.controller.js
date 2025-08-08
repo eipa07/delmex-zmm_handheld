@@ -12,12 +12,29 @@ sap.ui.define([
      * @param {typeof sap.ui.core.Fragment} Fragment
      * @param {typeof sap.ui.Device} Device
      * @param {typeof sap.m.MessageBox} MessageBox
-     * @param {sap.m.MessageToast} MessageToast 
+     * @param {sap.m.MessageToast} MessageToast
      */
     function (BaseController, JSONModel, Fragment, Device, MessageBox, MessageToast) {
         "use strict";
 
-        var oPositions = [];
+
+        const c_601 = '601-03'; // Orden de venta
+        const c_602 = '602-03'; // Anulación orden de venta
+        const c_551 = '551-03'; // desguace
+        const c_552 = '552-03'; // Anulación desguace
+        const c_201 = '201-03'; // salida de mercancia cargo ceco
+        const c_202 = '202-03'; // Anulación salida de mercancia cargo ceco
+        const c_261 = '261-03'; // Orden de producción - correcto
+        const c_262 = '262-03'; // Anulación Orden de producción
+        const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order
+        const c_102_01 = '102-01'; // Anul. entrada / orden compra
+        const c_101_02 = '101_02'; // Entrada / orden produccion
+        const c_102_02 = '102-02'; // Anulación entrada / orden produccion
+        const c_303 = '303-04'; // Pendiente
+        const c_309 = '309-04'; // Pendiente
+
+        const c_999 = '999'; // Entrada manual de movimiento
+
 
         return BaseController.extend("delmex.zmmhandheld.controller.Main", {
             onInit: function () {
@@ -32,61 +49,128 @@ sap.ui.define([
                 let oRequestModel = this.getRequestModel();
                 this.getOwnerComponent().setModel(oRequestModel, "requestModel");
 
-
-                var odisplayModel = new sap.ui.model.json.JSONModel();
-
-                odisplayModel.loadData("./utils/DisplayConfiguration.json", false);
+                //var odisplayModel = new sap.ui.model.json.JSONModel();
+                //odisplayModel.loadData("./utils/DisplayConfiguration.json", false);
                 //_pdfStructureModel.setData(_jsonPDF);
-                this.getView().setModel(odisplayModel, "oDisplayModel");
+
+                let oTipoMov = this.getTipoMovModel();
+                this.getOwnerComponent().setModel(oTipoMov, "ClaseMovList");
+
+
+                let odisplayModel = this.getDisplayConfiguration();
+                this.getOwnerComponent().setModel(odisplayModel, "oDisplayModel");
                 console.log(odisplayModel);
 
 
-                try {
-                    // 1. Intenta consultar la entidad con una clave de ejemplo
-                    this._loadAllPlantsPaginated();
-                } catch (e) {
-                    // 3. El error ya fue manejado internamente con MessageBox
-                }
+                console.log(this.getOwnerComponent().getManifestEntry("/sap.app/id"));
 
 
             },
 
-            onClaseMovChange: function (oEvent) {
+            onGetClaseMovList: async function () {
+                this.getView().setBusy(true);
+                let oModel_handheld = "ZSB_HANDHELD_V2";
+                let oEntity_clasemov = "/ClaseMov";
+                if (!this.getOwnerComponent().getModel("ClaseMovList")) {
+                    let oClaseMov = await this.readOneAjax(oModel_handheld, oEntity_clasemov, '', '', '', '', '', '');
+                    //oClaseMov = await this.readOneAjax2();
+                    let oClaseMovList = oClaseMov.d.results;
+
+
+                    let oLocalClaseMovList = new JSONModel();
+                    oLocalClaseMovList.setData(oClaseMovList);
+                    this.getOwnerComponent().setModel(oLocalClaseMovList, "ClaseMovList_backend");
+
+
+                    /* console.log(this.getOwnerComponent().getModel("ClaseMovList_backend").getData("ClaseMovList"));
+                    console.log(this.getOwnerComponent().getModel("ClaseMovList_2").getData("ClaseMovList")); */
+                }
+
+
+                this.getView().setBusy(false);
+
+            },
+
+            onGetMotivoList: async function () {
+                this.getView().setBusy(true);
+                let oModel_handheld = "ZSB_HANDHELD_V2";
+                let oEntity_clasemov = "/Motivos";
+                if (!this.getOwnerComponent().getModel("MotivoList")) {
+                    let oMotivos = await this.readOneAjax(oModel_handheld, oEntity_clasemov, '', '', '', '', '', '');
+                    //oClaseMov = await this.readOneAjax2();
+                    let oMotivosList = oMotivos.d.results;
+
+
+                    let oLocalMotivoList = new JSONModel();
+                    oLocalMotivoList.setData(oMotivosList);
+                    this.getOwnerComponent().setModel(oLocalMotivoList, "MotivoList");
+                    console.log(this.getOwnerComponent().getModel("MotivoList").getData());
+                }
+
+
+                this.getView().setBusy(false);
+
+            },
+
+            onClaseMovChange: async function (oEvent) {
+                //await this.onRestartProcess();
+
                 let sSelectedKey = oEvent.getParameter("selectedItem").getKey();
                 let sSelectext = oEvent.getParameter("selectedItem").getText();
-                this.getOwnerComponent().getModel("localModel").setProperty("/Header/claseMov", sSelectedKey);
+                let oClaseMovModel = this.getOwnerComponent().getModel("ClaseMovList").getData();
+
+                let oData = sSelectedKey.split("-");
+                let oClaseMov = oData[0];
+                let oClaveMov = oData[1];
+
+                let oMatch = oClaseMovModel.find(item =>
+                    item.ClaveMov === sSelectedKey
+                );
+
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/claseMov", oClaseMov);
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/GoodsMovementRefDocType", oMatch.GoodsMovementRefDocType);
                 this.getOwnerComponent().getModel("localModel").setProperty("/Header/textClaseMov", sSelectext);
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/claveMov", sSelectedKey);
 
                 // Deshabilitar elementos dependiendo de la seleccion
-                let oSelectedKey = oEvent.getSource().getSelectedKey();
-                const c_601 = '601';
-                const c_602 = '602';
-                const c_551 = '551';
-                const c_552 = '552';
-                const c_201 = '201';
-                const c_202 = '202';
-                const c_261 = '261';
-                const c_262 = '262';
-                const c_999 = "999"
+                //let oSelectedKey = oEvent.getSource().getSelectedKey(); 
+                //let oSelectedKey = oClaseMov;
 
-                if (oSelectedKey === c_601 || oSelectedKey === c_602 || oSelectedKey === c_261 || oSelectedKey === c_262) {
-                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
-                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", false);
-                    this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+
+                if (sSelectedKey === c_601 || sSelectedKey === c_602 || sSelectedKey === c_261 || sSelectedKey === c_262) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
                 }
 
-                if (oSelectedKey === c_551 || oSelectedKey === c_552 || oSelectedKey === c_201 || oSelectedKey === c_202 || oSelectedKey === c_999) {
-                    this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", false);
-                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
-                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
+                if (sSelectedKey === c_551 || sSelectedKey === c_201 || sSelectedKey === c_999) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
                 }
 
-                if (oSelectedKey === c_999) {
-                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
-                    this.getView().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
-                    this.getView().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                if (sSelectedKey === c_999) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
 
                 }
+
+                if (sSelectedKey === c_552 || sSelectedKey === c_202) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
+                }
+
+                // Motivo
+                if (sSelectedKey === c_551 || sSelectedKey === c_552 || sSelectedKey === c_601) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/motivo", true);
+                } else {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/motivo", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/motivo", false);
+                }
+
+                if (sSelectedKey === c_303 || sSelectedKey === c_309) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", false);
+                }
+
 
                 const oToday = new Date();
                 const sYear = oToday.getFullYear();
@@ -99,37 +183,9 @@ sap.ui.define([
 
 
 
+                // Validar tipo de movimiento Anulacion o normal (se asigna el valor en el la funcion)
+                this.getAnnulmentType(sSelectedKey);
             },
-
-            /* onGuardarFormulario: function () {
-                const oView = this.getView();
-                let oCantidad = Fragment.byId("scanner", "cantidadInput").getValue();
-
-                const oData = {
-                    material: Fragment.byId("scanner", "materialInput").getValue(),
-                    cantidad: Fragment.byId("scanner", "cantidadInput").getValue(),
-                    um: Fragment.byId("scanner", "umInput").getValue(),
-                    lote: Fragment.byId("scanner", "loteInput").getValue(),
-                    centro: Fragment.byId("scanner", "centroInput").getValue(),
-                    almacen: Fragment.byId("scanner", "almacenInput").getValue(),
-                    ceco: Fragment.byId("scanner", "cecoInput").getValue(),
-                    motivo: Fragment.byId("scanner", "motivoInput").getValue()
-                };
-
-                // Guardar en modelo local (puedes ajustar la ruta o el nombre si es distinto)
-                let oModel = this.getModel("positionsModel");
-                let odataModel = oModel.getData();
-                odataModel = odataModel.concat(oData || []);
-
-                oModel.setProperty("/positions", odataModel);
-                console.log("odataModel", odataModel);
-
-                // Mostrar confirmación
-                this.showSuccess("Datos guardados correctamente");
-
-                // Limpiar campos
-                this._limpiarCamposFormulario();
-            }, */
 
             onCancelarFormulario: function () {
                 this._limpiarCamposFormulario();
@@ -157,107 +213,250 @@ sap.ui.define([
             },
 
             onContinueHeader: async function () {
-
-                this.onClearPosition();
-
                 this.getView().setBusy(true);
+                this.onClearPosition();
+                this.onClearReferenceItemSelected();
+                this.onClearReferenceItems();
 
-                let bValid = this.validateHeaderFields();
-                if (!bValid) {
-                    return; // Detén si no es válido
-                }
-
-                let oDisplayModel = this.getView().getModel("oDisplayModel").getData();
-                if (!oDisplayModel.Header.referencia) {
-                    this.onNavToIconTabBar("datos");
-                    this.getView().setBusy(false);
-                    return;
-                }
-
-                let oModel = this.getOwnerComponent().getModel("localModel").getData();
-                let oView = this.getView();
-
-                // Validar si material requiere batch y agregarlo al array
-                let sKey = oModel.Header.referencia
+                let isBatchRequired = false;
+                let sMaterialText = "";
+                let oItems = [];
                 let iPageSize = '5000';
                 let oBundle = this.getResourceBundle();
                 const const_si = oBundle.getText("yes");
                 const const_no = oBundle.getText("no");
 
+                let oDisplayModel = this.getOwnerComponent().getModel("oDisplayModel").getData();
+                let oModel = this.getOwnerComponent().getModel("localModel").getData();
 
-                let oModel_RefDetail = "API_PRODUCTION_ORDER_2_SRV";
-                let oEntity_RefDetail = "A_ProductionOrderComponent_4";
-                //let oReferenceDetail = await this.readOneAjax(oModel_RefDetail, oEntity_RefDetail, sKey, '', '', '', '');
-                let oReference = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, sKey);
-                let oRefItems = oReference.d.results;
-                console.log("A_ProductionOrderComponent_4", oRefItems);
 
-                // Validar si material requiere batch y agregarlo al array
-                let oItems = await Promise.all(
+                if (!oDisplayModel.Header.referencia) {
+                    this.onClearReferenceItems();
+
+
+                    this.onNavToIconTabBar("datos");
+                    this.getView().setBusy(false);
+
+
+                    return;
+                }
+
+
+                let oView = this.getView();
+
+                // Determinar servicio y entidad según clase de movimiento
+                let sKey = oModel.Header.referencia;
+                let oModel_RefDetail = "";
+                let oEntity_RefDetail = "";
+                let oEmptyValue = '';
+                let oModel_ProductionOrder = "";
+                let oEntity_ProductionOrder = "";
+                let oModel_PurchaseOrder = "";
+                let oEntity_PurchaseOrder = "";
+                let oProductionOrder = [];
+                let oProdOrderItems = [];
+                let oAnulacion_flag = this.getAnnulmentType(oModel.Header.claveMov);
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/esAnulacion", oAnulacion_flag);
+
+                if (oAnulacion_flag) {
+                    oModel_RefDetail = "API_MATERIAL_DOCUMENT_SRV";
+                    oEntity_RefDetail = "A_MaterialDocumentItem";
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnProcesar", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/btnContabilizar", false);
+                } else if (oModel.Header.claveMov === c_601) {
+                    oModel_RefDetail = "API_OUTBOUND_DELIVERY_SRV";
+                    oEntity_RefDetail = "/A_OutbDeliveryItem";
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esEntrega", true);
+                    this.setVisibleBtnPicking();
+                } else if (oModel.Header.claveMov === c_101_02) {  // orden produccion 
+                    //oModel_RefDetail = "API_MATERIAL_DOCUMENT_SRV";
+                    //oEntity_RefDetail = "A_MaterialDocumentItem";
+                    oModel_ProductionOrder = "API_PRODUCTION_ORDER_2_SRV";
+                    oEntity_ProductionOrder = "A_ProductionOrderItem_2";
+                } else if (oModel.Header.claveMov === c_101_01) { // Purchase Order - orden compra
+                    oModel_PurchaseOrder = "api_purchaseorder_2";
+                    oEntity_PurchaseOrder = "PurchaseOrderItem";
+                } else {
+                    oModel_RefDetail = "API_PRODUCTION_ORDER_2_SRV";
+                    oEntity_RefDetail = "A_ProductionOrderComponent_4";
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnProcesar", true);
+                }
+
+                let oReference = [];
+
+                if (oModel.Header.claveMov === c_101_02) { // orden produccion 
+                    //oReference = await this.readOneAjax(oModel_RefDetail, oEntity_RefDetail, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
+                    //oProductionOrder = await this.readOneAjax(oModel_ProductionOrder, oEntity_ProductionOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
+                    oReference = await this.readOneAjax(oModel_ProductionOrder, oEntity_ProductionOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
+                } else if (oModel.Header.claveMov === c_101_01) { // Purchase Order - orden compra
+                    oReference = await this.readOneAjax(oModel_PurchaseOrder, oEntity_PurchaseOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
+                } else {
+                    oReference = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, sKey, oModel.Header.claseMov);
+                }
+
+                let oRefItems = oReference.d?.results || oReference.value;
+
+                oItems = await Promise.all(
                     oRefItems.map(async (element) => {
-                        let oCant_disponible = parseFloat(element.RequiredQuantity) - parseFloat(element.WithdrawnQuantity);
-                        let isBatchRequired = await this.searchBatchRequired(element);
-                        let sMaterialText = await this.onSearchMaterialText(element);
-                        return {
-                            material: element.Material,
-                            txt_material: sMaterialText,
-                            cantidad: oCant_disponible,
-                            um: element.BaseUnitSAPCode,
-                            centro: element.Plant,
-                            almacen: element.StorageLocation,
-                            isBatchRequired_txt: isBatchRequired ? const_si : const_no,
-                            GoodsMovementType: element.GoodsMovementType,
-                            isBatchRequired: isBatchRequired
-                        };
+                        try {
+                            let oCant_disponible = 0;
+                            let oPickingStatus = '';
+                            let sMaterialText = '';
+                            let isBatchRequired = false;
+                            let oProductDetails = {};
+
+                            if (oAnulacion_flag) {
+                                oCant_disponible = element.QuantityInEntryUnit;
+                            } else if (oModel.Header.claseMov === c_601) {
+                                oCant_disponible = element.OriginalDeliveryQuantity;
+
+                                switch (element.PickingStatus) {
+                                    case '':
+                                        oPickingStatus = "No relevante"; break;
+                                    case 'A':
+                                        oPickingStatus = "No tratado"; break;
+                                    case 'B':
+                                        oPickingStatus = "Tratado parcialmente"; break;
+                                    case 'C':
+                                        oPickingStatus = "Tratado completamente"; break;
+                                }
+                            } else if (oModel.Header.claveMov === c_101_02) {
+                                //oCant_disponible = parseFloat(oProdOrderItems.MfgOrderItemPlannedTotalQty) - parseFloat(oProdOrderItems.MfgOrderItemGoodsReceiptQty);
+                                oCant_disponible = parseFloat(element.MfgOrderItemPlannedTotalQty) - parseFloat(element.MfgOrderItemGoodsReceiptQty);
+                            } else if (oModel.Header.claveMov === c_101_01) {
+                                oCant_disponible = parseFloat(element.OrderQuantity);
+                                isBatchRequired = false;
+                            } else {
+                                oCant_disponible = parseFloat(element.RequiredQuantity) - parseFloat(element.WithdrawnQuantity);
+                            }
+
+                            oProductDetails = await this.searchBatchRequired(element.Material) || {};
+                            sMaterialText = await this.onSearchMaterialText(element.Material);
+                            if (oModel.Header.claveMov === c_101_02) {
+                                isBatchRequired = false;
+                                this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnLote", false);
+                            } else {
+                                isBatchRequired = oProductDetails?.isBatchRequired || false;
+                                this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnLote", true);
+                            }
+
+                            return {
+                                material: element.Material,
+                                Item: element.PurchaseOrderItem || 'xxx', // Colocar el correcto de cada clase de movimiento
+                                txt_material: sMaterialText,
+                                cantidad: oCant_disponible,
+                                um: element.BaseUnitSAPCode || element.EntryUnit || element.DeliveryQuantityUnit || element.ProductionUnit || element.PurchaseOrderQuantityUnit,
+                                centro: element.Plant,
+                                almacen: element.StorageLocation,
+                                isBatchRequired_txt: isBatchRequired ? const_si : const_no,
+                                GoodsMovementType: element.GoodsMovementType,
+                                isBatchRequired: isBatchRequired,
+                                Reservation: element.Reservation,
+                                ReservationItem: element.ReservationItem,
+                                ReservationItemRecordType: element.ReservationItemRecordType,
+                                WeightUnit: oProductDetails?.WeightUnit || '',
+                                Plant: element.Plant,
+                                StorageLocation: element.StorageLocation,
+                                lote: element.Batch,
+                                ceco: element.CostCenter,
+                                MaterialDocumentItemText: element.MaterialDocumentItemText,
+                                GoodsMovementReasonCode: element.GoodsMovementReasonCode,
+                                PickingStatus: element.PickingStatus || '',
+                                PickingStatus_desc: oPickingStatus,
+                                ReferenceSDDocumentItem: element.ReferenceSDDocumentItem || '',
+                                ActualDeliveryQuantity: element.ActualDeliveryQuantity || '',
+                                GoodsMovementRefDocType: oModel.Header.GoodsMovementRefDocType, // ClaveMov: "102-01" F y purchase order B
+                                PurchaseOrderItem: element.PurchaseOrderItem || ''
+                            };
+                        } catch (error) {
+                            console.error("Error procesando item", element, error);
+                            return null;
+                        }
                     })
                 );
 
-                let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                oLocalModel.setProperty("/ReferenceItems", oItems);
+                oItems = oItems.filter(Boolean); // Elimina elementos nulos si hubo errores
 
+                this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItems", oItems);
 
+                // Obtener el año del documento de material
+                let oModelDocYear = "API_MATERIAL_DOCUMENT_SRV";
+                let oEntity_DocYear = `A_MaterialDocumentHeader`;
+                let oEmpty = '';
+                let oMaterialDocumentHeader = await this.readOneAjax(oModelDocYear, oEntity_DocYear, oModel.Header.referencia, oEmpty, oEmpty, oEmpty, oEmpty, oEmpty);
+                let oMatDocYear = oMaterialDocumentHeader?.d?.results?.[0]?.MaterialDocumentYear || '';
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/MaterialDocumentYear", oMatDocYear);
 
-
-
-                // Verifica si Ya existe
+                // Mostrar el dialog de ítems
                 if (!this.oItemsDialog) {
                     this.oItemsDialog = Fragment.load({
-                        id: oView.getId(), // Usa el ID de la vista como scope
+                        id: oView.getId(),
                         name: "delmex.zmmhandheld.view.fragments.ReferenceItemsDialog",
                         controller: this
                     }).then(function (oDialog) {
                         oView.addDependent(oDialog);
-                        oDialog.open(); // <<< Abre el Dialog aquí!
+                        oDialog.open();
                         oView.setBusy(false);
                         return oDialog;
                     });
                 } else {
-                    // Si ya existe, recuerda que es una Promise, así que espera
                     this.oItemsDialog.then(function (oDialog) {
                         oDialog.open();
                         oView.setBusy(false);
                     });
                 }
+
+                this.onNavToIconTabBar("datos");
+                this.getView().setBusy(false);
             },
 
-            searchBatchRequired: async function (element) {
 
-
-                // Buscar si el Material requiere Batch para ser procesado
+            searchBatchRequired: async function (eMaterial) {
                 let oModel_BatchRequired = "productApi";
                 let oEntity_BatchRequired = "Product";
-                let sMaterialBatch = await this.readOneAjax(oModel_BatchRequired, oEntity_BatchRequired, element.ManufacturingOrder, element.Material, '', '', '', '');
-                let isBatchRequired = sMaterialBatch.value[0].IsBatchManagementRequired;
-                return isBatchRequired;
 
+                let oLocalModel = this.getOwnerComponent().getModel("localModel").getProperty("/Header/claveMov");
+                if (oLocalModel === "101-02") {
+                    return {
+                        isBatchRequired: false,
+                        WeightUnit: '',
+                        Plant: '',
+                        StorageLocation: '',
+                        Batch: ''
+                    };
+                }
 
+                let sMaterialBatch = await this.readOneAjax(oModel_BatchRequired, oEntity_BatchRequired, '', eMaterial, '', '', '', '');
+
+                if (!sMaterialBatch || !sMaterialBatch.value || sMaterialBatch.value.length === 0) {
+                    console.warn("No se encontró el material en productApi:", eMaterial);
+                    return {
+                        isBatchRequired: false,
+                        WeightUnit: '',
+                        Plant: '',
+                        StorageLocation: '',
+                        Batch: ''
+                    };
+                }
+
+                let oProduct = sMaterialBatch.value[0];
+
+                return {
+                    isBatchRequired: oProduct.IsBatchManagementRequired,
+                    WeightUnit: oProduct.WeightUnit,
+                    Plant: oProduct.Plant,
+                    StorageLocation: oProduct.StorageLocation,
+                    Batch: oProduct.Batch
+                };
             },
 
-            onSearchMaterialText: async function (element) {
+
+            onSearchMaterialText: async function (eMaterial) {
                 // Texto de material
                 let oModel_MatText = "productApi";
                 let oEntity_MatText = "ProductDescription";
-                let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, element.ManufacturingOrder, element.Material, '', '', '', '');
+                const oEmpty = '';
+                let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, eMaterial, oEmpty, oEmpty, oEmpty, oEmpty);
                 console.log("sMaterialText", sMaterialData);
                 let sMaterialText = sMaterialData.value[0].ProductDescription;
                 return sMaterialText;
@@ -271,24 +470,32 @@ sap.ui.define([
                 }
             },
 
-            onSearchBatchList: async function (element) {
-                // Texto de material
+            onSearchBatchList: async function (eMaterial) {
                 let oModel = "apiBatch";
                 let oEntity = "Batch";
 
-                let sList = await this.readOneAjax(oModel, oEntity, '', element.material, '', '', '', '');
-                let sBatchList = sList.d.results;
+                try {
+                    let sList = await this.readOneAjax(oModel, oEntity, '', eMaterial, '', '', '', '');
+                    let sBatchList = sList?.d?.results || [];
 
-                var oBatchModel = new sap.ui.model.json.JSONModel();
-                oBatchModel.setData(sBatchList);
-                this.getView().setModel(oBatchModel, "BatchList");
-                console.log(sBatchList);
+                    // Setear modelo
+                    var oBatchModel = new sap.ui.model.json.JSONModel();
+                    oBatchModel.setData(sBatchList);
+                    this.getView().setModel(oBatchModel, "BatchList");
 
-                return sBatchList;
+                    return sBatchList;
+                } catch (error) {
+                    console.error("Error al buscar lote:", error);
+
+                    // Devolver arreglo vacío si hubo error
+                    return [];
+                }
             },
+
 
             onProcesarItem: function (oEvent) {
 
+                this.onClearPosition();
 
                 let oModel = this.getModel("localModel");
                 let sPath = oEvent.getSource().getBindingContext("localModel").getPath(); // ej: /Positions/2
@@ -300,80 +507,22 @@ sap.ui.define([
                 if (!isNaN(iIndex) && iIndex >= 0 && iIndex < aPositions.length) {
                     this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected", aPositions[iIndex]);
                     this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected/index", iIndex);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItemSelected/material", aPositions[iIndex].material);
                     //this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", aPositions[iIndex].material);
                     //this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", aPositions[iIndex].lote);
 
-                    this.onSearchBatchList(aPositions[iIndex]);
+                    this.onSearchBatchList(aPositions[iIndex].material);
 
 
                     // Paso 2: Cambiar la pestaña activa por su key
                     this.onNavToIconTabBar("datos");
-
-                    /* let oDataPosition = {
-                        material: aPositions[iIndex].Material,
-                        txt_material: aPositions[iIndex].txt_material,
-                        cantidad: aPositions[iIndex].cantidad,
-                        um: aPositions[iIndex].um,
-                        lote: aPositions[iIndex].lote, // Batch
-                        centro: aPositions[iIndex].centro, //Planta
-                        almacen: aPositions[iIndex].almacen,
-                        ceco: aPositions[iIndex].ceco,
-                        motivo: aPositions[iIndex].motivo,
-                        txt_posicion: aPositions[iIndex].txt_posicion,
-                        txt_posicion_historico: aPositions[iIndex].txt_posicion_historico,
-                        cantidad_disponible: aPositions[iIndex].cantidad_disponible,
-                        PurchaseOrderItem: aPositions[iIndex].PurchaseOrderItem,
-                        GoodsMovementRefDocType: aPositions[iIndex].GoodsMovementRefDocType,
-                        numero_documento: aPositions[iIndex].numero_documento,
-                        isBatchRequired: aPositions[iIndex].isBatchRequired, // true requiere lote | false no requiere lote
-                    } */
                 }
 
                 this.onCloseItemsDialog();
 
             },
 
-
-
-
-            onSavePosition: function () {
-
-                if (!this.getOwnerComponent().getModel("localModel").getProperty("/DataPosition/cantidad")) {
-                    let oInputCantidad = this.getView().byId("cantidadInput").getValue();
-                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", oInputCantidad);
-                }
-
-                let oModel = this.getOwnerComponent().getModel("localModel").getData().DataPosition;
-
-                //let flagCantidad = this.validarCantidad(parseFloat(oModel.cantidad), parseFloat(oModel.cantidad_disponible));
-                let flagCantidad = true;
-                if (flagCantidad) {
-                    let _position = {
-                        material: oModel.material,
-                        cantidad: oModel.cantidad,
-                        um: oModel.um,
-                        lote: oModel.lote,
-                        centro: oModel.centro,
-                        almacen: oModel.almacen,
-                        ceco: oModel.ceco,
-                        motivo: oModel.motivo,
-                        txt_posicion: oModel.txt_posicion,
-                        txt_material: oModel.txt_material,
-                        isBatchRequired: oModel.isBatchRequired
-                    }
-                    oPositions.push(_position);
-                    let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                    oLocalModel.setProperty("/Positions", oPositions);
-                    this._actualizarContadorPosiciones();
-
-                    console.log(oLocalModel.getProperty("/Positions"));
-                }
-
-
-
-            },
-
-            onClearPosition: function (oMaterial_Flag = true) {
+            onClearPosition: async function (oMaterial_Flag = true) {
 
                 if (oMaterial_Flag) {
                     this.getView().byId("materialInput").setValue();
@@ -388,54 +537,59 @@ sap.ui.define([
                 this.getView().byId("motivoInput").setValue();
                 this.getView().byId("txtPosicionArea").setValue();
                 this.getView().byId("txtPosicionArea_historico").setValue();
+
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/ceco", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/motivo", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", 0);
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/PurchaseOrderItem", 0);
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/GoodsMovementRefDocType", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/isBatchRequired", true);
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/isBatchRequired_txt", "");
+                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/GoodsMovementType", "");
+
+                if (this.getView().getModel("BatchList")) {
+                    this.getView().getModel("BatchList").setData([]);
+                }
+
+
+
             },
 
-            onClearHeader: function () {
-                this.getView().byId("header_select_clasemov").setSelectedKey("0");
+            onClearHeader: async function () {
+                this.getView().byId("header_select_clasemov").setSelectedKey("000-00");
                 this.getView().byId("header_input_clasemov").setValue();
                 this.getView().byId("header_input_fecha_doc").setValue();
                 this.getView().byId("header_input_fecha_cont").setValue();
                 this.getView().byId("header_input_referencia").setValue();
                 this.getView().byId("header_input_fecha_texto_cabecera").setValue();
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/esAnulacion", false);
 
             },
 
-            onRestartProcess: function () {
-                this.onClearPosition();
-                this.onClearHeader();
+            onClearOrden: async function () {
+                if (this.getView().getModel("localModel")) {
+                    this.getView().getModel("localModel").setProperty("/Positions", null);
+                    //oPositions = []; // Variable Global
+                }
+            },
+
+            onRestartProcess: async function () {
+                await this.onClearPosition();
+                await this.onClearHeader();
+                await this.onClearOrden();
 
                 this.onNavToIconTabBar("cabecera");
 
             },
-
-            /* onEliminarPosicion: function (oEvent) {
-                let oModel = this.getModel("localModel");
-                let oBundle = this.getResourceBundle();
-
-                let sPath = oEvent.getSource().getBindingContext("localModel").getPath(); // ej: /Positions/2
-                let aPositions = oModel.getProperty("/Positions");
-                let iIndex = parseInt(sPath.split("/")[2], 10);
-
-                if (!isNaN(iIndex) && iIndex >= 0 && iIndex < aPositions.length) {
-                    MessageBox.confirm(oBundle.getText("mensajeConfirmacionEliminar"), {
-                        title: oBundle.getText("tituloConfirmacionEliminar"),
-                        actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-                        emphasizedAction: MessageBox.Action.OK,
-                        onClose: (sAction) => {
-                            if (sAction === MessageBox.Action.OK) {
-                                let sMaterial = aPositions[iIndex].material || "";
-                                aPositions.splice(iIndex, 1);
-                                oModel.setProperty("/Positions", aPositions);
-                                this._actualizarContadorPosiciones();
-
-                                MessageToast.show(oBundle.getText("mensajePosicionEliminada", [sMaterial]));
-                            }
-                        }
-                    });
-                } else {
-                    this.showError(oBundle.getText("errorIndiceInvalidoEliminar"));
-                }
-            }, */
 
             _actualizarContadorPosiciones: function () {
                 let oModel = this.getModel("localModel");
@@ -449,34 +603,22 @@ sap.ui.define([
                 oModel.setProperty("/posicionesTexto", sTexto);
             },
 
-           /*  onCleanHeader: function () {
-                this.getView().byId("header_input_clasemov").setValue();
-                this.getView().byId("header_input_fecha_doc").setValue();
-                this.getView().byId("header_input_fecha_cont").setValue();
-                this.getView().byId("header_input_referencia").setValue();
-                this.getView().byId("header_input_fecha_texto_cabecera").setValue();
-            }, */
 
-            /**
-             * Carga datos desde AJAX y los imprime (o enlaza a modelo).
-             */
-            _loadAllPlantsPaginated: async function () {
-                try {
-                    let aPlants = await this.readAllPagedAjax();
-                    console.log("Total cargado:", aPlants.length);
-                    this.getView().getModel("localModel").setProperty("/productPlants", aPlants);
-                } catch (e) {
-                    // Ya está manejado visualmente
-                }
-            },
 
             onBuscarDetalle: async function () {
                 let oView = this.getView();
-                let oLocalModelData = this.getOwnerComponent().getModel("localModel").getData();
-                let oBatchListModel = oView.getModel("BatchList");
+                oView.setBusy(true);
+                let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                let oLocalModelData = oLocalModel.getData();
+                let isBatchRequired = false;
+                let sMaterialText = "";
                 let oBundle = this.getResourceBundle();
-                let isBatchRequired = oLocalModelData.ReferenceItemSelected.isBatchRequired;
-                this.getView().getModel("oDisplayModel").setProperty("/Posiciones/lote", isBatchRequired);
+
+                const const_si = oBundle.getText("yes");
+                const const_no = oBundle.getText("no");
+
+
+
 
                 console.log("ReferenceItemSelected", oLocalModelData.ReferenceItemSelected);
 
@@ -485,31 +627,69 @@ sap.ui.define([
                 let sMaterial = this.getView().byId("materialInput").getValue();
                 let sBatch = this.getView().byId("loteInput").getValue();
 
+                let oProduct = await this.searchBatchRequired(sMaterial);
+                isBatchRequired = oProduct.isBatchRequired;
+                sMaterialText = await this.onSearchMaterialText(sMaterial);
+
 
                 let componentMaterial = oLocalModelData.ReferenceItemSelected.material;
-                if (sMaterial !== componentMaterial) {
-                    let sMessage = oBundle.getText("position.noMatch", [
-                        sMaterial,
-                        componentMaterial
-                    ]);
-                    MessageBox.alert(sMessage);
-                    return;
+
+                if (oLocalModelData.Header.claseMov === '261') {
+                    if (sMaterial !== componentMaterial) {
+                        let sMessage = oBundle.getText("position.noMatch", [
+                            sMaterial,
+                            componentMaterial
+                        ]);
+                        MessageBox.alert(sMessage);
+                        oView.setBusy(false);
+                        return;
+                    }
+                } else if (oLocalModelData.Header.claseMov === '201' || oLocalModelData.Header.claseMov === '551') {
+
+                    let oItems = {
+                        material: sMaterial,
+                        txt_material: sMaterialText,
+                        cantidad: "",
+                        um: "",
+                        centro: "",
+                        almacen: "",
+                        isBatchRequired_txt: isBatchRequired ? const_si : const_no,
+                        GoodsMovementType: oLocalModelData.Header.claseMov,
+                        isBatchRequired: isBatchRequired,
+                        Reservation: "",
+                        ReservationItem: "",
+                        ReservationItemRecordType: ""
+                    }
+                    oLocalModel.setProperty("/ReferenceItems", oItems);
                 }
 
-                if (isBatchRequired) {
+                this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/lote", isBatchRequired);
+
+
+                if (isBatchRequired && oLocalModelData.Header.claveMov !== '101-02') {
+
+
+
 
                     // 2️⃣ Validar campos obligatorios
                     if (!sMaterial || !sBatch) {
-                        MessageToast.show(oBundle.getText("position.missingFields"));
+                        let oMessage = oBundle.getText("position.missingFields");
+                        MessageToast.show(oMessage, {
+                            duration: 8000 // milisegundos (8 segundos)
+                        });
+
 
                         if (!sBatch) {
                             this.getView().byId("loteInput").focus();
                         }
+
+                        oView.setBusy(false);
                         return;
                     }
 
                     // 3️⃣ Obtener datos del modelo BatchList
-                    let aBatchData = oBatchListModel.getData() || [];
+                    //let aBatchData = oBatchListModel.getData() || [];
+                    let aBatchData = await this.onSearchBatchList(sMaterial); // ✅ ahora sí esperas la promesa
 
                     // 4️⃣ Buscar combinación material-lote
                     let oMatch = aBatchData.find(item =>
@@ -517,7 +697,11 @@ sap.ui.define([
                     );
 
                     if (oMatch) {
-                        MessageToast.show(oBundle.getText("position.batchFound"));
+                        let oMessage = oBundle.getText("position.batchFound");
+
+                        MessageToast.show(oMessage, {
+                            duration: 8000 // milisegundos (8 segundos)
+                        });
 
 
                         /**
@@ -531,13 +715,14 @@ sap.ui.define([
 
                     } else {
                         // Si no hay match y el batch es requerido: mostrar mensaje
-                        if (oLocalModelData.ReferenceItemSelected.isBatchRequired) {
+                        if (isBatchRequired) {
                             let oMessage = oBundle.getText("position.batchNotFound");
                             MessageToast.show(oMessage, {
                                 duration: 8000 // milisegundos (8 segundos)
                             });
                             let oMatrial_flag = false;
                             this.onClearPosition(oMatrial_flag);
+                            oView.setBusy(false);
 
                         }
                     }
@@ -545,8 +730,10 @@ sap.ui.define([
                     console.log("dataposition => " + oLocalModelData.DataPosition.material);
                     console.log("escaneado => " + this.getView().byId("materialInput").getValue());
 
-                    const sInputValue = this.getView().byId("materialInput").getValue().trim();
-                    const sModelValue = oLocalModelData.DataPosition.material?.trim();
+                    let sInputValue = this.getView().byId("materialInput").getValue().trim();
+                    let sModelValue = oLocalModelData.DataPosition.material?.trim();
+
+                    this.getView().byId("loteInput").setValue();
 
                     // 📌 Comparar usando includes()
                     if (sInputValue.toUpperCase().includes(sModelValue.toUpperCase())) {
@@ -564,6 +751,8 @@ sap.ui.define([
 
 
                 }
+
+                oView.setBusy(false);
             },
 
             setPositionValue: async function () {
@@ -589,78 +778,6 @@ sap.ui.define([
 
 
             },
-
-
-            /*  onBuscarDetalle: async function () {
- 
-                 let oModelName = "API_MATERIAL_DOCUMENT_SRV";
-                 let oEntity = "A_MaterialDocumentItem";
-                 let olocalModel = this.getOwnerComponent().getModel("localModel").getData();
-                 let sKey = olocalModel.Header.referencia; //"1000004";
-                 let sMaterial = olocalModel.DataPosition.material;
-                 let sBatch = olocalModel.DataPosition.lote;
-                 let sPlant = '';
-                 let sLocation = '';
-               
- 
-                 try {
-                     let sOrderDetail = await this.readOneAjax(oModelName, oEntity, sKey, sMaterial, sBatch, sPlant, sLocation);
-                     //console.log("API_MATERIAL_DOCUMENT_SRV:", sOrderDetail);
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", sOrderDetail.d.results[0].EntryUnit);
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", sOrderDetail.d.results[0].Plant);
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", sOrderDetail.d.results[0].StorageLocation);
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", sOrderDetail.d.results[0].Batch);
-                     let oDetailText = this.onGetDetailText(sKey, sMaterial, sBatch);
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", oDetailText);
- 
- 
-                     // Header tab Texto cabecera
-                     //this.getOwnerComponent().getModel("localModel").setProperty("/Header/texto_cabecera", sOrderDetail.d.results[0].MaterialDocumentItemText);
- 
-                     // Cantidad Disponible
-                     let oModel_MatDoc = "API_PRODUCTION_ORDER_2_SRV";
-                     //let oEntity_MatDoc = "A_ProductionOrder_2";
-                     let oEntity_MatDoc = "A_ProductionOrderComponent_4";
-                     sPlant = sOrderDetail.d.results[0].Plant;
-                     sLocation = sOrderDetail.d.results[0].StorageLocation;
-                     let sQuantityDetail = await this.readOneAjax(oModel_MatDoc, oEntity_MatDoc, sKey, sMaterial, sBatch, sPlant, sLocation);
- 
- 
-                     let oCant_disponible = parseFloat(sQuantityDetail.d.results[0].RequiredQuantity) - parseFloat(sQuantityDetail.d.results[0].WithdrawnQuantity);
-                     console.log("cantidad disponible: oCant_disponible: " + oCant_disponible);
-                     if (oCant_disponible > 0) {
-                         this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", oCant_disponible);
-                         this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", oCant_disponible);
-                     } else {
-                         const oBundle = this.getResourceBundle();
-                         let sTexto = oBundle.getText("error.cantidad_no_disponible", [oCant_disponible]);
-                         MessageBox.error(sTexto);
-                     }
- 
- 
-                     // Texto de material
-                     let oModel_MatText = "productApi";
-                     let oEntity_MatText = "ProductDescription";
-                     //let sMaterialText = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, sMaterial, oEmpty, oEmpty, oEmpty);
-                     let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, sKey, sMaterial, sBatch, sPlant, sLocation);
-                     console.log("sMaterialText", sMaterialData);
-                     let sMaterialText = sMaterialData.value[0].ProductDescription;
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", sMaterialText);
- 
- 
-                     // Material requiere Batch para ser procesado
-                     let oModel_BatchRequired = "productApi";
-                     let oEntity_BatchRequired = "Product";
-                     //let sMaterialText = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, sMaterial, oEmpty, oEmpty, oEmpty);
-                     let sMaterialBatch = await this.readOneAjax(oModel_BatchRequired, oEntity_BatchRequired, sKey, sMaterial, sBatch, sPlant, sLocation);
-                     let isBatchRequired = sMaterialBatch.value[0].IsBatchManagementRequired;
-                     this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", isBatchRequired);
- 
-                 } catch (e) {
-                     // Ya está manejado visualmente
-                 }
- 
-             }, */
 
             onGetDetailText: async function (sKey, sMaterial, sBatch, oClaseMov) {
                 let oModelName = "ZSB_HANDHELD_V2";
@@ -693,8 +810,6 @@ sap.ui.define([
                 }
             },
 
-
-
             guardarTextoEditado: function () {
                 let oLocalModel = this.getView().getModel("localModel");
                 let sTexto = oLocalModel.getProperty("/DataPosition/txt_posicion");
@@ -720,22 +835,6 @@ sap.ui.define([
 
                 let oReturn = false;
 
-
-
-
-                /* if (!iCantidad) {
-                    const oBundle = this.getResourceBundle();
-                    let sTexto = oBundle.getText("error.cantidad_no_valida", [iDisponible]);
-                    MessageBox.warning(sTexto);
-
-                } else if (iCantidad > iDisponible) {
-                    const oBundle = this.getResourceBundle();
-                    let sTexto = oBundle.getText("error.cantidad_no_disponible", [iDisponible]);
-                    MessageBox.warning(sTexto);
-                } else {
-                    oReturn = true;
-                } */
-
                 oReturn = true;
 
                 return oReturn;
@@ -751,100 +850,131 @@ sap.ui.define([
             onCreateMov: async function () {
 
                 this.getView().setBusy(true);
+                let oBundle = this.getResourceBundle();
 
                 try {
+
+
                     // 1️⃣ Obtener datos locales del modelo local
                     let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
-                    let sModelName = "API_MATERIAL_DOCUMENT_SRV";
-                    let sEntitySet = "A_MaterialDocumentHeader";
-                    let oBundle = this.getResourceBundle();
 
-                    // 2️⃣ Formatear la fecha de contabilización (ISO con hora 00:00:00)
-                    let oDate = oLocalModel.Header.fecha_cont + "T00:00:00";
+                    let esEntrega = oLocalModel.Header.esEntrega;
+                    let oGoodsMovementType = '';
 
-                    // 3️⃣ Obtener la clave del movimiento de mercancía según la lógica de negocio
-                    let oGoodMovement = this.getGoodMovement(oLocalModel.Header.claseMov);
-
-                    // 4️⃣ Validar que exista código válido
-                    if (!oGoodMovement) {
-                        sap.m.MessageBox.error(this.getResourceBundle().getText("error.missingMovement"));
-                        this.getView().setBusy(false);
+                    if (oLocalModel.Header.claveMov === c_303 || oLocalModel.Header.claveMov === c_309) {
+                        this.onShowReceiver();
                         return;
                     }
 
-                    // 5️⃣ Inicializar el objeto JSON con cabecera y array vacío de ítems
-                    let oRequestJson = {
-                        PostingDate: oDate,
-                        GoodsMovementCode: oGoodMovement,
-                        MaterialDocumentHeaderText: oLocalModel.Header.texto_cabecera,
-                        to_MaterialDocumentItem: [] // Lista de posiciones
-                    };
 
-                    // 6️⃣ Recorrer todos los ítems seleccionados y agregarlos al array
-                    /* oLocalModel.Positions.forEach((element) => {
-                        oRequestJson.to_MaterialDocumentItem.push({
-                            Material: element.material,                           // Código de material
-                            Plant: element.centro,                                // Planta / Centro
-                            Batch: element.lote,                                  // Lote, valor default si no viene
-                            StorageLocation: element.almacen,                     // Almacén
-                            GoodsMovementType: oLocalModel.Header.claseMov,       // Clase de movimiento
-                            MaterialDocumentItemText: element.texto || "Rollo",   // Texto de posición
-                            ManufacturingOrder: oLocalModel.Header.referencia,    // Orden de fabricación
-                            IsCompletelyDelivered: false,                         // Indicador de entrega
-                            QuantityInEntryUnit: element.cantidad,                // Cantidad
-                            CostCenter: element.ceco,                             // Centro de costo
-                            MaterialDocumentItemText: element.txt_material
+                    // Procesar Entregas
+                    if (esEntrega) {
+                        this.onContabilizarEntrega();
+                        return;
+                    } else {
+
+
+
+
+                        // 3️⃣ Obtener la clave del movimiento de mercancía según la lógica de negocio
+                        let oGoodMovement = this.getGoodMovement();
+
+
+
+                        // 4️⃣ Validar que exista código válido
+                        if (!oGoodMovement) {
+                            sap.m.MessageBox.error(this.getResourceBundle().getText("error.missingMovement"));
+                            this.getView().setBusy(false);
+                            return;
+                        }
+
+                        if (oLocalModel.Header.claveMov === '101-02') {
+                            oGoodsMovementType = oLocalModel.Header.claseMov;
+                        } else {
+                            oGoodsMovementType = oLocalModel.ReferenceItemSelected.GoodsMovementType || oLocalModel.Header.claseMov;
+                        }
+
+
+                        let oRequestJson = this.onBuildRequest();
+
+                        if(!oRequestJson){
+                            MessageBox.warning("Selecciona un motivo");
+                            return;
+                        }
+
+
+
+
+                        // Paso 8️⃣ Obtener CSRF Token usando helper del BaseController
+                        let sModelName = "";
+                        let sEntitySet = "";
+                        let sEntitySetToken = "A_MaterialDocumentHeader";
+                        if (oLocalModel.Header.esAnulacion) {
+
+                            sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'&PostingDate=datetime'${oLocalModel.Header.fecha_cont}T00:00'`;
+                            sModelName = "API_MATERIAL_DOCUMENT_SRV";
+
+                           /*  if (oLocalModel.Header.claveMov === "202-03") { borrar en caso de requerir fecha para todos
+                                sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'`;
+                            } else if (oLocalModel.Header.claveMov === "102-01") {
+                                sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'&PostingDate=datetime'${oLocalModel.Header.fecha_cont}T00:00'`;
+                            } */
+
+
+                            //API_MATERIAL_DOCUMENT_SRV/Cancel?
+                            // MaterialDocumentYear='2017'&
+                            // MaterialDocument='5000021255'
+                            // &PostingDate=datetime'2017-07-02T00:00:00'
+                        } else {
+                            sModelName = "API_MATERIAL_DOCUMENT_SRV";
+                            sEntitySet = "A_MaterialDocumentHeader?";
+                        }
+
+                        // Manejo de Motivo para cada movimiento
+
+                        /*   const c_601 = '601'; // entrega de material
+                          const c_602 = '602'; // Anulacion entrega de material
+                          const c_551 = '551'; // Desguace
+                          const c_552 = '552'; // Anulacion desguace
+                          const c_201 = '201'; // salida de mercancia con cargo a ceco
+                          const c_202 = '202'; // anulacion salida de mercancia con cargo a ceco
+                          const c_261 = '261'; // Orden de produccion
+                          const c_262 = '262'; // anulacion orden de produccion
+                          const c_999 = "999"; */
+
+                        let oMovType = oRequestJson.to_MaterialDocumentItem[0].GoodsMovementType;
+                        if (oMovType === c_261 || oMovType === c_262 || oMovType === c_201 || oMovType === c_202) {
+                            oRequestJson.to_MaterialDocumentItem[0].GoodsMovementReasonCode = '';
+                        }
+
+                        let sToken = await this.fetchCsrfToken(sModelName, sEntitySetToken);
+                        console.log("CSRF Token obtenido:", sToken);
+
+                        // Paso 9 Ejecutar POST usando helper del BaseController
+                        let oResponse = [];
+                        if (oLocalModel.Header.esAnulacion) {
+                            oResponse = await this.postEntityAjax(sModelName, sEntitySet, oRequestJson, sToken);
+                        } else {
+                            oResponse = await this.postEntityAjax(sModelName, sEntitySet, oRequestJson, sToken);
+                        }
+
+                        let oMessage = oBundle.getText("success.movCreated");
+                        MessageToast.show(oMessage, {
+                            duration: 8000 // milisegundos (8 segundos)
                         });
-                    }); */
-
-                    oRequestJson.to_MaterialDocumentItem.push({
-                        Material: oLocalModel.DataPosition.material,                           // Código de material
-                        Plant: oLocalModel.DataPosition.centro,                                // Planta / Centro
-                        Batch: oLocalModel.DataPosition.lote,                                  // Lote, valor default si no viene
-                        StorageLocation: oLocalModel.DataPosition.almacen,                     // Almacén
-                        GoodsMovementType: oLocalModel.ReferenceItemSelected.GoodsMovementType,       // Clase de movimiento
-                        MaterialDocumentItemText: oLocalModel.DataPosition.texto || "Rollo",   // Texto de posición
-                        ManufacturingOrder: oLocalModel.Header.referencia,    // Orden de fabricación
-                        IsCompletelyDelivered: false,                         // Indicador de entrega
-                        QuantityInEntryUnit: oLocalModel.DataPosition.cantidad,                // Cantidad
-                        CostCenter: oLocalModel.DataPosition.ceco,                             // Centro de costo
-                        MaterialDocumentItemText: oLocalModel.DataPosition.txt_material,
-                        InventoryTransactionType: "WA"
-                    });
-
-                    // 7️⃣ Mostrar payload final en consola para validación (opcional)
-                    let oRequestJson_2 = {
-                        "PostingDate": "2025-02-03T15:00:00",
-                        "GoodsMovementCode": "03",
-                        "MaterialDocumentHeaderText": "Cabecera HandHeld",
-                        "to_MaterialDocumentItem": [
-                            {
-                                "Material": "MP50002T",
-                                "Plant": "1000",
-                                "Batch": "TEST1",
-                                "StorageLocation": "1000",
-                                "GoodsMovementType": "201",
-                                "MaterialDocumentItemText": "Rollo",
-                                "ManufacturingOrder": "1000140",
-                                "IsCompletelyDelivered": false,
-                                "QuantityInEntryUnit": "1",
-                                "CostCenter": "5110101208"
-                            }
-                        ]
-                    };
-                    console.log("Payload final:", oRequestJson_2);
+                        console.log("Respuesta del POST:", oResponse);
+                        this.PopulatePositions(oResponse.d);
 
 
-                    // Paso 8️⃣ Obtener CSRF Token usando helper del BaseController
-                    let sToken = await this.fetchCsrfToken(sModelName, sEntitySet);
-                    console.log("CSRF Token obtenido:", sToken);
 
-                    // Paso 9 Ejecutar POST usando helper del BaseController
-                    let oResponse = await this.postEntityAjax(sModelName, sEntitySet, oRequestJson, sToken);
 
-                    sap.m.MessageToast.show(oBundle.getText("success.movCreated"));
-                    console.log("Respuesta del POST:", oResponse);
-                    this.PopulatePositions(oResponse.d);
+
+
+                    }
+
+
+
+
 
                     this.getView().setBusy(false);
 
@@ -852,6 +982,7 @@ sap.ui.define([
                     console.error("Error en onCreateMov:", e);
                     this._showErrorMessage(oBundle.getText("error.unexpected"), oBundle);
                     this.getView().setBusy(false);
+                    this.onCloseItemsDialog();
                 }
 
                 this.getView().setBusy(false);
@@ -861,7 +992,7 @@ sap.ui.define([
                 let oView = this.getView();
                 let oBundle = this.getResourceBundle();
                 let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                let oDisplayModel = this.getView().getModel("oDisplayModel").getData();
+                let oDisplayModel = this.getOwnerComponent().getModel("oDisplayModel").getData();
                 let bValid = true;
                 let aMissingFields = [];
 
@@ -935,13 +1066,13 @@ sap.ui.define([
 
             onTabChanged: function (oEvent) {
                 let sKey = oEvent.getParameter("key");
-                if (sKey !== "cabecera") {
+                /* if (sKey !== "cabecera") {
                     let bValid = this.validateHeaderFields();
                     if (!bValid) {
                         // 🚩 Si no es válido, forza volver al tab Cabecera
                         this.byId("mainTabs").setSelectedKey("cabecera");
                     }
-                }
+                } */
             },
 
 
@@ -952,31 +1083,108 @@ sap.ui.define([
             },
 
 
-            PopulatePositions: function (oResponse) {
+            PopulatePositions: async function (oResponse) {
 
                 let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                let oDataPosition = oLocalModel.getData().DataPosition;
+                let oLocalModelData = oLocalModel.getData();
+                let oDataPosition = oLocalModelData.DataPosition;
+                let _position = [];
+                let iPageSize = '5000';
+                let oModel_RefDetail = "API_MATERIAL_DOCUMENT_SRV";
+                let oEntity_RefDetail = "A_MaterialDocumentItem";
+                let oItems = [];
+                var oPositions = [];
+                let sMaterialText = "";
+                let oMotivo = "";
+
+                console.log("Llenar tabla: ", oResponse);
+
+                let oDocumentDetails = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, oResponse.MaterialDocument, oLocalModelData.Header.claseMov);
+                let oDetails = oDocumentDetails.d.results;
+                let oMotivoModel = "";
+
+
+
 
                 if (oResponse.MaterialDocument) {
-                    let _position = {
-                        material: oDataPosition.material,
-                        txt_material: oDataPosition.txt_material,
-                        cantidad: oDataPosition.cantidad,
-                        um: oDataPosition.um,
-                        lote: oDataPosition.lote,
-                        centro: oDataPosition.centro,
-                        almacen: oDataPosition.almacen,
-                        ceco: oDataPosition.ceco,
-                        motivo: oDataPosition.motivo,
-                        txt_posicion: oDataPosition.txt_posicion,
-                        MaterialDocument: oResponse.MaterialDocument
+                    //if (oLocalModelData.Header.esAnulacion) {
+
+
+                    //let oRefItems = oLocalModelData.ReferenceItems;
+
+                    if (oLocalModelData.Header.claveMov === "551-03") {
+                        oMotivoModel = this.getOwnerComponent().getModel("MotivoList").getData();
                     }
-                    oPositions.push(_position);
+
+                    console.log("PopulatePositions > oDetails: ", oDetails);
+                    for (let i = 0; i < oDetails.length; i++) {
+                        sMaterialText = await this.onSearchMaterialText(oDetails[i].Material);
+
+                        if (oLocalModelData.Header.claveMov === "551-03") {
+                            oMotivoModel = this.getOwnerComponent().getModel("MotivoList").getData();
+                            oMotivo = oMotivoModel.find(item =>
+                                item.Motivo === oDetails[0].GoodsMovementReasonCode
+                            );
+                        }
+
+
+
+                        _position = {
+                            material: oDetails[0].Material,
+                            txt_material: sMaterialText,
+                            cantidad: oDetails[0].QuantityInEntryUnit,
+                            um: oDetails[0].EntryUnit,
+                            lote: oDetails[0].Batch, // Lote
+                            centro: oDetails[0].Plant, // Centro/Planta
+                            almacen: oDetails[0].StorageLocation,
+                            ceco: oDetails[0].CostCenter,
+                            motivo: oMotivo?.Motivo || '', // Motivo
+                            DescMotivo: oMotivo.DescMotivo || '', // Motivo
+                            txt_posicion: oDetails[0].MaterialDocumentItemText,
+                            MaterialDocument: oResponse.MaterialDocument,
+                            //MaterialDocumentItemText: oDetails[i].MaterialDocumentItemText,
+                            motivo: oDetails[i].GoodsMovementReasonCode || ''
+
+                        }
+                        oPositions.push(_position);
+                        _position = {};
+                    }
+
+                    /*}  else {
+                        console.log("no es anulación");
+
+                        sMaterialText = await this.onSearchMaterialText(oDataPosition.material);
+                        _position = {
+                            material: oDetails[0].Material,
+                            txt_material: sMaterialText,
+                            cantidad: oDetails[0].QuantityInEntryUnit,
+                            um: oDetails[0].EntryUnit,
+                            lote: oDetails[0].Batch, // Lote
+                            centro: oDetails[0].Plant, // Centro/Planta
+                            almacen: oDetails[0].StorageLocation,
+                            ceco: oDetails[0].CostCenter,
+                            motivo: oDetails[0].GoodsMovementReasonCode || '', // Motivo
+                            txt_posicion: oDetails[0].MaterialDocumentItemText,
+                            MaterialDocument: oResponse.MaterialDocument,
+                            MaterialDocumentItemText: oDetails[i].MaterialDocumentItemText,
+                            motivo: oDetails[i].GoodsMovementReasonCode || ''
+                        }
+                        oPositions.push(_position);
+                        _position = {};
+                    } */
+
+                    console.log("oPositions: ", oPositions);
+
                     oLocalModel.setProperty("/Positions", oPositions);
                     this._actualizarContadorPosiciones();
                 }
 
+
+
+
+
                 // Paso 2: Cambiar la pestaña activa por su key
+                this.onCloseItemsDialog();
                 this.onNavToIconTabBar("orden");
 
             },
@@ -989,13 +1197,442 @@ sap.ui.define([
                 this.onLiveChangeUpper(oEvent, "/DataPosition/lote");
             },
 
+            onLiveChangeUM: function (oEvent) {
+                this.onLiveChangeUpper(oEvent, "/DataPosition/um");
+            },
+
             inputSubmit: function () {
                 console.log("inputSubmit");
+            },
+
+            getAnnulmentType: function (eClaveMov) {
+
+
+                /* const c_602 = '602';
+                const c_552 = '552-03';
+                const c_202 = '202-03';
+                const c_262 = '262-03';
+                const c_102_01 = '102-01';
+                const c_102_02 = '102-02'; */
+                let _return
+
+                if (eClaveMov === c_602 || eClaveMov === c_552 || eClaveMov === c_202 || eClaveMov === c_262 || eClaveMov === c_102_01 || eClaveMov === c_102_02) {
+                    _return = true;
+                } else {
+                    _return = false
+                }
+
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/esAnulacion", _return);
+
+                return _return
+            },
+
+            onClearReferenceItemSelected: function () {
+                this.getOwnerComponent().getModel("localModel").getProperty("/ReferenceItemSelected", null);
+            },
+
+            onClearReferenceItems: function () {
+                this.getOwnerComponent().getModel("localModel").getProperty("/ReferenceItems", null);
+            },
+
+            onPicking: async function () {
+                this.getView().setBusy(true);
+
+                // ✅ Tomar partes
+                let sMaterial = this.getView().byId("materialInput").getValue();
+                let sBatch = this.getView().byId("loteInput").getValue();
+                let oBundle = this.getResourceBundle(); // solo si lo estás usando abajo
+
+
+                // 2️⃣ Validar campos obligatorios
+                if (!sMaterial) {
+                    let oMessage = oBundle.getText("position.missingFields");
+                    MessageToast.show(oMessage, {
+                        duration: 8000 // milisegundos (8 segundos)
+                    });
+
+
+
+
+                    this.getView().setBusy(false);
+                    return;
+                }
+
+                this.onBuscarDetalle();
+
+
+
+
+                let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+                let oDisplayModel = this.getOwnerComponent().getModel("oDisplayModel").getData();
+
+                this.getView().setBusy(false);
+                this.getETagAndToken().then((oHeaders) => {
+                    let sKey = oLocalModel.Header.referencia;
+                    let sItem = oLocalModel.ReferenceItemSelected.ReferenceSDDocumentItem;
+                    //let sCantidad = oLocalModel.DataPosition.cantidad;
+                    let sCantidad = parseFloat(oLocalModel.DataPosition.cantidad).toFixed(3);
+                    let sUM = oLocalModel.DataPosition.um;
+                    let sBatch = oLocalModel.DataPosition.lote;
+                    let sUrl = '';
+                    let isBatchRequired = oDisplayModel.Posiciones.lote;
+                    if (isBatchRequired) {
+                        sUrl = `/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002/PickAndBatchSplitOneItem?DeliveryDocument='${sKey}'&DeliveryDocumentItem='${sItem}'&Batch='${sBatch}'&SplitQuantity=${sCantidad}m&SplitQuantityUnit='${sUM}'`;
+                    } else {
+                        sUrl = `/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002/PickOneItemWithSalesQuantity?DeliveryDocument='${sKey}'&DeliveryDocumentItem='${sItem}'&ActualDeliveryQuantity=${sCantidad}m&DeliveryQuantityUnit='${sUM}'`;
+                    }
+
+
+
+
+
+                    let sModelName = "API_OUTBOUND_DELIVERY_SRV";
+                    let sEntitySetToken = "?";
+
+                    console.log("Picking: " + sUrl);
+
+                    this.fetchCsrfToken(sModelName, sEntitySetToken).then((sToken) => {
+
+                        $.ajax({
+                            url: sUrl,
+                            method: "POST",
+                            headers: {
+                                "X-CSRF-Token": sToken,
+                                "If-Match": oHeaders.etag
+                            },
+                            contentType: "application/json",
+                            dataType: "json",
+                            success: (oData) => {
+                                MessageToast.show("Picking exitoso", oData);
+                                this.getView().setBusy(false);
+                            },
+                            error: (jqXHR) => {
+                                console.log("error en picking:", jqXHR)
+                                let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                                this._showErrorMessage(sMessage, oBundle);
+                                this.getView().setBusy(false);
+                            }
+                        });
+                    }).catch((oError) => {
+                        this.getView().setBusy(false);
+                        this._showErrorMessage("No se pudo obtener el Token", this.getResourceBundle());
+                        console.error("Error en fetchCsrfToken", oError);
+                    });
+
+
+
+
+                }).catch((oError) => {
+                    this.getView().setBusy(false);
+                    this._showErrorMessage("No se pudo obtener el ETag o Token", this.getResourceBundle());
+                    console.error("Error en getETagAndToken", oError);
+                });
+            },
+
+            onContabilizarEntrega: async function () {
+
+                let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+                let oBundle = this.getResourceBundle();
+
+                this.getETagAndToken().then((oHeaders) => {
+                    let sKey = oLocalModel.Header.referencia;
+                    let sItem = oLocalModel.ReferenceItemSelected.ReferenceSDDocumentItem;
+                    let sUrl = `/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002/PostGoodsIssue?DeliveryDocument='${sKey}'`;
+
+
+                    let sModelName = "API_OUTBOUND_DELIVERY_SRV";
+                    let sEntitySetToken = "?";
+
+                    this.fetchCsrfToken(sModelName, sEntitySetToken).then((sToken) => {
+
+                        $.ajax({
+                            url: sUrl,
+                            method: "POST",
+                            headers: {
+                                "X-CSRF-Token": sToken,
+                                "If-Match": oHeaders.etag
+                            },
+                            contentType: "application/json",
+                            dataType: "json",
+                            success: (oData) => {
+                                MessageToast.show("Delivery Completed");
+                                this.getView().setBusy(false);
+                            },
+                            error: (jqXHR) => {
+                                let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
+                                this._showErrorMessage(sMessage, oBundle);
+                                this.getView().setBusy(false);
+                            }
+                        });
+                    }).catch((oError) => {
+                        this.getView().setBusy(false);
+                        this._showErrorMessage("No se pudo obtener el Token", this.getResourceBundle());
+                        console.error("Error en fetchCsrfToken", oError);
+                    });
+
+
+
+
+                }).catch((oError) => {
+                    this.getView().setBusy(false);
+                    this._showErrorMessage("No se pudo obtener el ETag o Token", this.getResourceBundle());
+                    console.error("Error en getETagAndToken", oError);
+                });
+
+            },
+
+
+            /**
+             * Controla la visibilidad del botón "Picking" basado en el estado de los ítems de entrega.
+             * Oculta el botón si todos los ítems están con PickingStatus 'C' (completo).
+             */
+            setVisibleBtnPicking: async function () {
+                const oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+
+                this.checkPickingAndToggleButton(
+                    oLocalModel.Header.referencia,
+                    "API_OUTBOUND_DELIVERY_SRV",
+                    "/A_OutbDeliveryItem",                    // ID del botón en la vista
+                    "/Header/btnPicking"              // Propiedad del oDisplayModel usada en binding
+                );
+            },
+
+
+            /**
+             * Controla la visibilidad del botón "Contabilizar" usando binding.
+             * Oculta el botón si todos los ítems están con PickingStatus 'C'.
+             */
+            setVisibleBtnContinuar: async function () {
+                const oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+
+                this.checkPickingAndToggleButton(
+                    oLocalModel.Header.referencia,
+                    "API_OUTBOUND_DELIVERY_SRV",
+                    "/A_OutbDeliveryItem",
+                    "/Header/btnContabilizar"         // Propiedad del oDisplayModel
+                );
+            },
+
+            onShowReceiver: function () {
+
+                // Mostrar el dialog de ítems
+                let oView = this.getView();
+                if (!this.oReceiverDialog) {
+                    this.oReceiverDialog = Fragment.load({
+                        id: oView.getId(),
+                        name: "delmex.zmmhandheld.view.fragments.ReceiverDataDialog",
+                        controller: this
+                    }).then(function (oDialog) {
+                        oView.addDependent(oDialog);
+                        oDialog.open();
+                        oView.setBusy(false);
+                        return oDialog;
+                    });
+                } else {
+                    this.oReceiverDialog.then(function (oDialog) {
+                        oDialog.open();
+                        oView.setBusy(false);
+                    });
+                }
+
+
+            },
+
+            onCloseReceiverDialog: function () {
+                if (this.oReceiverDialog) {
+                    this.oReceiverDialog.then(function (oDialog) {
+                        oDialog.close();
+                    });
+                }
+            },
+
+            onBuildRequest: function () {
+                let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+                let oDisplayModel = this.getOwnerComponent().getModel("oDisplayModel").getData();
+                let oPostingDate = oLocalModel.Header.fecha_cont + "T00:00:00";
+                let oDocDate = oLocalModel.Header.fecha_doc + "T00:00:00";
+                let oGoodMovement = this.getGoodMovement();
+                let sClaveMov = oLocalModel.Header.claveMov;
+                let oGoodsMovementType = oLocalModel.ReferenceItems.GoodsMovementType ||  oLocalModel.ReferenceItemSelected.GoodsMovementType;
+                let oManufacturingOrder = oDisplayModel.Header.referencia ? oLocalModel.Header.referencia : '';
+
+                // 1️⃣ Crear base del JSON de request
+                let oRequestJson = {
+                    PostingDate: oPostingDate,
+                    DocumentDate: oDocDate,
+                    GoodsMovementCode: oGoodMovement,
+                    MaterialDocumentHeaderText: oLocalModel.Header.texto_cabecera,
+                    to_MaterialDocumentItem: []
+                };
+
+                // 2️⃣ Crear item completo con todos los posibles campos
+                let oItem = {
+                    Material: oLocalModel.DataPosition.material,
+                    Plant: oLocalModel.DataPosition.centro,
+                    Batch: oLocalModel.DataPosition.lote,
+                    StorageLocation: oLocalModel.DataPosition.almacen,
+                    GoodsMovementType: oGoodsMovementType,
+                    IsCompletelyDelivered: false,
+                    QuantityInEntryUnit: parseFloat(oLocalModel.DataPosition.cantidad).toFixed(3),
+                    EntryUnit: oLocalModel.DataPosition.um,
+                    CostCenter: oLocalModel.DataPosition.ceco,
+                    MaterialDocumentItemText: oLocalModel.DataPosition.txt_posicion, // 201, 261, 551, 303 y 309
+                    GoodsMovementReasonCode: oLocalModel.DataPosition.motivo, //551, 201, 601 (diferente catalogo de motivo)
+
+
+                    ManufacturingOrder: oManufacturingOrder,
+                    Reservation: oLocalModel.ReferenceItemSelected.Reservation || '',
+                    ReservationItem: oLocalModel.ReferenceItemSelected.ReservationItem || '',
+                    ReservationItemRecordType: oLocalModel.ReferenceItemSelected.ReservationItemRecordType || '',
+
+
+                    
+                    Delivery: sClaveMov === '601-03' ? oLocalModel.Header.referencia : '',
+                    DeliveryItem: oLocalModel.ReferenceItemSelected.ReferenceSDDocumentItem,
+                    GoodsMovementRefDocType: oLocalModel.ReferenceItemSelected.GoodsMovementRefDocType || '',
+                    PurchaseOrder: sClaveMov === '101-01' ? oLocalModel.Header.referencia : '',
+                    PurchaseOrderItem: sClaveMov === '101-01' ? oLocalModel.ReferenceItemSelected.PurchaseOrderItem : '',
+                    IssgOrRcvgMaterial: oLocalModel.DataPosition.IssgOrRcvgMaterial,
+                    IssuingOrReceivingPlant: oLocalModel.DataPosition.IssuingOrReceivingPlant,
+                    IssuingOrReceivingStorageLoc: oLocalModel.DataPosition.IssuingOrReceivingStorageLoc
+                };
+
+                
+
+
+
+
+
+
+                // 3️⃣ Agregar el item al array
+                oRequestJson.to_MaterialDocumentItem.push(oItem);
+
+                // 4️⃣ Eliminar campos no requeridos según clave de movimiento
+                let iLastIndex = oRequestJson.to_MaterialDocumentItem.length - 1;
+
+                switch (sClaveMov) {
+                    case c_303:
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["IssgOrRcvgMaterial", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc"]
+                        );
+                        break;
+                    case c_309:
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc"]
+                        );
+                        break;
+
+                    case c_101_01:
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode", "Delivery", "DeliveryItem",
+                                "GoodsMovementRefDocType", "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc"]
+                        );
+                        break;
+
+                    case c_101_02:
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["Batch", "IssgOrRcvgMaterial", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode",
+                                "Delivery", "DeliveryItem", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc"]
+                        );
+                        break;
+
+                    case c_601:
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["PurchaseOrder", "PurchaseOrderItem"]
+                        );
+                        break;
+
+                    case c_201:
+                    case c_551:
+
+                        if(!oLocalModel.DataPosition.motivo || oLocalModel.DataPosition.motivo === '0'){
+                            this.getView().setBusy(false);
+                            return false;
+                        }
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["GoodsMovementReasonCode", "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem",
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial"]
+                        );
+                        break;
+
+                    case c_202: // y 552
+                    case c_261:
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "GoodsMovementReasonCode", "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem",
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial"]
+                        );
+                        break;
+
+                    case c_262:
+
+                    case c_552:
+                    case c_602:
+                    case c_102_01:
+                    case c_102_02:
+                    case c_304:
+                    case c_310:
+                        // Aquí podrías eliminar campos si aplica
+                        break;
+
+                    default:
+                        // Podrías registrar un warning si el movimiento es inesperado
+                        break;
+                }
+
+                // 5️⃣ Validar cantidad contra el máximo permitido
+                let oInputTotal = parseFloat(oLocalModel.DataPosition.cantidad);
+                let oTotalMaterial = parseFloat(oLocalModel.ReferenceItemSelected.cantidad);
+
+                if (oInputTotal > oTotalMaterial) {
+                    MessageBox.alert(this.getResourceBundle().getText("failed.quantity", [oTotalMaterial]));
+                    this.getView().setBusy(false);
+                    return;
+                }
+
+                console.log("Payload final:", oRequestJson);
+                return oRequestJson;
+            },
+
+
+
+            getGoodMovement: function () {
+
+                let oReurn = false;
+                let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+
+                let oClaseMovModel = this.getOwnerComponent().getModel("ClaseMovList").getData();
+                let oGoodMovementItem = oClaseMovModel.find(item =>
+                    item.ClaveMov === oLocalModel.Header.claveMov
+                );
+
+                if (oGoodMovementItem) {
+                    oReurn = oGoodMovementItem.GoodMovType;
+                }
+                return oReurn;
+
             }
-
-
-
-
 
 
         });

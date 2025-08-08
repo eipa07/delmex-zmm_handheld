@@ -63,8 +63,8 @@
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnLote}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCentro}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnAlmacen}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCeco}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnMotivo}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCeco}" visible="{oDisplayModel>/Posiciones/ceco}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnMotivo}" visible="{oDisplayModel>/Columna/motivo}"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoPosicion}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnNumDocto}" /></Column>
             </columns>
@@ -79,8 +79,8 @@
                         <Text text="{localModel>lote}" />
                         <Text text="{localModel>centro}" />
                         <Text text="{localModel>almacen}" />
-                        <Text text="{localModel>ceco}" />
-                        <Text text="{localModel>motivo}" />
+                        <Text text="{localModel>ceco}" visible="{oDisplayModel>/Posiciones/ceco}" />
+                        <Text text="{localModel>DescMotivo}" visible="{oDisplayModel>/Columna/motivo}" />
                         <Text text="{localModel>txt_posicion}" wrapping="true" />
                         <Text text="{localModel>MaterialDocument}" />
                         <!-- <Button icon="sap-icon://delete" type="Reject" tooltip="{i18n>tooltipEliminar}" press=".onEliminarPosicion"/> -->

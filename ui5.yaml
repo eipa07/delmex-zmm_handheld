@@ -31,6 +31,12 @@ server:
           - path: /sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
             url: https://my413406.s4hana.cloud.sap
             destination: HandHeld_movmat
+          - path: /sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_delivery
+          - path: /sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_purchaseorder
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:

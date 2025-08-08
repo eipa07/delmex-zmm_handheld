@@ -1,0 +1,40 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog
+        id="ReceiveDataDialog"
+        title="Datos para recibir"
+        contentHeight="auto"
+        contentWidth="auto"
+        afterClose="">
+
+        <VBox class="sapUiSmallMargin">
+            
+          <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
+                <Label text="{i18n>position.IssuingOrReceivingStorageLoc}" width="10em"/>
+                <Input id="almacenInput_Receiver"
+                       placeholder="{i18n>position.almacen.placeholder}"
+                       width="15em"
+                       value="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"/>
+            </HBox>
+
+       
+            <HBox class="sapUiResponsiveMargin sapUiSizeCompact"> 
+                <Label text="{i18n>position.IssuingOrReceivingPlant}" width="10em"/>
+                <Input id="centroInput_Receiver"
+                       placeholder="{i18n>position.centro.placeholder}"
+                       width="15em"
+                       value="{localModel>/DataPosition/IssuingOrReceivingPlant}"/>      
+            </HBox>
+
+        </VBox>
+
+        <beginButton>
+
+           <Button  text="{i18n>position.contabilizar}" press=".onCreateMov" type="Accept" />
+        </beginButton>
+        <endButton>
+           <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseReceiverDialog"/>
+
+        </endButton>
+
+    </Dialog>
+</core:FragmentDefinition>

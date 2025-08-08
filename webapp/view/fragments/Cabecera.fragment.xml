@@ -12,16 +12,17 @@
             <Select
             id="header_select_clasemov"
                 width="15em"
-                items="{ path: 'ZSB_HANDHELD_V2>/ClaseMov' }"
-                selectedKey="{localModel>/Header/claseMov}"
+                items="{ClaseMovList>/}"
+                selectedKey="{localModel>/Header/claveMov}"
                 change="onClaseMovChange"
+                beforeOpen="onGetClaseMovList"
                 editable="{oDisplayModel>/Header/operacion_almacen}"
                 tooltip="{localModel>/Header/claseMov} - {localModel>/selectedKeys/textClaseMov}"
                 required="true"
             >
                 <core:Item
-                    key="{ZSB_HANDHELD_V2>ClaseMovimiento}"
-                    text="{ZSB_HANDHELD_V2>Descripcion}"
+                    key="{ClaseMovList>ClaveMov}"
+                    text="{ClaseMovList>Descripcion}"
                 />
             </Select>
 
@@ -97,7 +98,8 @@
                 width="15em"
                 value="{localModel>/Header/texto_cabecera}"
                 editable="{oDisplayModel>/Header/texto_cabecera}"
-                rows="5"
+                rows="2"
+                maxLength="25"
             />
         </HBox>
     </VBox>

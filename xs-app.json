@@ -4,36 +4,50 @@
     "routes": [
       {
         "source": "^/sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002/(.*)$",
-        "target": "/sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002/$1",
+        "target": "$1",
         "destination": "HandHeld_apiproduct_dev",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/ZSB_HANDHELD_V2/(.*)$",
-        "target": "/sap/opu/odata/sap/ZSB_HANDHELD_V2/$1",
+        "target": "$1",
         "destination": "HandHeld_dev",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_BATCH_SRV/(.*)$",
-        "target": "/sap/opu/odata/sap/API_BATCH_SRV/$1",
+        "target": "$1",
         "destination": "HandHeld_Batch_dev",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV/(.*)$",
-        "target": "/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV/$1",
+        "target": "$1",
         "destination": "HandHeld_orders_dev",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/(.*)$",
-        "target": "/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/$1",
+        "target": "$1",
         "destination": "HandHeld_movmat",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
+        "source": "^/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002/(.*)$",
+        "target": "$1",
+        "destination": "HandHeld_delivery",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
+        "source": "^/sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001/(.*)$",
+        "target": "$1",
+        "destination": "HandHeld_purchaseorder",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
@@ -57,4 +71,3 @@
       }
     ]
   }
-  
