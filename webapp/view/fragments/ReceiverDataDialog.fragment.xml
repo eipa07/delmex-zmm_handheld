@@ -1,28 +1,51 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <Dialog
         id="ReceiveDataDialog"
-        title="Datos para recibir"
+        title="{i18n>position.materialDestination}"
         contentHeight="auto"
         contentWidth="auto"
         afterClose="">
 
         <VBox class="sapUiSmallMargin">
             
+            <HBox class="sapUiResponsiveMargin sapUiSizeCompact"> 
+                <Label text="{i18n>position.IssuingOrReceivingPlant}" width="10em"/>
+                <Input id="centroInput_Destino"
+                       placeholder="{i18n>position.centro.placeholder}"
+                       width="15em"
+                       value="{localModel>/DataPosition/IssuingOrReceivingPlant}"
+                       editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"/>      
+            </HBox>
+
           <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
                 <Label text="{i18n>position.IssuingOrReceivingStorageLoc}" width="10em"/>
-                <Input id="almacenInput_Receiver"
+                <Input id="almacenInput_Destino"
                        placeholder="{i18n>position.almacen.placeholder}"
                        width="15em"
                        value="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"/>
             </HBox>
 
-       
-            <HBox class="sapUiResponsiveMargin sapUiSizeCompact"> 
-                <Label text="{i18n>position.IssuingOrReceivingPlant}" width="10em"/>
-                <Input id="centroInput_Receiver"
-                       placeholder="{i18n>position.centro.placeholder}"
+         <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
+            <Label text="{i18n>position.material}" width="9.5em"/>
+            <Input id="materialInput_Destino"
+                placeholder="{= ${localModel>/ReferenceItemSelected/material} ? ${localModel>/ReferenceItemSelected/material} : ${i18n>position.material.placeholder}}"
+                class="sapUiTinyMarginBeginEnd"
+                value="{localModel>/DataPosition/IssgOrRcvgMaterial}"
+                width="15em"
+                submit="onBuscarDetalleDestino"
+                liveChange="onLiveChangeMaterialDestino"/>
+            </HBox>
+
+             <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
+                <Label text="{i18n>position.lote}" width="9.5em"/>
+                <Input id="loteInput_Destino"
+                       placeholder="{i18n>position.lote.placeholder}"
+                       class="sapUiTinyMarginBeginEnd"
                        width="15em"
-                       value="{localModel>/DataPosition/IssuingOrReceivingPlant}"/>      
+                       value="{localModel>/DataPosition/IssgOrRcvgBatch}"
+                       submit="onBuscarDetalleDestino"
+                       liveChange="onLiveChangeLoteDestino"
+                       editable="{oDisplayModel>/Posiciones/lote}"/>
             </HBox>
 
         </VBox>
@@ -32,7 +55,7 @@
            <Button  text="{i18n>position.contabilizar}" press=".onCreateMov" type="Accept" />
         </beginButton>
         <endButton>
-           <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseReceiverDialog"/>
+           <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseDestinationDialog"/>
 
         </endButton>
 

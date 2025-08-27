@@ -1,105 +1,153 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
-    xmlns:i18n="sap.ui.model.resource.ResourceModel">
-
-    <VBox class="sapUiSmallMargin" id="formVBox">
-
+    xmlns:i18n="sap.ui.model.resource.ResourceModel"
+    id="scanner"
+>
+    <VBox
+        class="sapUiSmallMargin"
+        id="formVBox"
+    >
         <VBox>
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.material}" width="9.5em"/>
-                <Input id="materialInput"
-                       placeholder="{= ${localModel>/ReferenceItemSelected/material} ? ${localModel>/ReferenceItemSelected/material} : ${i18n>position.material.placeholder}}"
-                       class="sapUiTinyMarginBeginEnd"
-                       value="{localModel>/DataPosition/material}"
-                       width="15em"
-                       submit="onBuscarDetalle"
-                       liveChange="onLiveChangeMaterial"/>
-                <Button icon="sap-icon://bar-code"
-                        tooltip="{i18n>position.material.tooltip}"
-                        press=".onOpenScannerDialog"
-                        visible="false"
-                        />
-                        <Button
-                        icon="sap-icon://bar-code"
-                        type="Accept"
-                        press=".onContinueHeader"
-        />
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.cantidad}" width="10em"/>
-                <Input id="cantidadInput"
-                       placeholder="{i18n>position.cantidad.placeholder}"
-                       type="Number"
-                       width="15em"
-                       value="{localModel>/DataPosition/cantidad}"/>
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.um}" width="10em"/>
-                <Input id="umInput"
-                       placeholder="{i18n>position.um.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/um}"
-                       liveChange="onLiveChangeUM"/>
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.lote}" width="10em"/>
-                <Input id="loteInput"
-                       placeholder="{i18n>position.lote.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/lote}"
-                       submit="onBuscarDetalle"
-                       liveChange="onLiveChangeLote"
-                       editable="{oDisplayModel>/Posiciones/lote}"/>
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.centro}" width="10em"/>
-                <Input id="centroInput"
-                       placeholder="{i18n>position.centro.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/centro}"/>
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.almacen}" width="10em"/>
-                <Input id="almacenInput"
-                       placeholder="{i18n>position.almacen.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/almacen}"/>
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.ceco}" width="10em"/>
-                <Input id="cecoInput"
-                       placeholder="{i18n>position.ceco.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/ceco}"
-                       editable="{oDisplayModel>/Posiciones/ceco}"/>
-            </HBox>
-
-            <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.motivo}" width="10em"/>
-                <Select
-                id="motivoInput"
-                width="15em"
-                items="{MotivoList>/}"
-                selectedKey="{localModel>/DataPosition/motivo}"
-                change="onMotivoChange"
-                beforeOpen="onGetMotivoList"
-                editable="{oDisplayModel>/Posiciones/motivo}"
-                tooltip="{localModel>/DataPosition/motivo} - {localModel>/DataPosition/desc_motivo}"
-                required="true"
-            >
-                <core:Item
-                    key="{MotivoList>Motivo}"
-                    text="{MotivoList>DescMotivo}"
+                <Label
+                    text="{i18n>position.material}"
+                    width="6em"
                 />
-            </Select>
-               <!--  <Input id="motivoInput"
+                <Input
+                    id="materialInput"
+                    placeholder="{= ${localModel>/ReferenceItemSelected/material} ? ${localModel>/ReferenceItemSelected/material} : ${i18n>position.material.placeholder}}"
+                    class="sapUiTinyMarginBeginEnd"
+                    value="{localModel>/DataPosition/material}"
+                    width="10em"
+                    submit="onBuscarDetalle"
+                    liveChange="onLiveChangeMaterial"
+                    editable="{oDisplayModel>/Posiciones/material}"
+                />
+                <Button
+                    icon="sap-icon://bar-code"
+                    tooltip="{i18n>position.material.tooltip}"
+                    press=".onOpenScannerDialog"
+                    visible="false"
+                />
+                <Button
+                    icon="sap-icon://bar-code"
+                    type="Accept"
+                    press=".onContinueHeader"
+                />
+            </HBox>
+
+             <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.lote}"
+                    width="7em"
+                />
+                <Input
+                    id="loteInput"
+                    placeholder="{i18n>position.lote.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/lote}"
+                    submit="onBuscarDetalle"
+                    liveChange="onLiveChangeLote"
+                    editable="{oDisplayModel>/Posiciones/lote}"
+                />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.cantidad}"
+                    width="7em"
+                />
+                <Input
+                    id="cantidadInput"
+                    placeholder="{i18n>position.cantidad.placeholder}"
+                    type="Number"
+                    width="10em"
+                    value="{localModel>/DataPosition/cantidad}"
+                />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.um}"
+                    width="7em"
+                />
+                <Input
+                    id="umInput"
+                    placeholder="{i18n>position.um.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/um}"
+                    liveChange="onLiveChangeUM"
+                    editable="{oDisplayModel>/Posiciones/um}"
+                />
+            </HBox>
+
+           
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.centro}"
+                    width="7em"
+                />
+                <Input
+                    id="centroInput"
+                    placeholder="{i18n>position.centro.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/centro}"
+                     editable="{oDisplayModel>/Posiciones/centro}"
+                />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.almacen}"
+                    width="7em"
+                />
+                <Input
+                    id="almacenInput"
+                    placeholder="{i18n>position.almacen.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/almacen}"
+                     editable="{oDisplayModel>/Posiciones/almacen}"
+                />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.ceco}"
+                    width="7em"
+                />
+                <Input
+                    id="cecoInput"
+                    placeholder="{i18n>position.ceco.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/ceco}"
+                    editable="{oDisplayModel>/Posiciones/ceco}"
+                />
+            </HBox>
+
+            <HBox class="sapUiSmallMarginBottom">
+                <Label
+                    text="{i18n>position.motivo}"
+                    width="7em"
+                />
+                <Select
+                    id="motivoInput"
+                    width="10em"
+                    items="{MotivoList>/}"
+                    selectedKey="{localModel>/DataPosition/motivo}"
+                    change="onMotivoChange"
+                    beforeOpen="onGetMotivoList"
+                    editable="{oDisplayModel>/Posiciones/motivo}"
+                    tooltip="{localModel>/DataPosition/motivo} - {localModel>/DataPosition/desc_motivo}"
+                    required="true"
+                >
+                    <core:Item
+                        key="{MotivoList>Motivo}"
+                        text="{MotivoList>DescMotivo}"
+                    />
+                </Select>
+                <!--  <Input id="motivoInput"
                        placeholder="{i18n>position.motivo.placeholder}"
                        width="15em"
                        value="{localModel>/DataPosition/motivo}"
@@ -107,45 +155,71 @@
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.txt_posicion.historial}" width="10em"/>
-                <TextArea id="txtPosicionArea_historico"
-                       placeholder="{i18n>position.txt_posicion.historial.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/txt_posicion_historico}"
-                       rows="3"
-                       editable="false"/>
+                <Label
+                    text="{i18n>position.txt_posicion.historial}"
+                    width="7em"
+                />
+                <TextArea
+                    id="txtPosicionArea_historico"
+                    placeholder="{i18n>position.txt_posicion.historial.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/txt_posicion_historico}"
+                    rows="3"
+                    editable="false"
+                />
             </HBox>
             <HBox class="sapUiSmallMarginBottom">
-                <Label text="{i18n>position.txt_posicion}" width="10em"/>
-                <TextArea id="txtPosicionArea"
-                       placeholder="{i18n>position.txt_posicion.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/txt_posicion}"
-                       rows="3"
-                       editable="true"
-                       maxLength="40"/>
+                <Label
+                    text="{i18n>position.txt_posicion}"
+                    width="7em"
+                />
+                <TextArea
+                    id="txtPosicionArea"
+                    placeholder="{i18n>position.txt_posicion.placeholder}"
+                    width="10em"
+                    value="{localModel>/DataPosition/txt_posicion}"
+                    rows="3"
+                    editable="true"
+                    maxLength="40"
+                />
             </HBox>
         </VBox>
 
         <Toolbar class="sapUiSmallMarginTop">
-           <!--  <Button text="{i18n>position.contabilizar}" type="Accept" press=".onSavePosition"/> -->
-            <!-- <Button id="btnContabilizar" text="{i18n>position.contabilizar}" type="Accept" press=".onCreateMov" visible="{= ${localModel>/Header/esAnulacion} === true ? false : true}"/>-->            
+            <!--  <Button text="{i18n>position.contabilizar}" type="Accept" press=".onSavePosition"/> -->
+            <!-- <Button id="btnContabilizar" text="{i18n>position.contabilizar}" type="Accept" press=".onCreateMov" visible="{= ${localModel>/Header/esAnulacion} === true ? false : true}"/>-->
             <!-- <Button id="btnPicking" text="{i18n>position.picking}" type="Accept" press=".onPicking" visible="{oDisplayModel>/Header/picking}"/> -->
-            <Button id="btnContabilizar"
+            <Button
+                id="btnContabilizar"
                 text="{i18n>position.contabilizar}"
                 type="Accept"
                 press=".onCreateMov"
-                visible="{oDisplayModel>/Header/btnContabilizar}"/>
+                visible="{oDisplayModel>/Header/btnContabilizar}"
+            />
 
-            <Button id="btnPicking"
+            <Button
+                id="btnPicking"
                 text="{i18n>position.picking}"
                 type="Accept"
                 press=".onPicking"
-                visible="{oDisplayModel>/Header/btnPicking}"/>
+                visible="{oDisplayModel>/Header/btnPicking}"
+            />
 
-            <Button text="{i18n>position.cancelar}" type="Reject" press=".onClearPosition"/>
-            <!-- <Button text="buscar detalle" type="Reject" press=".onBuscarDetalle"/> Borrar 21 julio 2925--> 
+            <Button
+                id="btnTraspaso"
+                text="{i18n>position.continuarDestino}"
+                type="Accept"
+                press=".onContinueTraspaso"
+                visible="{localModel>/Header/esTraspaso}"
+            />
+
+            <Button
+                id="btnCancelar"
+                text="{i18n>position.cancelar}"
+                type="Reject"
+                press=".onClearPosition"
+            />
+            <!-- <Button text="buscar detalle" type="Reject" press=".onBuscarDetalle"/> Borrar 21 julio 2925-->
         </Toolbar>
-
     </VBox>
 </core:FragmentDefinition>

@@ -2,16 +2,17 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:i18n="sap.ui.model.resource.ResourceModel"
+    xmlns:tnt="sap.tnt"
 >
     <VBox class="sapUiSmallMargin">
         <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.operacion_almacen}"
-                width="12em"
+                width="7em"
             />
             <Select
             id="header_select_clasemov"
-                width="15em"
+                width="17em"
                 items="{ClaseMovList>/}"
                 selectedKey="{localModel>/Header/claveMov}"
                 change="onClaseMovChange"
@@ -32,12 +33,12 @@
         <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.clase_movimiento}"
-                width="12em"
+                width="7em"
             />
             <Input
                 id="header_input_clasemov"
                 placeholder="{i18n>header.clase_movimiento_placeholder}"
-                width="15em"
+                width="17em"
                 editable="{oDisplayModel>/Header/claseMov}"
                 value="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
                 tooltip="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
@@ -47,14 +48,14 @@
         <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.fecha_documento}"
-                width="12em"
+                width="7em"
             />
             <DatePicker
                 id="header_input_fecha_doc"
                 value="{path: 'localModel>/Header/fecha_doc'}"
                 valueFormat="yyyy-MM-dd"
                 displayFormat="MMM dd, yyyy"
-                width="15em"
+                width="17em"
                 editable="{oDisplayModel>/Header/fecha_doc}"
             />
         </HBox>
@@ -62,14 +63,14 @@
         <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.fecha_contabilizacion}"
-                width="12em"
+                width="7em"
             />
             <DatePicker
                 id="header_input_fecha_cont"
                 value="{path: 'localModel>/Header/fecha_cont'}"
                 valueFormat="yyyy-MM-dd"
                 displayFormat="MMM dd, yyyy"
-                width="15em"
+                width="17em"
                 editable="{oDisplayModel>/Header/fecha_cont}"
             />
         </HBox>
@@ -77,11 +78,11 @@
         <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.referencia}"
-                width="12em"
+                width="7em"
             />
             <Input
                 id="header_input_referencia"
-                width="15em"
+                width="17em"
                 value="{localModel>/Header/referencia}"
                 editable="{oDisplayModel>/Header/referencia}"
                 submit="onContinueHeader"
@@ -91,11 +92,11 @@
         <HBox class="sapUiSmallMarginBottom">
             <Label
                 text="{i18n>header.texto_cabecera}"
-                width="12em"
+                width="7em"
             />
             <TextArea
                 id="header_input_fecha_texto_cabecera"
-                width="15em"
+                width="17em"
                 value="{localModel>/Header/texto_cabecera}"
                 editable="{oDisplayModel>/Header/texto_cabecera}"
                 rows="2"

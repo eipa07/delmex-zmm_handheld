@@ -1,6 +1,6 @@
 <core:FragmentDefinition
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core" xmlns:tnt="sap.tnt">
 
     <VBox class="sapUiSmallMargin" id="formVBox_orden">
 
@@ -56,6 +56,7 @@
             growingScrollToLoad="true"
         >
             <columns>
+                <Column><Text text="{i18n>columnTraspasos}" visible="{oDisplayModel>/Columna/esTraspaso}"/></Column>
                 <Column><Text text="{i18n>columnMaterial}" /></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoMaterial}" /></Column>
                 <Column><Text text="{i18n>columnCantidad}" /></Column>
@@ -72,6 +73,8 @@
             <items>
                 <ColumnListItem>
                     <cells>
+                        <!-- <Text text="{localModel>tipoMovTraspaso}" /> -->
+                        <tnt:InfoLabel id="ordenEsTraspaso" text="{localModel>tipoMovTraspaso}" renderMode="Narrow" colorScheme="{localModel>color_tipo}"/>
                         <Text text="{localModel>material}" />
                         <Text text="{localModel>txt_material}" />
                         <Text text="{localModel>cantidad}" />

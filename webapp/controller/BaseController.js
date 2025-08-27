@@ -10,6 +10,44 @@ sap.ui.define([
 ], function (Controller, History, UIComponent, MessageToast, MessageBox, JSONModel, Filter, FilterOperator) {
     "use strict";
 
+
+    const c_601 = '601-03'; // Orden de venta
+        const c_602 = '602-03'; // Anulación orden de venta
+        const c_551 = '551-03'; // desguace
+        const c_552 = '552-03'; // Anulación desguace
+        const c_201 = '201-03'; // salida de mercancia cargo ceco
+        const c_202 = '202-03'; // Anulación salida de mercancia cargo ceco
+        const c_261 = '261-03'; // Orden de producción - correcto
+        const c_262 = '262-03'; // Anulación Orden de producción
+        const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order
+        const c_102_01 = '102-01'; // Anul. entrada / orden compra
+        const c_101_02 = '101-02'; // Entrada / orden produccion
+        const c_102_02 = '102-02'; // Anulación entrada / orden produccion
+        const c_303 = '303-04'; // Pendiente
+        const c_304 = '304-04'; // Pendiente
+        const c_306 = '306-04'; // Pendiente
+        const c_305 = '305-04'; // Pendiente
+        const c_309 = '309-04'; // Pendiente
+        const c_310 = '310-04'; // Pendiente
+        const c_321 = '321-04'; // Pendiente
+        const c_322 = '322-04'; // Pendiente
+        const c_343 = "343-04";
+        const c_344_A = "344-04-A";
+        const c_344 = "344-04";
+        const c_543 = "543-04";
+        const c_101_Sub = "101-02-Sub";
+        const c_541 = "541-04";
+
+        const c_999 = '999'; // Entrada manual de movimiento
+
+        const c_columnOrigen = "Origen";
+        const c_columnDestino = "Destino";
+        const c_columnLibre_util = "L. Util.";
+        const c_columnCalidad = "Calid.";
+        const c_columnBloqueado = "Bloq."
+
+
+
     return Controller.extend("delmex.zmmhandheld.controller.BaseController", {
 
 
@@ -27,7 +65,8 @@ sap.ui.define([
                     esAnulacion: false,
                     MaterialDocumentYear: "",
                     esEntrega: false,
-                    GoodsMovementRefDocType: ""
+                    GoodsMovementRefDocType: "",
+                    esTraspaso: false
                 },
                 DataPosition: {
                     material: "",
@@ -35,11 +74,12 @@ sap.ui.define([
                     cantidad: "",
                     um: "",
                     lote: "", // Batch
-                    centro: "", //Planta
-                    IssuingOrReceivingPlant: "", // Planta que recibe
-                    almacen: "",
-                    IssuingOrReceivingStorageLoc: "", // Almacen que recibe
-                    IssgOrRcvgMaterial: "",     // Material que recibe
+                    centro: "", // Planta
+                    almacen: "", // Almacen
+                    IssuingOrReceivingPlant: "", // Planta - Centro Destino
+                    IssuingOrReceivingStorageLoc: "", // Almacen destino
+                    IssgOrRcvgMaterial: "",     // Material destino
+                    IssgOrRcvgBatch: "", // Lote Destino
                     ceco: "",
                     motivo: "",
                     DescMotivo: "",
@@ -55,7 +95,9 @@ sap.ui.define([
                     MaterialDocumentItemText: '', // texto de posicion para mostrarlo solo en anulaciones en la orden
                     PickingStatus: '', // estatus de picking en 601
                     PickingStatus_desc: '',
-                    ReferenceSDDocumentItem: '' // 601 item
+                    ReferenceSDDocumentItem: '', // 601 item
+                    MaterialDocument: '',
+                    Supplier: ""
                 },
                 Positions: [],
                 posicionesTexto: "Total: 0 posiciones",
@@ -105,15 +147,22 @@ sap.ui.define([
                         almacen: true,
                         ceco: true,
                         motivo: true,
-                        txt_posicion: true
+                        txt_posicion: true,
+                        IssuingOrReceivingPlant: true
                     },
                     TablaReferenciaItems: {
                         columnProcesar: true,
-                        columnLote: true
+                        columnLote: true,
+                        esTraspasoEntrada_305: false,
+                        columnPickingStatus: false
                     },
 
                     Columna: {
-                        motivo: false
+                        motivo: false,
+                        esTraspaso: false,
+                        texto_posicion: false,
+                        Supplier: false,
+                        color_tipo: 2
                     }
                 }
             )
@@ -150,14 +199,14 @@ sap.ui.define([
                     },
                     {
                         ClaseMovimiento: "261",
-                        Descripcion: "Entrada / orden de producción",
+                        Descripcion: "Consumo / orden de producción",
                         GoodMovType: '03',
                         ClaveMov: "261-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "262",
-                        Descripcion: "Anul. / orden de producción",
+                        Descripcion: "Anul. / consumo de producción",
                         GoodMovType: '03',
                         ClaveMov: "262-03",
                         GoodsMovementRefDocType: ''
@@ -178,7 +227,7 @@ sap.ui.define([
                     },
                     {
                         ClaseMovimiento: "601",
-                        Descripcion: "Salida / ent. vs ord. venta",
+                        Descripcion: "Salida / ent. vs ord. venta", // Entrega
                         GoodMovType: '03',
                         ClaveMov: "601-03",
                         GoodsMovementRefDocType: ''
@@ -211,46 +260,116 @@ sap.ui.define([
                     },
                     {
                         ClaseMovimiento: "102",
-                        Descripcion: "Anulación entrada / orden produccion",
+                        Descripcion: "Anul. entrada / orden produccion",
                         GoodMovType: '02',
                         ClaveMov: "102-02",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "303",
-                        Descripcion: "Entrada / traspaso 303",
-                        GoodMovType: '',
+                        Descripcion: "Traspaso / salida 303",
+                        GoodMovType: '04',
                         ClaveMov: "303-04",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "304",
-                        Descripcion: "Anul. entrada / traspaso 303",
-                        GoodMovType: '',
+                        Descripcion: "Anul. traspaso / salida 303",
+                        GoodMovType: '04',
                         ClaveMov: "304-04",
                         GoodsMovementRefDocType: ''
                     },
                     {
+                        ClaseMovimiento: "305",
+                        Descripcion: "Traspaso / entrada 305",
+                        GoodMovType: '04',
+                        ClaveMov: "305-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "306",
+                        Descripcion: "Anul. traspaso / entrada 305",
+                        GoodMovType: '04',
+                        ClaveMov: "306-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
                         ClaseMovimiento: "309",
-                        Descripcion: "Entrada / traspaso 309",
-                        GoodMovType: '',
-                        ClaveMov: "303-04",
+                        Descripcion: "Traspaso / material 309",
+                        GoodMovType: '04',
+                        ClaveMov: "309-04",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "310",
-                        Descripcion: "Anul. entrada / traspaso 309",
-                        GoodMovType: '',
+                        Descripcion: "Anul. traspaso / material 309",
+                        GoodMovType: '04',
                         ClaveMov: "310-04",
                         GoodsMovementRefDocType: ''
                     },
                     {
+                        ClaseMovimiento: "321",
+                        Descripcion: "Traspaso Calidad / lib. utilización",
+                        GoodMovType: '04',
+                        ClaveMov: "321-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "322",
+                        Descripcion: "Anul. Traspaso Calidad / lib. utilización",
+                        GoodMovType: '04',
+                        ClaveMov: "322-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "343",
+                        Descripcion: "Traspaso 343",
+                        GoodMovType: '04',
+                        ClaveMov: "343-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "344",
+                        Descripcion: "Anul. Traspaso 343",
+                        GoodMovType: '04',
+                        ClaveMov: "344-04-A",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "344",
+                        Descripcion: "Traspaso Lib. Utl. a Bloq. 344",
+                        GoodMovType: '04',
+                        ClaveMov: "344-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "543",
+                        Descripcion: "Entrada / subcontratación 543",
+                        GoodMovType: '04',
+                        ClaveMov: "543-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "101",
+                        Descripcion: "Entrada / subcontratación 101",
+                        GoodMovType: '02',
+                        ClaveMov: "101-02-Sub",
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "541",
+                        Descripcion: "Salida compra  / subcontratación 541",
+                        GoodMovType: '04',
+                        ClaveMov: "541-04",
+                        GoodsMovementRefDocType: ''
+                    },
+                    /* {
                         ClaseMovimiento: "999",
                         Descripcion: "Entrada manual de movimiento",
-                        GoodMovType: '',
-                        ClaveMov: "999-00",
+                        GoodMovType: '05',
+                        ClaveMov: "999-05",
                         GoodsMovementRefDocType: ''
-                    }
+                    } */
 
                 ]
             );
@@ -411,7 +530,12 @@ sap.ui.define([
                         sUrl = sUrl + `?$filter=ManufacturingOrder eq '${sKey}'`;
                     } else if (sEntitySet === "A_MaterialDocumentItem" && claseMov !== '101') {
                         sUrl = sUrl + `?$filter=MaterialDocument eq '${sKey}'`;
+                    }else if (sEntitySet === "POSubcontractingComponent" && claseMov !== '541') {
+                        sUrl = sUrl + `?$filter=PurchaseOrder eq '${sKey}'`;
                     }
+
+
+                    
 
                 }
                 return new Promise((resolve, reject) => {
@@ -444,6 +568,8 @@ sap.ui.define([
                         sUrl = `${sBaseUrl}${sEntitySet}?$format=json&$filter=MaterialDocument eq '${sKey}'`;
                     } else if (sEntitySet === "/A_OutbDeliveryItem") {
                         sUrl = `${sBaseUrl}${sEntitySet}?$format=json&$filter=DeliveryDocument eq '${sKey}'`;
+                    }else if (sEntitySet === "POSubcontractingComponent") {
+                        sUrl = `${sBaseUrl}${sEntitySet}?$format=json&$filter=PurchaseOrder eq '${sKey}'`;
                     }
 
                 }
@@ -496,7 +622,7 @@ sap.ui.define([
          * @param {string} sKey - Clave del registro a consultar, en formato simple (ej. 'ID001') o compuesto si lo armas tú.
          * @returns {Promise<Object>} - Objeto con los datos del registro solicitado.
          */
-        readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov) {
+        readOneAjax: async function (sModelName, sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaveMov) {
             let oModel = this.getOwnerComponent().getModel(sModelName);
             let oBundle = this.getResourceBundle();
 
@@ -507,16 +633,19 @@ sap.ui.define([
             }
 
             let sBaseUrl = oModel.sServiceUrl;
-            let oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov);
+            let oFilters = this.getFilters(sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaveMov);
             let sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`;
 
             try {
+                this.getView().setBusy(true);
                 let oData = await $.ajax({
                     url: sUrl,
                     method: "GET",
                     contentType: "application/json",
                     dataType: "json"
                 });
+
+                this.getView().setBusy(false);
 
                 if (sEntitySet === 'A_MaterialDocumentItem' && oData?.d?.results?.length === 0) {
                     // Devuelve null para que el Controller decida qué mostrar
@@ -530,6 +659,7 @@ sap.ui.define([
                 console.log(`Error en ${sEntitySet}:`, jqXHR);
                 let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle) || oBundle.getText("error_ajax_generic");
                 this._showErrorMessage(sMessage, oBundle);
+                this.getView().setBusy(false);
                 throw jqXHR;
             }
         },
@@ -549,13 +679,13 @@ sap.ui.define([
          * @param {string} sBatch - Batch a filtrar.
          * @returns {string} - String de filtro OData, con orden y top si aplica.
          */
-        getFilters: function (sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaseMov) {
+        getFilters: function (sEntitySet, sKey, sMaterial, sBatch, sPlant, sLocation, oClaveMov) {
             let aFilters = [];
             let sFilterStr = "";
             let sUrl = "";
 
             if (sEntitySet === 'OrderItemsText') {
-                if (sKey && (oClaseMov === '601' || oClaseMov === '602' || oClaseMov === '261' || oClaseMov === '261')) {
+                if (sKey && (oClaveMov === '601' || oClaveMov === '602' || oClaveMov === '261' || oClaveMov === '261')) {
                     sFilterStr = `ManufacturingOrder eq '${sKey}'`;
                     sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
 
@@ -570,7 +700,7 @@ sap.ui.define([
                     sFilterStr = `(GoodsMovementType eq '102' or GoodsMovementType eq '502' or GoodsMovementType eq '602' or GoodsMovementType eq '552')`;
                     sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}&$orderby=MaterialDocument desc&$top=1`;
                 }
-            } else if (sEntitySet === "A_MaterialDocumentItem" && oClaseMov === '101') {
+            } else if (sEntitySet === "A_MaterialDocumentItem" && oClaveMov === '101') {
                 // 🔥 Aquí armamos filtro manual para el caso especial con OR
                 if (sKey) {
                     sFilterStr = `ManufacturingOrder eq '${sKey}' and GoodsMovementType eq '101'`;
@@ -603,6 +733,9 @@ sap.ui.define([
                 sFilterStr = `ManufacturingOrder eq '${sKey}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
             } else if (sEntitySet === 'PurchaseOrderItem') {
+                sFilterStr = `PurchaseOrder eq '${sKey}'`;
+                sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
+            }else if (sEntitySet === 'PurchaseOrder' && oClaveMov === '541') {
                 sFilterStr = `PurchaseOrder eq '${sKey}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
             }
@@ -884,7 +1017,7 @@ sap.ui.define([
  * @param {string} sButtonId - ID del botón a mostrar/ocultar (opcional)
  * @param {string} sDisplayPath - Ruta en oDisplayModel para setProperty (opcional)
  */
-        checkPickingAndToggleButton: async function (sReferencia, sModelName, sEntity, sDisplayPath) {
+        checkPickingAndToggleButton: async function (sReferencia, sModelName, sEntity, sDisplayPath, claseMov) {
             try {
                 let oBundle = this.getResourceBundle();
                 let oView = this.getView();

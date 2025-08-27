@@ -80,6 +80,16 @@
           "odataVersion": "4.0",
           "useBatch": false
         }
+      },
+      "aapi_cost_center": {
+        "uri": "/sap/opu/odata4/sap/aapi_cost_center/srvd_a2x/sap/costcenter/0001/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/aapi_cost_center.xml",
+          "odataVersion": "4.0",
+          "useBatch": false
+        }
       }
     },
     "crossNavigation": {
@@ -190,6 +200,15 @@
       },
       "api_purchaseorder_2": {
         "dataSource": "api_purchaseorder_2",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "aapi_cost_center": {
+        "dataSource": "aapi_cost_center",
         "preload": true,
         "settings": {
           "operationMode": "Server",

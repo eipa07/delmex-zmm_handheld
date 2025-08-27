@@ -1,7 +1,7 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:tnt="sap.tnt">
     <Dialog
         id="ReferenceItemsDialog"
-        title="Mat. Doc. {localModel>/Header/referencia}"
+        title="Mat. Doc. {localModel>/Header/referencia} "
         contentHeight="auto"
         contentWidth="auto"
         afterClose=".onScannerDialogClosed">
@@ -19,6 +19,7 @@
             width="50%"
         >
             <columns>
+             <Column> <Text text="{i18n>columnTraspasos}" visible="{oDisplayModel>/Columna/esTraspaso}" width="50px"/></Column>
                 <Column><Text text="{i18n>columnItem}" width="40px"/></Column>
                 <Column><Text text="{i18n>columnMaterial}" width="40px"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnTextoMaterial}" width="50px" wrapping="true"/></Column>
@@ -28,15 +29,19 @@
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnLote}" visible="{oDisplayModel>/TablaReferenciaItems/columnLote}" width="40px"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnCentro}" width="50px"/></Column>
                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnAlmacen}" width="50px"/></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnPickingStatus}" width="50px"/></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>columnPickingStatus}" width="50px" visible="{oDisplayModel>/TablaReferenciaItems/columnPickingStatus}"/></Column>
                 <Column><Text text="{i18n>columnProcesar}" visible="{oDisplayModel>/TablaReferenciaItems/columnProcesar}"/></Column>
                 <Column><Text text="{i18n>columnMotivo}" visible="{oDisplayModel>/Columna/motivo}" width="30px"/></Column>
-                <Column><Text text="{i18n>columnTextoPosicion}" visible="{localModel>/Header/esAnulacion}"/></Column>
+                <Column><Text text="{i18n>columnTextoPosicion}" visible="{oDisplayModel>/Columna/texto_posicion}" width="80px"/></Column>
+                <Column><Text text="{i18n>columnSupplier}" visible="{oDisplayModel>/Columna/Supplier}" width="80px"/></Column>
             </columns>
 
             <items>
                 <ColumnListItem>
                     <cells>
+                        <!-- <Text text="{localModel>MaterialDocumentItem}" /> -->
+                        <!-- <GenericTag text="{localModel>MaterialDocumentItem}" status="Warning"  /> -->
+                        <tnt:InfoLabel id="il1" text="{localModel>MaterialDocumentItem}" renderMode="Narrow" colorScheme="{localModel>color_tipo}"/>
                         <Text text="{localModel>Item}" width="70px"/>
                         <Text text="{localModel>material}" width="70px"/>
                         <Text text="{localModel>txt_material}" width="100px"/>
@@ -46,10 +51,11 @@
                         <Text text="{= ${localModel>/Header/esAnulacion} === true ? ${localModel>lote} : ${localModel>isBatchRequired_txt} }" visible="{oDisplayModel>/TablaReferenciaItems/columnLote}" width="65px" />
                         <Text text="{localModel>centro}" width="50px"/>
                         <Text text="{localModel>almacen}" width="50px"/>
-                        <Text text="{localModel>PickingStatus_desc}" width="50px"/>
+                        <Text text="{localModel>PickingStatus_desc}" width="50px" visible="{oDisplayModel>/TablaReferenciaItems/columnPickingStatus}"/>
                         <Button icon="sap-icon://touch" type="Reject" tooltip="{i18n>columnProcesar}" press=".onProcesarItem" visible="{oDisplayModel>/TablaReferenciaItems/columnProcesar}"/>
                         <Text text="{localModel>GoodsMovementReasonCode}" width="50px" visible="{oDisplayModel>/Columna/motivo}"/> <!-- Motivo -->
-                        <Text text="{localModel>MaterialDocumentItemText}" width="50px"/> 
+                        <Text text="{localModel>MaterialDocumentItemText}" width="80px" visible="{oDisplayModel>/Columna/texto_posicion}"/> 
+                        <Text text="{localModel>Supplier}" width="80px" visible="{oDisplayModel>/Columna/Supplier}"/>
                     </cells>
                 </ColumnListItem>
             </items>
@@ -78,10 +84,11 @@
             </HBox>
         </VBox>
 
-        <beginButton>
+        <Toolbar class="sapUiSmallMarginTop">
 
            <Button  text="{i18n>anularItemsDialog}" press=".onCreateMov" type="Accept" visible="{localModel>/Header/esAnulacion}"/>
-        </beginButton>
+           <Button  text="{i18n>continuar305}" press=".onContinueTraspasoEntrada_305" type="Accept" visible="{oDisplayModel>/TablaReferenciaItems/esTraspasoEntrada_305}"/>
+       </Toolbar>
         <endButton>
            <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseItemsDialog"/>
 

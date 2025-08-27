@@ -28,12 +28,30 @@ sap.ui.define([
         const c_262 = '262-03'; // Anulación Orden de producción
         const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order
         const c_102_01 = '102-01'; // Anul. entrada / orden compra
-        const c_101_02 = '101_02'; // Entrada / orden produccion
+        const c_101_02 = '101-02'; // Entrada / orden produccion
         const c_102_02 = '102-02'; // Anulación entrada / orden produccion
         const c_303 = '303-04'; // Pendiente
+        const c_304 = '304-04'; // Pendiente
+        const c_306 = '306-04'; // Pendiente
+        const c_305 = '305-04'; // Pendiente
         const c_309 = '309-04'; // Pendiente
+        const c_310 = '310-04'; // Pendiente
+        const c_321 = '321-04'; // Pendiente
+        const c_322 = '322-04'; // Pendiente
+        const c_343 = "343-04";
+        const c_344_A = "344-04-A";
+        const c_344 = "344-04";
+        const c_543 = "543-04";
+        const c_101_Sub = "101-02-Sub";
+        const c_541 = "541-04";
 
         const c_999 = '999'; // Entrada manual de movimiento
+
+        const c_columnOrigen = "Origen";
+        const c_columnDestino = "Destino";
+        const c_columnLibre_util = "L. Util.";
+        const c_columnCalidad = "Calid.";
+        const c_columnBloqueado = "Bloq."
 
 
         return BaseController.extend("delmex.zmmhandheld.controller.Main", {
@@ -64,7 +82,28 @@ sap.ui.define([
 
                 console.log(this.getOwnerComponent().getManifestEntry("/sap.app/id"));
 
+                //this.CargaInicial();
 
+
+            },
+
+            cargaInicial: async function(){
+                
+                let oModel_Cecos = "aapi_cost_center";
+                let oEntity_cecos = "/A_CostCenterText_2";
+                if (!this.getOwnerComponent().getModel("costCenterList")) {
+                    let oCostCenter = await this.readOneAjax(oModel_handheld, oEntity_clasemov, '', '', '', '', '', '');
+                    //oClaseMov = await this.readOneAjax2();
+                    let oCostCenterList = oCostCenter.d.results;
+
+
+                    let oLocalCecoList = new JSONModel();
+                    oLocalCecoList.setData(oCostCenterList);
+                    this.getOwnerComponent().setModel(oLocalCecoList, "costCenterList");
+                }
+
+
+                
             },
 
             onGetClaseMovList: async function () {
@@ -115,6 +154,8 @@ sap.ui.define([
             onClaseMovChange: async function (oEvent) {
                 //await this.onRestartProcess();
 
+                this.getOwnerComponent().getModel("localModel").setProperty("/Header/referencia", '');
+
                 let sSelectedKey = oEvent.getParameter("selectedItem").getKey();
                 let sSelectext = oEvent.getParameter("selectedItem").getText();
                 let oClaseMovModel = this.getOwnerComponent().getModel("ClaseMovList").getData();
@@ -137,31 +178,61 @@ sap.ui.define([
                 //let oSelectedKey = oClaseMov;
 
 
-                if (sSelectedKey === c_601 || sSelectedKey === c_602 || sSelectedKey === c_261 || sSelectedKey === c_262) {
+                if (sSelectedKey === c_601 || sSelectedKey === c_602 || sSelectedKey === c_261 || sSelectedKey === c_262 || sSelectedKey === c_543) {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esEntrega", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
                 }
 
                 if (sSelectedKey === c_551 || sSelectedKey === c_201 || sSelectedKey === c_999) {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", false);
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esEntrega", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
                 }
 
                 if (sSelectedKey === c_999) {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esEntrega", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
 
                 }
 
                 if (sSelectedKey === c_552 || sSelectedKey === c_202) {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esEntrega", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
                 }
 
                 // Motivo
-                if (sSelectedKey === c_551 || sSelectedKey === c_552 || sSelectedKey === c_601) {
+                if (sSelectedKey === c_551 || sSelectedKey === c_552 || sSelectedKey === c_601 || sSelectedKey === c_543) {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/motivo", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/esEntrega", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
                 } else {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/motivo", false);
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/motivo", false);
@@ -169,6 +240,81 @@ sap.ui.define([
 
                 if (sSelectedKey === c_303 || sSelectedKey === c_309) {
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
+
+                }
+
+                if (sSelectedKey === c_305) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/texto_posicion", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
+
+
+                    //solo es editable la cantidad
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/material", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/um", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/lote", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/centro", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/almacen", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/motivo", false);
+
+                    this.getView().byId("txtPosicionArea").setProperty("maxLength", 10);
+
+                }
+
+                if (sSelectedKey === c_321 || sSelectedKey === c_343 || sSelectedKey === c_344) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", false);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
+                }
+
+
+                if (sSelectedKey === c_202 || sSelectedKey === c_321 || c_262 || sSelectedKey === c_304 || sSelectedKey === c_306 || sSelectedKey === c_310 || sSelectedKey === c_101_02 || sSelectedKey === c_102_02 || sSelectedKey === c_305 || sSelectedKey === c_343 || sSelectedKey === c_344) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/texto_posicion", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                }
+
+                if (sSelectedKey === c_304 || sSelectedKey === c_306 || sSelectedKey === c_310 || sSelectedKey === c_322 || sSelectedKey === c_344_A) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/esTraspaso", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", false);
+                }
+
+
+                if (sSelectedKey === c_541 || sSelectedKey === c_101_Sub) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Columna/Supplier", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Header/referencia", true);
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", false);
+                }
+
+                if (sSelectedKey === c_601) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/esTraspasoEntrada_305", true);
+                }
+
+                if (sSelectedKey === c_321 || sSelectedKey === c_343 || sSelectedKey === c_344) {
+                    this.getOwnerComponent().getModel("localModel").setProperty("/Header/esTraspaso", false);
+
+
+                }
+
+                if (sSelectedKey === c_344) {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/motivo", true);
+                }
+
+                if (sSelectedKey === c_601) { // mostrar estatus solo para picking / entregas
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnPickingStatus", true);
+                } else {
+                    this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnPickingStatus", false);
                 }
 
 
@@ -256,9 +402,10 @@ sap.ui.define([
                 let oProductionOrder = [];
                 let oProdOrderItems = [];
                 let oAnulacion_flag = this.getAnnulmentType(oModel.Header.claveMov);
+                let oSupplier = '';
                 this.getOwnerComponent().getModel("localModel").setProperty("/Header/esAnulacion", oAnulacion_flag);
 
-                if (oAnulacion_flag) {
+                if (oAnulacion_flag || oModel.Header.claveMov === c_305) {
                     oModel_RefDetail = "API_MATERIAL_DOCUMENT_SRV";
                     oEntity_RefDetail = "A_MaterialDocumentItem";
                     this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnProcesar", false);
@@ -273,9 +420,19 @@ sap.ui.define([
                     //oEntity_RefDetail = "A_MaterialDocumentItem";
                     oModel_ProductionOrder = "API_PRODUCTION_ORDER_2_SRV";
                     oEntity_ProductionOrder = "A_ProductionOrderItem_2";
-                } else if (oModel.Header.claveMov === c_101_01) { // Purchase Order - orden compra
+                } else if (oModel.Header.claveMov === c_101_01 || oModel.Header.claveMov === c_543) { // Purchase Order - orden compra
                     oModel_PurchaseOrder = "api_purchaseorder_2";
                     oEntity_PurchaseOrder = "PurchaseOrderItem";
+                } else if (oModel.Header.claveMov === c_541) { // Purchase Order - orden compra
+                    oModel_RefDetail = "api_purchaseorder_2";
+                    oEntity_RefDetail = "POSubcontractingComponent";
+                    oModel_PurchaseOrder = "api_purchaseorder_2";
+                    oEntity_PurchaseOrder = "PurchaseOrder";
+                } else if (oModel.Header.claveMov === c_101_Sub) { // Purchase Order - orden compra (Pendiente terminar, cambiar clasemov)
+                    oModel_RefDetail = "api_purchaseorder_2";
+                    oEntity_RefDetail = "PurchaseOrder";
+                    oModel_PurchaseOrder = "api_purchaseorder_2";
+                    oEntity_PurchaseOrder = "PurchaseOrder";
                 } else {
                     oModel_RefDetail = "API_PRODUCTION_ORDER_2_SRV";
                     oEntity_RefDetail = "A_ProductionOrderComponent_4";
@@ -283,13 +440,20 @@ sap.ui.define([
                 }
 
                 let oReference = [];
+                let oPurchaseOrderHeader = [];
 
                 if (oModel.Header.claveMov === c_101_02) { // orden produccion 
                     //oReference = await this.readOneAjax(oModel_RefDetail, oEntity_RefDetail, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
                     //oProductionOrder = await this.readOneAjax(oModel_ProductionOrder, oEntity_ProductionOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
                     oReference = await this.readOneAjax(oModel_ProductionOrder, oEntity_ProductionOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
-                } else if (oModel.Header.claveMov === c_101_01) { // Purchase Order - orden compra
+                } else if (oModel.Header.claveMov === c_101_01 || oModel.Header.claveMov === c_543) { // Purchase Order - orden compra
                     oReference = await this.readOneAjax(oModel_PurchaseOrder, oEntity_PurchaseOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
+                } else if (oModel.Header.claveMov === c_541 || oModel.Header.claveMov === c_101_Sub) { // Purchase Order - orden compra
+                    oReference = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, sKey, oModel.Header.claseMov);
+
+                    // Segunda petivion para traer el Supplier
+                    oPurchaseOrderHeader = await this.readOneAjax(oModel_PurchaseOrder, oEntity_PurchaseOrder, sKey, oEmptyValue, oEmptyValue, oEmptyValue, oEmptyValue, oModel.Header.claseMov);
+                    oSupplier = oPurchaseOrderHeader.value[0].Supplier;
                 } else {
                     oReference = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, sKey, oModel.Header.claseMov);
                 }
@@ -302,12 +466,14 @@ sap.ui.define([
                             let oCant_disponible = 0;
                             let oPickingStatus = '';
                             let sMaterialText = '';
+                            let sBaseUnit = "";
                             let isBatchRequired = false;
                             let oProductDetails = {};
+                            let oItem = '';
 
                             if (oAnulacion_flag) {
                                 oCant_disponible = element.QuantityInEntryUnit;
-                            } else if (oModel.Header.claseMov === c_601) {
+                            } else if (oModel.Header.claveMov === c_601) {
                                 oCant_disponible = element.OriginalDeliveryQuantity;
 
                                 switch (element.PickingStatus) {
@@ -326,26 +492,51 @@ sap.ui.define([
                             } else if (oModel.Header.claveMov === c_101_01) {
                                 oCant_disponible = parseFloat(element.OrderQuantity);
                                 isBatchRequired = false;
+                            } else if (oModel.Header.claveMov === c_541 || oModel.Header.claveMov === c_101_Sub) {
+                                oCant_disponible = parseFloat(element.RequiredQuantity);
+                                isBatchRequired = false;
+                            } else if (oModel.Header.claveMov === c_305) {
+                                oCant_disponible = element.QuantityInEntryUnit;
                             } else {
                                 oCant_disponible = parseFloat(element.RequiredQuantity) - parseFloat(element.WithdrawnQuantity);
                             }
 
                             oProductDetails = await this.searchBatchRequired(element.Material) || {};
                             sMaterialText = await this.onSearchMaterialText(element.Material);
+
                             if (oModel.Header.claveMov === c_101_02) {
+                                sBaseUnit = await this.onSearchMaterialBaseUnit(element.Material);
                                 isBatchRequired = false;
                                 this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnLote", false);
                             } else {
                                 isBatchRequired = oProductDetails?.isBatchRequired || false;
                                 this.getOwnerComponent().getModel("oDisplayModel").setProperty("/TablaReferenciaItems/columnLote", true);
+                                sBaseUnit = element.BaseUnitSAPCode || element.EntryUnit || element.DeliveryQuantityUnit || element.PurchaseOrderQuantityUnit;
                             }
+
+                            // tipo de item en traspasos (origen/destino)
+
+                            let result = this.columnaTipoTraspaso(oModel.Header.claveMov, element.MaterialDocumentItem);
+                            let { sTipoMovTraspaso, sColor } = result;
+
+                            if (oModel.Header.claveMov === c_101_01 || oModel.Header.claveMov === c_541 || oModel.Header.claveMov === c_543 || oModel.Header.claveMov === c_101_Sub) {
+                                oItem = element.PurchaseOrderItem;
+                            } else if (oModel.Header.claveMov === c_601) {
+                                oItem = element.DeliveryDocumentItem;
+                            } else if (oModel.Header.claveMov === c_101_02) {
+                                oItem = element.ManufacturingOrderItem;
+                            } else {
+                                oItem = element.MaterialDocumentItem;
+                            }
+
+
 
                             return {
                                 material: element.Material,
-                                Item: element.PurchaseOrderItem || 'xxx', // Colocar el correcto de cada clase de movimiento
+                                Item: oItem, // Colocar el correcto de cada clase de movimiento
                                 txt_material: sMaterialText,
                                 cantidad: oCant_disponible,
-                                um: element.BaseUnitSAPCode || element.EntryUnit || element.DeliveryQuantityUnit || element.ProductionUnit || element.PurchaseOrderQuantityUnit,
+                                um: sBaseUnit,
                                 centro: element.Plant,
                                 almacen: element.StorageLocation,
                                 isBatchRequired_txt: isBatchRequired ? const_si : const_no,
@@ -366,7 +557,12 @@ sap.ui.define([
                                 ReferenceSDDocumentItem: element.ReferenceSDDocumentItem || '',
                                 ActualDeliveryQuantity: element.ActualDeliveryQuantity || '',
                                 GoodsMovementRefDocType: oModel.Header.GoodsMovementRefDocType, // ClaveMov: "102-01" F y purchase order B
-                                PurchaseOrderItem: element.PurchaseOrderItem || ''
+                                PurchaseOrderItem: element.PurchaseOrderItem || '',
+                                MaterialDocumentItem: sTipoMovTraspaso,
+                                MaterialDocument: element.MaterialDocument || '',
+                                PurchaseOrderItemCategory: element.PurchaseOrderItemCategory || '',
+                                Supplier: oSupplier,
+                                color_tipo: sColor
                             };
                         } catch (error) {
                             console.error("Error procesando item", element, error);
@@ -377,7 +573,9 @@ sap.ui.define([
 
                 oItems = oItems.filter(Boolean); // Elimina elementos nulos si hubo errores
 
-                this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItems", oItems);
+                await this.setItemValues(oItems);
+                console.log("Items => ", oItems);
+
 
                 // Obtener el año del documento de material
                 let oModelDocYear = "API_MATERIAL_DOCUMENT_SRV";
@@ -457,9 +655,32 @@ sap.ui.define([
                 let oEntity_MatText = "ProductDescription";
                 const oEmpty = '';
                 let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, eMaterial, oEmpty, oEmpty, oEmpty, oEmpty);
-                console.log("sMaterialText", sMaterialData);
-                let sMaterialText = sMaterialData.value[0].ProductDescription;
+                let sMaterialText = "";
+
+                if (sMaterialData.value) {
+                    console.log("sMaterialText", sMaterialData);
+                    sMaterialText = sMaterialData.value[0].ProductDescription;
+                }
+
                 return sMaterialText;
+
+            },
+
+            onSearchMaterialBaseUnit: async function (eMaterial) {
+                // Texto de material
+                let oModel_MatText = "productApi";
+                let oEntity_MatText = "Product";
+                const oEmpty = '';
+                let sMaterialData = await this.readOneAjax(oModel_MatText, oEntity_MatText, oEmpty, eMaterial, oEmpty, oEmpty, oEmpty, oEmpty);
+                let sMaterialBaseUnit = "";
+
+                if (sMaterialData.value) {
+                    console.log("sMaterialBaseUnit", sMaterialData.value[0]);
+                    sMaterialBaseUnit = sMaterialData.value[0].BaseUnit;
+                }
+
+                return sMaterialBaseUnit;
+
             },
 
             onCloseItemsDialog: function () {
@@ -527,34 +748,51 @@ sap.ui.define([
                 if (oMaterial_Flag) {
                     this.getView().byId("materialInput").setValue();
                 }
+                let oModelData = this.getOwnerComponent().getModel("localModel").getData();
+                let oClaveMov = oModelData.Header.claveMov;
+                if (oClaveMov === c_309) {
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgBatch", "");
+                } else {
+                    this.getView().byId("cantidadInput").setValue();
+                    this.getView().byId("umInput").setValue();
+                    this.getView().byId("loteInput").setValue();
+                    this.getView().byId("centroInput").setValue();
+                    this.getView().byId("almacenInput").setValue();
+                    this.getView().byId("cecoInput").setValue();
+                    this.getView().byId("motivoInput").setValue();
+                    this.getView().byId("txtPosicionArea").setValue();
+                    this.getView().byId("txtPosicionArea_historico").setValue();
 
-                this.getView().byId("cantidadInput").setValue();
-                this.getView().byId("umInput").setValue();
-                this.getView().byId("loteInput").setValue();
-                this.getView().byId("centroInput").setValue();
-                this.getView().byId("almacenInput").setValue();
-                this.getView().byId("cecoInput").setValue();
-                this.getView().byId("motivoInput").setValue();
-                this.getView().byId("txtPosicionArea").setValue();
-                this.getView().byId("txtPosicionArea_historico").setValue();
+                    //Destino para Traspasos 303 y 309
+                    /* this.getView().byId("centroInput_Destino").setValue();
+                    this.getView().byId("almacenInput_Destino").setValue();
+                    this.getView().byId("materialInput_Destino").setValue();
+                    this.getView().byId("loteInput_Destino").setValue(); */
 
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/ceco", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/motivo", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", 0);
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/PurchaseOrderItem", 0);
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/GoodsMovementRefDocType", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/isBatchRequired", true);
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/isBatchRequired_txt", "");
-                this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/GoodsMovementType", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_material", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/ceco", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/motivo", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/txt_posicion_historico", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad_disponible", 0);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/PurchaseOrderItem", 0);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/GoodsMovementRefDocType", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/isBatchRequired", true);
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/isBatchRequired_txt", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/GoodsMovementType", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingPlant", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingStorageLoc", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgMaterial", "");
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgBatch", "");
+                }
+
+
 
                 if (this.getView().getModel("BatchList")) {
                     this.getView().getModel("BatchList").setData([]);
@@ -606,151 +844,17 @@ sap.ui.define([
 
 
             onBuscarDetalle: async function () {
-                let oView = this.getView();
-                oView.setBusy(true);
-                let oLocalModel = this.getOwnerComponent().getModel("localModel");
-                let oLocalModelData = oLocalModel.getData();
-                let isBatchRequired = false;
-                let sMaterialText = "";
-                let oBundle = this.getResourceBundle();
-
-                const const_si = oBundle.getText("yes");
-                const const_no = oBundle.getText("no");
-
-
-
-
-                console.log("ReferenceItemSelected", oLocalModelData.ReferenceItemSelected);
-
 
                 // ✅ Tomar partes
+                let oView = this.getView();
                 let sMaterial = this.getView().byId("materialInput").getValue();
                 let sBatch = this.getView().byId("loteInput").getValue();
-
-                let oProduct = await this.searchBatchRequired(sMaterial);
-                isBatchRequired = oProduct.isBatchRequired;
-                sMaterialText = await this.onSearchMaterialText(sMaterial);
+                const c_sOrigen = "onBuscarDetalle";
 
 
-                let componentMaterial = oLocalModelData.ReferenceItemSelected.material;
-
-                if (oLocalModelData.Header.claseMov === '261') {
-                    if (sMaterial !== componentMaterial) {
-                        let sMessage = oBundle.getText("position.noMatch", [
-                            sMaterial,
-                            componentMaterial
-                        ]);
-                        MessageBox.alert(sMessage);
-                        oView.setBusy(false);
-                        return;
-                    }
-                } else if (oLocalModelData.Header.claseMov === '201' || oLocalModelData.Header.claseMov === '551') {
-
-                    let oItems = {
-                        material: sMaterial,
-                        txt_material: sMaterialText,
-                        cantidad: "",
-                        um: "",
-                        centro: "",
-                        almacen: "",
-                        isBatchRequired_txt: isBatchRequired ? const_si : const_no,
-                        GoodsMovementType: oLocalModelData.Header.claseMov,
-                        isBatchRequired: isBatchRequired,
-                        Reservation: "",
-                        ReservationItem: "",
-                        ReservationItemRecordType: ""
-                    }
-                    oLocalModel.setProperty("/ReferenceItems", oItems);
-                }
-
-                this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/lote", isBatchRequired);
+                this.onValidarBatch(sMaterial, sBatch, c_sOrigen);
 
 
-                if (isBatchRequired && oLocalModelData.Header.claveMov !== '101-02') {
-
-
-
-
-                    // 2️⃣ Validar campos obligatorios
-                    if (!sMaterial || !sBatch) {
-                        let oMessage = oBundle.getText("position.missingFields");
-                        MessageToast.show(oMessage, {
-                            duration: 8000 // milisegundos (8 segundos)
-                        });
-
-
-                        if (!sBatch) {
-                            this.getView().byId("loteInput").focus();
-                        }
-
-                        oView.setBusy(false);
-                        return;
-                    }
-
-                    // 3️⃣ Obtener datos del modelo BatchList
-                    //let aBatchData = oBatchListModel.getData() || [];
-                    let aBatchData = await this.onSearchBatchList(sMaterial); // ✅ ahora sí esperas la promesa
-
-                    // 4️⃣ Buscar combinación material-lote
-                    let oMatch = aBatchData.find(item =>
-                        item.Material === sMaterial && item.Batch === sBatch
-                    );
-
-                    if (oMatch) {
-                        let oMessage = oBundle.getText("position.batchFound");
-
-                        MessageToast.show(oMessage, {
-                            duration: 8000 // milisegundos (8 segundos)
-                        });
-
-
-                        /**
-                         * 5️⃣ Actualizar datos fijos de la selección
-                         * 6️⃣ Esperar texto de detalle (ahora usando await)
-                         * 7️⃣ Guardar el texto final en el modelo
-                         */
-
-                        await this.setPositionValue();
-
-
-                    } else {
-                        // Si no hay match y el batch es requerido: mostrar mensaje
-                        if (isBatchRequired) {
-                            let oMessage = oBundle.getText("position.batchNotFound");
-                            MessageToast.show(oMessage, {
-                                duration: 8000 // milisegundos (8 segundos)
-                            });
-                            let oMatrial_flag = false;
-                            this.onClearPosition(oMatrial_flag);
-                            oView.setBusy(false);
-
-                        }
-                    }
-                } else {
-                    console.log("dataposition => " + oLocalModelData.DataPosition.material);
-                    console.log("escaneado => " + this.getView().byId("materialInput").getValue());
-
-                    let sInputValue = this.getView().byId("materialInput").getValue().trim();
-                    let sModelValue = oLocalModelData.DataPosition.material?.trim();
-
-                    this.getView().byId("loteInput").setValue();
-
-                    // 📌 Comparar usando includes()
-                    if (sInputValue.toUpperCase().includes(sModelValue.toUpperCase())) {
-                        console.log("✅ El valor del modelo SÍ se encuentra dentro del input");
-                        /**
-                         * 5️⃣ Actualizar datos fijos de la selección
-                         * 6️⃣ Esperar texto de detalle (ahora usando await)
-                         * 7️⃣ Guardar el texto final en el modelo
-                         */
-
-                        await this.setPositionValue();
-                    } else {
-                        console.log("❌ El valor del modelo NO se encuentra dentro del input");
-                    }
-
-
-                }
 
                 oView.setBusy(false);
             },
@@ -859,12 +963,13 @@ sap.ui.define([
                     let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
 
                     let esEntrega = oLocalModel.Header.esEntrega;
+                    let esTraspaso = oLocalModel.Header.esTraspaso;
                     let oGoodsMovementType = '';
 
-                    if (oLocalModel.Header.claveMov === c_303 || oLocalModel.Header.claveMov === c_309) {
-                        this.onShowReceiver();
+                    /* if (oLocalModel.Header.claveMov === c_303 || oLocalModel.Header.claveMov === c_309) {
+                        this.onContinueTraspaso();
                         return;
-                    }
+                    } */
 
 
                     // Procesar Entregas
@@ -877,12 +982,13 @@ sap.ui.define([
 
 
                         // 3️⃣ Obtener la clave del movimiento de mercancía según la lógica de negocio
-                        let oGoodMovement = this.getGoodMovement();
+                        let oGoodMovement = this.getGoodMovementItem();
+
 
 
 
                         // 4️⃣ Validar que exista código válido
-                        if (!oGoodMovement) {
+                        if (!oGoodMovement.GoodMovType) {
                             sap.m.MessageBox.error(this.getResourceBundle().getText("error.missingMovement"));
                             this.getView().setBusy(false);
                             return;
@@ -897,7 +1003,7 @@ sap.ui.define([
 
                         let oRequestJson = this.onBuildRequest();
 
-                        if(!oRequestJson){
+                        if (!oRequestJson) {
                             MessageBox.warning("Selecciona un motivo");
                             return;
                         }
@@ -914,11 +1020,11 @@ sap.ui.define([
                             sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'&PostingDate=datetime'${oLocalModel.Header.fecha_cont}T00:00'`;
                             sModelName = "API_MATERIAL_DOCUMENT_SRV";
 
-                           /*  if (oLocalModel.Header.claveMov === "202-03") { borrar en caso de requerir fecha para todos
-                                sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'`;
-                            } else if (oLocalModel.Header.claveMov === "102-01") {
-                                sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'&PostingDate=datetime'${oLocalModel.Header.fecha_cont}T00:00'`;
-                            } */
+                            /*  if (oLocalModel.Header.claveMov === "202-03") { borrar en caso de requerir fecha para todos
+                                 sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'`;
+                             } else if (oLocalModel.Header.claveMov === "102-01") {
+                                 sEntitySet = `Cancel?MaterialDocumentYear='${oLocalModel.Header.MaterialDocumentYear}'&MaterialDocument='${oLocalModel.Header.referencia}'&PostingDate=datetime'${oLocalModel.Header.fecha_cont}T00:00'`;
+                             } */
 
 
                             //API_MATERIAL_DOCUMENT_SRV/Cancel?
@@ -963,6 +1069,10 @@ sap.ui.define([
                             duration: 8000 // milisegundos (8 segundos)
                         });
                         console.log("Respuesta del POST:", oResponse);
+
+                        if (esTraspaso) {
+                            this.onCloseDestinationDialog();
+                        }
                         this.PopulatePositions(oResponse.d);
 
 
@@ -1102,6 +1212,7 @@ sap.ui.define([
                 let oDocumentDetails = await this.readAllPagedAjax(oModel_RefDetail, oEntity_RefDetail, iPageSize, oResponse.MaterialDocument, oLocalModelData.Header.claseMov);
                 let oDetails = oDocumentDetails.d.results;
                 let oMotivoModel = "";
+                let oClaveMov = oLocalModelData.Header.claveMov;
 
 
 
@@ -1112,7 +1223,7 @@ sap.ui.define([
 
                     //let oRefItems = oLocalModelData.ReferenceItems;
 
-                    if (oLocalModelData.Header.claveMov === "551-03") {
+                    if (oClaveMov === c_551) {
                         oMotivoModel = this.getOwnerComponent().getModel("MotivoList").getData();
                     }
 
@@ -1120,30 +1231,46 @@ sap.ui.define([
                     for (let i = 0; i < oDetails.length; i++) {
                         sMaterialText = await this.onSearchMaterialText(oDetails[i].Material);
 
-                        if (oLocalModelData.Header.claveMov === "551-03") {
+
+
+                        if (oClaveMov === c_551) {
                             oMotivoModel = this.getOwnerComponent().getModel("MotivoList").getData();
                             oMotivo = oMotivoModel.find(item =>
                                 item.Motivo === oDetails[0].GoodsMovementReasonCode
                             );
                         }
 
+                        let result = this.columnaTipoTraspaso(oClaveMov, oDetails[i].MaterialDocumentItem);
+                        let { sTipoMovTraspaso, sColor } = result;
+                        //let sTipoMovTraspaso = this.columnaTipoTraspaso(oClaveMov, oDetails[i].MaterialDocumentItem);
+                        //color_tipo = this.colorTipo(oClaveMov, oDetails[i].MaterialDocumentItem);
+
+
+                        if (oDetails[i].CostCenter) {
+                            this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", true);
+
+                        } else {
+                            this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/ceco", false);
+                        }
 
 
                         _position = {
-                            material: oDetails[0].Material,
+                            tipoMovTraspaso: sTipoMovTraspaso,
+                            material: oDetails[i].Material,
                             txt_material: sMaterialText,
-                            cantidad: oDetails[0].QuantityInEntryUnit,
-                            um: oDetails[0].EntryUnit,
-                            lote: oDetails[0].Batch, // Lote
-                            centro: oDetails[0].Plant, // Centro/Planta
-                            almacen: oDetails[0].StorageLocation,
-                            ceco: oDetails[0].CostCenter,
+                            cantidad: oDetails[i].QuantityInEntryUnit,
+                            um: oDetails[i].EntryUnit,
+                            lote: oDetails[i].Batch, // Lote
+                            centro: oDetails[i].Plant, // Centro/Planta
+                            almacen: oDetails[i].StorageLocation,
+                            ceco: oDetails[i].CostCenter,
                             motivo: oMotivo?.Motivo || '', // Motivo
                             DescMotivo: oMotivo.DescMotivo || '', // Motivo
-                            txt_posicion: oDetails[0].MaterialDocumentItemText,
+                            txt_posicion: oDetails[i].MaterialDocumentItemText,
                             MaterialDocument: oResponse.MaterialDocument,
                             //MaterialDocumentItemText: oDetails[i].MaterialDocumentItemText,
-                            motivo: oDetails[i].GoodsMovementReasonCode || ''
+                            motivo: oDetails[i].GoodsMovementReasonCode || '',
+                            color_tipo: sColor
 
                         }
                         oPositions.push(_position);
@@ -1189,12 +1316,128 @@ sap.ui.define([
 
             },
 
+            // Devuelve { sTipoMovTraspaso: string, sColor: number|null }
+            columnaTipoTraspaso: function (oClaveMov, sMaterialDocumentItem) {
+                let ITEM_1 = '1';
+                let ITEM_2 = '2';
+                let movOrigenDestino = new Set([c_303, c_309, c_305, c_304, c_306, c_310]);
+                let movLibreUtil = new Set([c_321, c_322, c_344, c_344_A]);
+                let MOV_343 = c_343;
+
+                let sTipoMovTraspaso = "";
+                let sColor = null; // sin color por defecto
+
+                switch (String(sMaterialDocumentItem)) {
+                    case ITEM_1: {
+                        if (movOrigenDestino.has(oClaveMov)) {
+                            sTipoMovTraspaso = c_columnOrigen;
+                        } else if (movLibreUtil.has(oClaveMov)) {
+                            sTipoMovTraspaso = c_columnLibre_util;
+                            sColor = 8; // Verde
+                        } else if (oClaveMov === MOV_343) {
+                            sTipoMovTraspaso = c_columnLibre_util;
+                            sColor = 2; // Rojo
+                        }
+                        break;
+                    }
+
+                    case ITEM_2: {
+                        if (movOrigenDestino.has(oClaveMov)) {
+                            sTipoMovTraspaso = c_columnDestino;
+                        } else if (movLibreUtil.has(oClaveMov) || oClaveMov === MOV_343) {
+                            if (oClaveMov === c_344 || oClaveMov === c_344_A) {
+                                sTipoMovTraspaso = c_columnBloqueado;
+                                sColor = 2; // Rojo
+                            } else if (oClaveMov === MOV_343) {
+                                sTipoMovTraspaso = c_columnBloqueado;
+                                sColor = 8; // Verde
+                            } else {
+                                sTipoMovTraspaso = c_columnCalidad;
+                                sColor = 2; // Rojo
+                            }
+                        }
+                        break;
+                    }
+
+                    default:
+                        sColor = 0;
+                        sTipoMovTraspaso = '';
+                        break;
+                }
+
+                return { sTipoMovTraspaso, sColor };
+            },
+
+
+            colorTipo: function (oClaveMov, sMaterialDocumentItem) {
+                let oUno = '1';
+                let oDos = '2';
+                let sTipoMovTraspaso = "";
+                let sColor = 0;
+
+
+
+
+                switch (sMaterialDocumentItem) {
+                    case oUno:
+
+                        if (oClaveMov === c_303 || oClaveMov === c_309 || oClaveMov === c_305 || oClaveMov === c_304 || oClaveMov === c_306 || oClaveMov === c_310) {
+                            sTipoMovTraspaso = c_columnOrigen;
+                        } else if (oClaveMov === c_321 || oClaveMov === c_344 || oClaveMov === c_322 || oClaveMov === c_344_A) {
+                            sTipoMovTraspaso = c_columnLibre_util;
+                            sColor = 8; // Verde
+                        } else if (oClaveMov === c_343) {
+                            sTipoMovTraspaso = c_columnLibre_util;
+                            sColor = 2; // rojo
+                        }
+
+                        break;
+
+                    case oDos:
+
+                        if (oClaveMov === c_303 || oClaveMov === c_309 || oClaveMov === c_305 || oClaveMov === c_304 || oClaveMov === c_306 || oClaveMov === c_310) {
+                            sTipoMovTraspaso = c_columnDestino;
+                        } else if (oClaveMov === c_321 || oClaveMov === c_343 || oClaveMov === c_344 || oClaveMov === c_322 || oClaveMov === c_344_A) {
+
+                            if (oClaveMov === c_344 || oClaveMov === c_344_A) {
+                                sTipoMovTraspaso = c_columnBloqueado;
+                                sColor = 2; // Rojo
+                            } else if (oClaveMov === c_343) {
+                                sTipoMovTraspaso = c_columnBloqueado;
+                                sColor = 8; // Verde
+
+                            } else {
+                                sTipoMovTraspaso = c_columnCalidad;
+                                sColor = 2; // Rojo
+                            }
+
+                        }
+
+                        break;
+
+                    default:
+                        break;
+                }
+
+
+                return sColor;
+
+            },
+
             onLiveChangeMaterial: function (oEvent) {
                 this.onLiveChangeUpper(oEvent, "/DataPosition/material");
             },
 
+            onLiveChangeMaterialDestino: function (oEvent) {
+                this.onLiveChangeUpper(oEvent, "/DataPosition/IssgOrRcvgMaterial");
+            },
+
             onLiveChangeLote: function (oEvent) {
                 this.onLiveChangeUpper(oEvent, "/DataPosition/lote");
+            },
+
+            onLiveChangeLoteDestino: function (oEvent) {
+                this.onLiveChangeUpper(oEvent, "/DataPosition/IssgOrRcvgBatch");
             },
 
             onLiveChangeUM: function (oEvent) {
@@ -1214,9 +1457,9 @@ sap.ui.define([
                 const c_262 = '262-03';
                 const c_102_01 = '102-01';
                 const c_102_02 = '102-02'; */
-                let _return
+                let _return = false;
 
-                if (eClaveMov === c_602 || eClaveMov === c_552 || eClaveMov === c_202 || eClaveMov === c_262 || eClaveMov === c_102_01 || eClaveMov === c_102_02) {
+                if (eClaveMov === c_602 || eClaveMov === c_552 || eClaveMov === c_202 || eClaveMov === c_262 || eClaveMov === c_102_01 || eClaveMov === c_102_02 || eClaveMov === c_304 || eClaveMov === c_306 || eClaveMov === c_310 || eClaveMov === c_322 || eClaveMov === c_344_A) {
                     _return = true;
                 } else {
                     _return = false
@@ -1393,7 +1636,8 @@ sap.ui.define([
                     oLocalModel.Header.referencia,
                     "API_OUTBOUND_DELIVERY_SRV",
                     "/A_OutbDeliveryItem",                    // ID del botón en la vista
-                    "/Header/btnPicking"              // Propiedad del oDisplayModel usada en binding
+                    "/Header/btnPicking",              // Propiedad del oDisplayModel usada en binding
+                    oLocalModel.Header.claveMov
                 );
             },
 
@@ -1413,12 +1657,54 @@ sap.ui.define([
                 );
             },
 
-            onShowReceiver: function () {
+            onContinueTraspaso: function () {
 
                 // Mostrar el dialog de ítems
                 let oView = this.getView();
-                if (!this.oReceiverDialog) {
-                    this.oReceiverDialog = Fragment.load({
+                let oLocalModelData = this.getOwnerComponent().getModel("localModel").getData();
+                let oClaveMov = oLocalModelData.Header.claveMov
+                let oMaterialOrigen = this.getView().byId("materialInput").getValue();
+                let oLoteOrigen = this.getView().byId("loteInput").getValue();
+                let oPlantaOrigen = this.getView().byId("centroInput").getValue();
+                let oALmacenOrigen = this.getView().byId("almacenInput").getValue();
+
+                if (oMaterialOrigen || oLoteOrigen) {
+
+                    if (oClaveMov === c_303 || oClaveMov === c_305) {
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgMaterial", oMaterialOrigen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgBatch", oLoteOrigen);
+
+                    } else if (oClaveMov === c_321 || oClaveMov === c_343 || oClaveMov === c_344) {
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgMaterial", oMaterialOrigen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgBatch", oLoteOrigen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingPlant", oPlantaOrigen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingStorageLoc", oALmacenOrigen);
+                    }
+
+
+
+
+
+                }
+
+                if (oPlantaOrigen || oALmacenOrigen) {
+                    if (oClaveMov === c_309) {
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingPlant", oPlantaOrigen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingStorageLoc", oALmacenOrigen);
+                        this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/IssuingOrReceivingPlant", false);
+                    }
+
+
+
+                }
+
+
+
+
+
+
+                if (!this.onDestinoDialog) {
+                    this.onDestinoDialog = Fragment.load({
                         id: oView.getId(),
                         name: "delmex.zmmhandheld.view.fragments.ReceiverDataDialog",
                         controller: this
@@ -1429,7 +1715,7 @@ sap.ui.define([
                         return oDialog;
                     });
                 } else {
-                    this.oReceiverDialog.then(function (oDialog) {
+                    this.onDestinoDialog.then(function (oDialog) {
                         oDialog.open();
                         oView.setBusy(false);
                     });
@@ -1438,9 +1724,9 @@ sap.ui.define([
 
             },
 
-            onCloseReceiverDialog: function () {
-                if (this.oReceiverDialog) {
-                    this.oReceiverDialog.then(function (oDialog) {
+            onCloseDestinationDialog: function () {
+                if (this.onDestinoDialog) {
+                    this.onDestinoDialog.then(function (oDialog) {
                         oDialog.close();
                     });
                 }
@@ -1451,17 +1737,30 @@ sap.ui.define([
                 let oDisplayModel = this.getOwnerComponent().getModel("oDisplayModel").getData();
                 let oPostingDate = oLocalModel.Header.fecha_cont + "T00:00:00";
                 let oDocDate = oLocalModel.Header.fecha_doc + "T00:00:00";
-                let oGoodMovement = this.getGoodMovement();
+                let oGoodMovementItem = this.getGoodMovementItem();
+                let oGoodsMovementCode = oGoodMovementItem.GoodMovType;
                 let sClaveMov = oLocalModel.Header.claveMov;
-                let oGoodsMovementType = oLocalModel.ReferenceItems.GoodsMovementType ||  oLocalModel.ReferenceItemSelected.GoodsMovementType;
+                //let oGoodsMovementType = oLocalModel.ReferenceItems.GoodsMovementType || oLocalModel.ReferenceItemSelected.GoodsMovementType;
+                let oGoodsMovementType = oGoodMovementItem.ClaseMovimiento
                 let oManufacturingOrder = oDisplayModel.Header.referencia ? oLocalModel.Header.referencia : '';
+                let oBundle = this.getResourceBundle();
+                let oMaterialDocumentItemText = "";
+
+                if (sClaveMov === c_305) {
+                    oMaterialDocumentItemText = oBundle.getText("position.documentItemText", oLocalModel.Header.referencia);
+                    oMaterialDocumentItemText = oMaterialDocumentItemText + " " + oLocalModel.DataPosition.txt_posicion;
+                } else {
+                    oMaterialDocumentItemText = oLocalModel.DataPosition.txt_posicion
+                }
 
                 // 1️⃣ Crear base del JSON de request
                 let oRequestJson = {
                     PostingDate: oPostingDate,
                     DocumentDate: oDocDate,
-                    GoodsMovementCode: oGoodMovement,
+                    GoodsMovementCode: oGoodsMovementCode,
                     MaterialDocumentHeaderText: oLocalModel.Header.texto_cabecera,
+                    ManualPrintIsTriggered: "X",
+                    VersionForPrintingSlip: "2",
                     to_MaterialDocumentItem: []
                 };
 
@@ -1476,7 +1775,7 @@ sap.ui.define([
                     QuantityInEntryUnit: parseFloat(oLocalModel.DataPosition.cantidad).toFixed(3),
                     EntryUnit: oLocalModel.DataPosition.um,
                     CostCenter: oLocalModel.DataPosition.ceco,
-                    MaterialDocumentItemText: oLocalModel.DataPosition.txt_posicion, // 201, 261, 551, 303 y 309
+                    MaterialDocumentItemText: oMaterialDocumentItemText, // 201, 261, 551, 303 y 309
                     GoodsMovementReasonCode: oLocalModel.DataPosition.motivo, //551, 201, 601 (diferente catalogo de motivo)
 
 
@@ -1486,7 +1785,7 @@ sap.ui.define([
                     ReservationItemRecordType: oLocalModel.ReferenceItemSelected.ReservationItemRecordType || '',
 
 
-                    
+
                     Delivery: sClaveMov === '601-03' ? oLocalModel.Header.referencia : '',
                     DeliveryItem: oLocalModel.ReferenceItemSelected.ReferenceSDDocumentItem,
                     GoodsMovementRefDocType: oLocalModel.ReferenceItemSelected.GoodsMovementRefDocType || '',
@@ -1494,10 +1793,17 @@ sap.ui.define([
                     PurchaseOrderItem: sClaveMov === '101-01' ? oLocalModel.ReferenceItemSelected.PurchaseOrderItem : '',
                     IssgOrRcvgMaterial: oLocalModel.DataPosition.IssgOrRcvgMaterial,
                     IssuingOrReceivingPlant: oLocalModel.DataPosition.IssuingOrReceivingPlant,
-                    IssuingOrReceivingStorageLoc: oLocalModel.DataPosition.IssuingOrReceivingStorageLoc
+                    IssuingOrReceivingStorageLoc: oLocalModel.DataPosition.IssuingOrReceivingStorageLoc,
+                    IssgOrRcvgBatch: oLocalModel.DataPosition.IssgOrRcvgBatch,
+                    SpecialStockIndicator: "",            // clave para stock en proveedor
+                    StockType: "1",                         // 1=Libre (opcional)
+                    PurchaseOrderItemCategory: '3',     // Subcontracting = 3 solo van en estos: 541,543,544,542
+                    InventorySpecialStockType: '',       // debe ir vacio
+                    Supplier: oLocalModel.ReferenceItemSelected.Supplier        // "PN0437"
                 };
 
-                
+
+
 
 
 
@@ -1515,9 +1821,9 @@ sap.ui.define([
                         this.removeFieldsIfNeeded(
                             oRequestJson.to_MaterialDocumentItem,
                             iLastIndex,
-                            ["IssgOrRcvgMaterial", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode",
-                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
-                                "IssuingOrReceivingStorageLoc"]
+                            ["IssgOrRcvgMaterial", "ManufacturingOrder", "GoodsMovementReasonCode",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "Supplier", 
+                                "SpecialStockIndicator", "StockType", "PurchaseOrderItemCategory"]
                         );
                         break;
                     case c_309:
@@ -1525,8 +1831,7 @@ sap.ui.define([
                             oRequestJson.to_MaterialDocumentItem,
                             iLastIndex,
                             ["ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode",
-                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
-                                "IssuingOrReceivingStorageLoc"]
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "Supplier", "SpecialStockIndicator", "StockType", "PurchaseOrderItemCategory"]
                         );
                         break;
 
@@ -1535,7 +1840,8 @@ sap.ui.define([
                             oRequestJson.to_MaterialDocumentItem,
                             iLastIndex,
                             ["ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode", "Delivery", "DeliveryItem",
-                                "GoodsMovementRefDocType", "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc"]
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "Supplier", "SpecialStockIndicator", "StockType",
+                                "PurchaseOrderItemCategory", "InventorySpecialStockType", "IssgOrRcvgBatch", "IssgOrRcvgMaterial",]
                         );
                         break;
 
@@ -1546,7 +1852,7 @@ sap.ui.define([
                             iLastIndex,
                             ["Batch", "IssgOrRcvgMaterial", "Reservation", "ReservationItem", "ReservationItemRecordType", "GoodsMovementReasonCode",
                                 "Delivery", "DeliveryItem", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
-                                "IssuingOrReceivingStorageLoc"]
+                                "IssuingOrReceivingStorageLoc", "Supplier", "SpecialStockIndicator", "StockType", "PurchaseOrderItemCategory"]
                         );
                         break;
 
@@ -1554,14 +1860,35 @@ sap.ui.define([
                         this.removeFieldsIfNeeded(
                             oRequestJson.to_MaterialDocumentItem,
                             iLastIndex,
-                            ["PurchaseOrder", "PurchaseOrderItem"]
+                            ["PurchaseOrder", "PurchaseOrderItem", "Supplier", "SpecialStockIndicator", "StockType"]
+                        );
+                        break;
+
+
+                    case c_543:
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["IssgOrRcvgBatch", "IssuingOrReceivingStorageLoc", "IssuingOrReceivingPlant", "IssgOrRcvgMaterial", "GoodsMovementRefDocType",
+                                "DeliveryItem", "Delivery", "ReservationItemRecordType", "ReservationItem", "Reservation", "GoodsMovementReasonCode",
+                                "ManufacturingOrder", "CostCenter", "StockType", "PurchaseOrderItemCategory",
+                                "InventorySpecialStockType", "SpecialStockIndicator"]
                         );
                         break;
 
                     case c_201:
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["GoodsMovementReasonCode", "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem",
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial", "Supplier", "SpecialStockIndicator", "StockType",
+                                "IssgOrRcvgBatch", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "InventorySpecialStockType",
+                                "PurchaseOrderItemCategory"]
+                        );
+                        break;
                     case c_551:
 
-                        if(!oLocalModel.DataPosition.motivo || oLocalModel.DataPosition.motivo === '0'){
+                        if (!oLocalModel.DataPosition.motivo || oLocalModel.DataPosition.motivo === '0') {
                             this.getView().setBusy(false);
                             return false;
                         }
@@ -1570,28 +1897,125 @@ sap.ui.define([
                             oRequestJson.to_MaterialDocumentItem,
                             iLastIndex,
                             ["GoodsMovementReasonCode", "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem",
-                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial"]
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial", "Supplier", "SpecialStockIndicator", "StockType",
+                                "IssgOrRcvgBatch", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType", "InventorySpecialStockType",
+                                "PurchaseOrderItemCategory"]
                         );
                         break;
 
                     case c_202: // y 552
+
                     case c_261:
 
                         this.removeFieldsIfNeeded(
                             oRequestJson.to_MaterialDocumentItem,
                             iLastIndex,
                             ["CostCenter", "GoodsMovementReasonCode", "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem",
-                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial"]
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial", "Supplier", "SpecialStockIndicator", "StockType",
+                                "PurchaseOrderItemCategory"]
                         );
                         break;
 
+                    case c_305:
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["PurchaseOrderItem", "PurchaseOrder", "GoodsMovementRefDocType", "DeliveryItem", "Delivery",
+                                "ManufacturingOrder", "GoodsMovementReasonCode", "InventorySpecialStockType",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "Supplier", "SpecialStockIndicator", "StockType", "PurchaseOrderItemCategory"]
+                        );
+
+                        // temporal para prueba 261 => en 305
+                       /*  this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "GoodsMovementReasonCode", "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem",
+                                "IssuingOrReceivingPlant", "IssuingOrReceivingStorageLoc", "IssgOrRcvgMaterial", "Supplier", "SpecialStockIndicator", "StockType",
+                                "PurchaseOrderItemCategory"]
+                        ); */
+
+                        break;
+
                     case c_262:
+
+                    case c_321:
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "IssgOrRcvgMaterial", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc", "IssgOrRcvgBatch", "Supplier", "SpecialStockIndicator", "StockType",
+                                "PurchaseOrderItemCategory", "InventorySpecialStockType"]
+                        );
+
+                        break;
+
+                    case c_343:
+
+
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "IssgOrRcvgMaterial", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc", "IssgOrRcvgBatch", "Supplier", "SpecialStockIndicator", "StockType",
+                                "InventorySpecialStockType", "PurchaseOrderItemCategory"]
+                        );
+
+
+                        break;
+
+                    case c_344:
+
+
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "IssgOrRcvgMaterial", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "PurchaseOrder", "PurchaseOrderItem", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc", "IssgOrRcvgBatch", "Supplier", "SpecialStockIndicator", "StockType",
+                                "InventorySpecialStockType", "PurchaseOrderItemCategory"]
+                        );
+
+
+                        break;
+
+                    case c_541:
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "GoodsMovementReasonCode", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "IssgOrRcvgMaterial", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc", "IssgOrRcvgBatch", "StockType", "PurchaseOrderItemCategory",
+                                "InventorySpecialStockType", "SpecialStockIndicator"]
+                        );
+
+
+
+                        break;
+
+                    case c_101_Sub:
+
+                        this.removeFieldsIfNeeded(
+                            oRequestJson.to_MaterialDocumentItem,
+                            iLastIndex,
+                            ["CostCenter", "GoodsMovementReasonCode", "ManufacturingOrder", "Reservation", "ReservationItem", "ReservationItemRecordType",
+                                "Delivery", "DeliveryItem", "GoodsMovementRefDocType", "IssgOrRcvgMaterial", "IssuingOrReceivingPlant",
+                                "IssuingOrReceivingStorageLoc", "IssgOrRcvgBatch", "StockType", "PurchaseOrderItemCategory",
+                                "InventorySpecialStockType", "SpecialStockIndicator"]
+                        );
+                        break;
 
                     case c_552:
                     case c_602:
                     case c_102_01:
                     case c_102_02:
-                    case c_304:
+
                     case c_310:
                         // Aquí podrías eliminar campos si aplica
                         break;
@@ -1617,7 +2041,7 @@ sap.ui.define([
 
 
 
-            getGoodMovement: function () {
+            getGoodMovementItem: function () {
 
                 let oReurn = false;
                 let oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
@@ -1628,10 +2052,278 @@ sap.ui.define([
                 );
 
                 if (oGoodMovementItem) {
-                    oReurn = oGoodMovementItem.GoodMovType;
+                    //oReurn = oGoodMovementItem.GoodMovType;
+                    oReurn = oGoodMovementItem;
                 }
                 return oReurn;
 
+            },
+
+
+            onValidarBatch: async function (sMaterial, sBatch, sOrigen) {
+
+                let oView = this.getView();
+                oView.setBusy(true);
+                let oLocalModel = this.getOwnerComponent().getModel("localModel");
+                let oLocalModelData = oLocalModel.getData();
+                let isBatchRequired = false;
+                let sMaterialText = "";
+                let oBundle = this.getResourceBundle();
+
+                const const_si = oBundle.getText("yes");
+                const const_no = oBundle.getText("no");
+
+
+
+
+                console.log("ReferenceItemSelected", oLocalModelData.ReferenceItemSelected);
+
+
+
+
+                let oProduct = await this.searchBatchRequired(sMaterial);
+                isBatchRequired = oProduct.isBatchRequired;
+                sMaterialText = await this.onSearchMaterialText(sMaterial);
+
+
+                let componentMaterial = oLocalModelData.ReferenceItemSelected.material;
+
+                if (oLocalModelData.Header.claveMov === c_261) {
+                    if (sMaterial !== componentMaterial) {
+                        let sMessage = oBundle.getText("position.noMatch", [
+                            sMaterial,
+                            componentMaterial
+                        ]);
+                        MessageBox.alert(sMessage);
+                        oView.setBusy(false);
+                        return;
+                    }
+                } else if (oLocalModelData.Header.claveMov === c_201 || oLocalModelData.Header.claveMov === c_551) {
+
+                    let oItems = {
+                        material: sMaterial,
+                        txt_material: sMaterialText,
+                        cantidad: "",
+                        um: "",
+                        centro: "",
+                        almacen: "",
+                        isBatchRequired_txt: isBatchRequired ? const_si : const_no,
+                        GoodsMovementType: oLocalModelData.Header.claseMov,
+                        isBatchRequired: isBatchRequired,
+                        Reservation: "",
+                        ReservationItem: "",
+                        ReservationItemRecordType: ""
+                    }
+                    oLocalModel.setProperty("/ReferenceItems", oItems);
+                }
+
+                this.getOwnerComponent().getModel("oDisplayModel").setProperty("/Posiciones/lote", isBatchRequired);
+
+
+                if (isBatchRequired && oLocalModelData.Header.claveMov !== c_101_02) {
+
+
+
+
+                    // 2️⃣ Validar campos obligatorios
+                    if (!sMaterial || !sBatch) {
+                        let oMessage = oBundle.getText("position.missingFields");
+                        MessageToast.show(oMessage, {
+                            duration: 8000 // milisegundos (8 segundos)
+                        });
+
+
+                        if (!sBatch) {
+                            if (sOrigen === "onBuscarDetalleDestino") {
+
+                                // si viene de datos destino y no han colocado el Lote se debe mostrar la ventana hasta que lo ingresen
+
+                                this.onContinueTraspaso();
+                                this.getView().byId("loteInput_Destino").focus();
+
+
+                            } else if (sOrigen === "onBuscarDetalle") {
+                                this.getView().byId("loteInput").focus();
+                            }
+
+                        }
+
+
+
+
+                        oView.setBusy(false);
+                        return;
+                    }
+
+                    // 3️⃣ Obtener datos del modelo BatchList
+                    //let aBatchData = oBatchListModel.getData() || [];
+                    let aBatchData = await this.onSearchBatchList(sMaterial); // ✅ ahora sí esperas la promesa
+
+                    // 4️⃣ Buscar combinación material-lote
+                    let oMatch = aBatchData.find(item =>
+                        item.Material === sMaterial && item.Batch === sBatch
+                    );
+
+                    if (oMatch) {
+                        let oMessage = oBundle.getText("position.batchFound");
+
+                        /* if (sOrigen === "onBuscarDetalleDestino") {
+                            this.getView().byId("materialInput").focus();
+                            this.onCloseDestinationDialog();
+                            this.onNavToIconTabBar("datos");
+
+
+                        } else */ if (sOrigen === "onBuscarDetalle") {
+                            //this.getView().byId("loteInput").focus();
+                            this.getView().byId("cantidadInput").focus();
+
+                            await this.setPositionValue();
+                        }
+
+
+                        MessageToast.show(oMessage, {
+                            duration: 8000 // milisegundos (8 segundos)
+                        });
+
+
+                        /**
+                         * 5️⃣ Actualizar datos fijos de la selección
+                         * 6️⃣ Esperar texto de detalle (ahora usando await)
+                         * 7️⃣ Guardar el texto final en el modelo
+                         */
+
+
+
+                        oView.setBusy(false);
+
+                    } else {
+                        // Si no hay match y el batch es requerido: mostrar mensaje
+                        if (isBatchRequired) {
+                            let oMessage = oBundle.getText("position.batchNotFound");
+                            MessageToast.show(oMessage, {
+                                duration: 8000 // milisegundos (8 segundos)
+                            });
+                            let oMatrial_flag = false;
+                            this.onClearPosition(oMatrial_flag);
+                            oView.setBusy(false);
+
+                        }
+                    }
+                } else {
+                    console.log("dataposition => " + oLocalModelData.DataPosition.material);
+                    console.log("escaneado => " + this.getView().byId("materialInput").getValue());
+
+                    let sInputValue = this.getView().byId("materialInput").getValue().trim();
+                    let sModelValue = oLocalModelData.DataPosition.material?.trim();
+
+
+                    if (sOrigen === "onBuscarDetalleDestino") {
+
+                        this.getView().byId("loteInput_Destino").setValue();
+
+                    } else if (sOrigen === "onBuscarDetalle") {
+
+                        this.getView().byId("loteInput").setValue();
+                    }
+
+
+
+                    // 📌 Comparar usando includes()
+                    if (sInputValue.toUpperCase().includes(sModelValue.toUpperCase())) {
+                        console.log("✅ El valor del modelo SÍ se encuentra dentro del input");
+                        /**
+                         * 5️⃣ Actualizar datos fijos de la selección
+                         * 6️⃣ Esperar texto de detalle (ahora usando await)
+                         * 7️⃣ Guardar el texto final en el modelo
+                         */
+
+                        await this.setPositionValue();
+                    } else {
+                        console.log("❌ El valor del modelo NO se encuentra dentro del input");
+                    }
+
+                    oView.setBusy(false);
+                }
+
+                oView.setBusy(false);
+
+            },
+
+
+            onBuscarDetalleDestino: async function () {
+
+                let oView = this.getView();
+
+                // ✅ Tomar partes
+                let sMaterial = this.getView().byId("materialInput_Destino").getValue();
+                let sBatch = this.getView().byId("loteInput_Destino").getValue();
+                const c_sOrigen = "onBuscarDetalleDestino";
+
+
+
+                this.onValidarBatch(sMaterial, sBatch, c_sOrigen);
+
+
+
+                oView.setBusy(false);
+            },
+
+            /**
+             * 
+             * @param {[]} oItems - Recibe el resultado de la búsqueda del documento de referencia
+             */
+            setItemValues: async function (oItems) {
+
+                let oLocalModelData = this.getOwnerComponent().getModel("localModel").getData();
+                let oBundle = this.getResourceBundle();
+
+
+                if (oLocalModelData.Header.claveMov === c_305) {
+
+                    try {
+
+                        let oPosition = oItems[1];
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", oPosition.material);
+
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/material", oPosition.material);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/cantidad", oPosition.cantidad);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", oPosition.um);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/lote", oPosition.lote);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/centro", oPosition.centro);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/almacen", oPosition.almacen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/ceco", oPosition.ceco);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/motivo", oPosition.GoodsMovementReasonCode);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingPlant", oPosition.centro);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssuingOrReceivingStorageLoc", oPosition.almacen);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgMaterial", oPosition.material);
+                        this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/IssgOrRcvgBatch", oPosition.lote);
+
+
+
+
+
+
+                        this.onNavToIconTabBar("datos");
+                        this.getView().setBusy(false);
+
+                    } catch (error) {
+                        let oMessage = oBundle.getText("position.error305");
+                        MessageBox.error(oMessage);
+                    }
+
+                }
+
+
+                // guardar el Item en ReferenceItems para ambos casos
+                this.getOwnerComponent().getModel("localModel").setProperty("/ReferenceItems", oItems);
+
+
+
+            },
+
+            onContinueTraspasoEntrada_305: function () {
+                this.onCloseItemsDialog();
+                this.onNavToIconTabBar("datos");
             }
 
 
