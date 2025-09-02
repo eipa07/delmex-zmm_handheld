@@ -81,13 +81,23 @@
           "useBatch": false
         }
       },
-      "aapi_cost_center": {
-        "uri": "/sap/opu/odata4/sap/aapi_cost_center/srvd_a2x/sap/costcenter/0001/",
+      "api_cost_center": {
+        "uri": "/sap/opu/odata4/sap/api_cost_center/srvd_a2x/sap/costcenter/0001/",
         "type": "OData",
         "settings": {
           "annotations": [],
-          "localUri": "localService/aapi_cost_center.xml",
+          "localUri": "localService/api_cost_center.xml",
           "odataVersion": "4.0",
+          "useBatch": false
+        }
+      },
+      "api_product_baseunit": {
+        "uri": "/sap/opu/odata/sap/API_PRODUCT_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/api_product.xml",
+          "odataVersion": "2.0",
           "useBatch": false
         }
       }
@@ -207,8 +217,17 @@
           "earlyRequests": true
         }
       },
-      "aapi_cost_center": {
-        "dataSource": "aapi_cost_center",
+      "api_cost_center": {
+        "dataSource": "api_cost_center",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "api_product_baseunit": {
+        "dataSource": "api_product_baseunit",
         "preload": true,
         "settings": {
           "operationMode": "Server",

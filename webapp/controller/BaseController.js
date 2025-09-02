@@ -12,39 +12,39 @@ sap.ui.define([
 
 
     const c_601 = '601-03'; // Orden de venta
-        const c_602 = '602-03'; // Anulación orden de venta
-        const c_551 = '551-03'; // desguace
-        const c_552 = '552-03'; // Anulación desguace
-        const c_201 = '201-03'; // salida de mercancia cargo ceco
-        const c_202 = '202-03'; // Anulación salida de mercancia cargo ceco
-        const c_261 = '261-03'; // Orden de producción - correcto
-        const c_262 = '262-03'; // Anulación Orden de producción
-        const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order
-        const c_102_01 = '102-01'; // Anul. entrada / orden compra
-        const c_101_02 = '101-02'; // Entrada / orden produccion
-        const c_102_02 = '102-02'; // Anulación entrada / orden produccion
-        const c_303 = '303-04'; // Pendiente
-        const c_304 = '304-04'; // Pendiente
-        const c_306 = '306-04'; // Pendiente
-        const c_305 = '305-04'; // Pendiente
-        const c_309 = '309-04'; // Pendiente
-        const c_310 = '310-04'; // Pendiente
-        const c_321 = '321-04'; // Pendiente
-        const c_322 = '322-04'; // Pendiente
-        const c_343 = "343-04";
-        const c_344_A = "344-04-A";
-        const c_344 = "344-04";
-        const c_543 = "543-04";
-        const c_101_Sub = "101-02-Sub";
-        const c_541 = "541-04";
+    const c_602 = '602-03'; // Anulación orden de venta
+    const c_551 = '551-03'; // desguace
+    const c_552 = '552-03'; // Anulación desguace
+    const c_201 = '201-03'; // salida de mercancia cargo ceco
+    const c_202 = '202-03'; // Anulación salida de mercancia cargo ceco
+    const c_261 = '261-03'; // Orden de producción - correcto
+    const c_262 = '262-03'; // Anulación Orden de producción
+    const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order
+    const c_102_01 = '102-01'; // Anul. entrada / orden compra
+    const c_101_02 = '101-02'; // Entrada / orden produccion
+    const c_102_02 = '102-02'; // Anulación entrada / orden produccion
+    const c_303 = '303-04'; // Pendiente
+    const c_304 = '304-04'; // Pendiente
+    const c_306 = '306-04'; // Pendiente
+    const c_305 = '305-04'; // Pendiente
+    const c_309 = '309-04'; // Pendiente
+    const c_310 = '310-04'; // Pendiente
+    const c_321 = '321-04'; // Pendiente
+    const c_322 = '322-04'; // Pendiente
+    const c_343 = "343-04";
+    const c_344_A = "344-04-A";
+    const c_344 = "344-04";
+    const c_543 = "543-04";
+    const c_101_Sub = "101-02-Sub";
+    const c_541 = "541-04";
 
-        const c_999 = '999'; // Entrada manual de movimiento
+    const c_999 = '999'; // Entrada manual de movimiento
 
-        const c_columnOrigen = "Origen";
-        const c_columnDestino = "Destino";
-        const c_columnLibre_util = "L. Util.";
-        const c_columnCalidad = "Calid.";
-        const c_columnBloqueado = "Bloq."
+    const c_columnOrigen = "Origen";
+    const c_columnDestino = "Destino";
+    const c_columnLibre_util = "L. Util.";
+    const c_columnCalidad = "Calid.";
+    const c_columnBloqueado = "Bloq."
 
 
 
@@ -66,7 +66,8 @@ sap.ui.define([
                     MaterialDocumentYear: "",
                     esEntrega: false,
                     GoodsMovementRefDocType: "",
-                    esTraspaso: false
+                    esTraspaso: false,
+                    esCoproducto: false
                 },
                 DataPosition: {
                     material: "",
@@ -148,7 +149,8 @@ sap.ui.define([
                         ceco: true,
                         motivo: true,
                         txt_posicion: true,
-                        IssuingOrReceivingPlant: true
+                        IssuingOrReceivingPlant: true,
+                        IssuingOrReceivingStorageLoc: true
                     },
                     TablaReferenciaItems: {
                         columnProcesar: true,
@@ -377,6 +379,398 @@ sap.ui.define([
 
         },
 
+        getCecosModel: function () {
+
+            let oModel = new JSONModel(
+                [
+                    {
+                        Plant: "",
+                        Name: ""
+                    },
+                    {
+                        Plant: "1000",
+                        Name: "GENERAL ESCOBEDO, NUEVO LEON"
+                    },
+                    {
+                        Plant: "1010",
+                        Name: "CHIHUAHUA"
+                    },
+                    {
+                        Plant: "1020",
+                        Name: "CIUDAD JUÁREZ"
+                    },
+                    {
+                        Plant: "1030",
+                        Name: "CUERNAVACA"
+                    },
+                    {
+                        Plant: "1040",
+                        Name: "MONTERREY"
+                    },
+                    {
+                        Plant: "1050",
+                        Name: "SAN NICOLÁS DE LOS GARZA"
+                    },
+                    {
+                        Plant: "1060",
+                        Name: "TEJERÍA"
+                    },
+                    {
+                        Plant: "1070",
+                        Name: "PUEBLA"
+                    },
+                    {
+                        Plant: "1080",
+                        Name: "CULIACÁN"
+                    },
+                    {
+                        Plant: "1090",
+                        Name: "LEÓN"
+                    },
+                    {
+                        Plant: "1100",
+                        Name: "GUADALAJARA"
+                    },
+                    {
+                        Plant: "1110",
+                        Name: "EL MARQUÉS QUERÉTARO"
+                    },
+                    {
+                        Plant: "1120",
+                        Name: "IZTAPALAPA"
+                    },
+                    {
+                        Plant: "1130",
+                        Name: "GUSTAVO A. MADERO"
+                    },
+                    {
+                        Plant: "1140",
+                        Name: "KANASIN"
+                    },
+                    {
+                        Plant: "1150",
+                        Name: "CIUDAD BENITO JUÁREZ"
+                    },
+                    {
+                        Plant: "2000",
+                        Name: "PROTEC STEEL DE MEXICO SA DE CV"
+                    },
+                    {
+                        Plant: "3000",
+                        Name: "MEJAAL SA DE CV"
+                    },
+                    {
+                        Plant: "4000",
+                        Name: "LAMINADOS DELMEX SA DE CV"
+                    },
+                    {
+                        Plant: "5000",
+                        Name: "SERVICIO INTEGRADO VERSATIL SA DE CV"
+                    },
+                    {
+                        Plant: "6000",
+                        Name: "ACEROS DELMEX SA DE CV"
+                    },
+                    {
+                        Plant: "7000",
+                        Name: "SOLTRO SA DE CV"
+                    },
+                    {
+                        Plant: "8000",
+                        Name: "TECHNO FORGE. S. A. DE C. V."
+                    },
+                    {
+                        Plant: "9000",
+                        Name: "FORJAS MERIK SA DE CV"
+                    }
+
+
+                ]
+            );
+
+            return oModel;
+
+        },
+
+        getLocationModel: function () {
+
+            let oModel = new JSONModel(
+                [
+                    {
+                        Plant: "",
+                        StorageLocation: "",
+                        StorageLocationName: ""
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "1000",
+                        StorageLocationName: "MP"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "2000",
+                        StorageLocationName: "P EN PROCESO"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "4000",
+                        StorageLocationName: "REFACCIONES"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "6000",
+                        StorageLocationName: "ACERO ESPECIAL"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "7000",
+                        StorageLocationName: "FORJA"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "8000",
+                        StorageLocationName: "SEGUNDAS"
+                    }, {
+                        Plant: "1000",
+                        StorageLocation: "9000",
+                        StorageLocationName: "ACTIVOS FIJOS"
+                    }, {
+                        Plant: "1010",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1010",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1020",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1020",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1030",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1030",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1040",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1040",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1050",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1050",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1060",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1060",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1070",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1070",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1080",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1080",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1090",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1090",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1100",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1100",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1110",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1110",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1120",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1120",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1130",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1130",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1140",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1140",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "1150",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "1150",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "2000",
+                        StorageLocation: "1000",
+                        StorageLocationName: "MP"
+                    }, {
+                        Plant: "2000",
+                        StorageLocation: "2000",
+                        StorageLocationName: "P EN PROCESO"
+                    }, {
+                        Plant: "2000",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "2000",
+                        StorageLocation: "4000",
+                        StorageLocationName: "REFACCIONES"
+                    }, {
+                        Plant: "2000",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "3000",
+                        StorageLocation: "8000",
+                        StorageLocationName: "A GENERAL"
+                    }, {
+                        Plant: "3000",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "3000",
+                        StorageLocation: "4000",
+                        StorageLocationName: "REFACCIONES"
+                    }, {
+                        Plant: "3000",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "5000",
+                        StorageLocation: "8000",
+                        StorageLocationName: "A GENERAL"
+                    }, {
+                        Plant: "7000",
+                        StorageLocation: "1000",
+                        StorageLocationName: "MP"
+                    }, {
+                        Plant: "7000",
+                        StorageLocation: "2000",
+                        StorageLocationName: "P EN PROCESO"
+                    }, {
+                        Plant: "7000",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "7000",
+                        StorageLocation: "4000",
+                        StorageLocationName: "REFACCIONES"
+                    }, {
+                        Plant: "7000",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "8000",
+                        StorageLocation: "1000",
+                        StorageLocationName: "MP"
+                    }, {
+                        Plant: "8000",
+                        StorageLocation: "2000",
+                        StorageLocationName: "P EN PROCESO"
+                    }, {
+                        Plant: "8000",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "8000",
+                        StorageLocation: "4000",
+                        StorageLocationName: "REFACCIONES"
+                    }, {
+                        Plant: "8000",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    }, {
+                        Plant: "8000",
+                        StorageLocation: "1000",
+                        StorageLocationName: "MP"
+                    }, {
+                        Plant: "9000",
+                        StorageLocation: "2000",
+                        StorageLocationName: "P EN PROCESO"
+                    }, {
+                        Plant: "9000",
+                        StorageLocation: "3000",
+                        StorageLocationName: "P TERMINADO"
+                    }, {
+                        Plant: "9000",
+                        StorageLocation: "4000",
+                        StorageLocationName: "REFACCIONES"
+                    }, {
+                        Plant: "9000",
+                        StorageLocation: "5000",
+                        StorageLocationName: "CONSUMIBLES"
+                    },
+
+
+
+
+
+
+
+                ]
+            );
+
+            return oModel;
+
+        },
+
 
         /**
          * Devuelve el enrutador de la aplicación.
@@ -530,12 +924,12 @@ sap.ui.define([
                         sUrl = sUrl + `?$filter=ManufacturingOrder eq '${sKey}'`;
                     } else if (sEntitySet === "A_MaterialDocumentItem" && claseMov !== '101') {
                         sUrl = sUrl + `?$filter=MaterialDocument eq '${sKey}'`;
-                    }else if (sEntitySet === "POSubcontractingComponent" && claseMov !== '541') {
+                    } else if (sEntitySet === "POSubcontractingComponent" && claseMov !== '541') {
                         sUrl = sUrl + `?$filter=PurchaseOrder eq '${sKey}'`;
                     }
 
 
-                    
+
 
                 }
                 return new Promise((resolve, reject) => {
@@ -568,7 +962,7 @@ sap.ui.define([
                         sUrl = `${sBaseUrl}${sEntitySet}?$format=json&$filter=MaterialDocument eq '${sKey}'`;
                     } else if (sEntitySet === "/A_OutbDeliveryItem") {
                         sUrl = `${sBaseUrl}${sEntitySet}?$format=json&$filter=DeliveryDocument eq '${sKey}'`;
-                    }else if (sEntitySet === "POSubcontractingComponent") {
+                    } else if (sEntitySet === "POSubcontractingComponent") {
                         sUrl = `${sBaseUrl}${sEntitySet}?$format=json&$filter=PurchaseOrder eq '${sKey}'`;
                     }
 
@@ -650,7 +1044,10 @@ sap.ui.define([
                 if (sEntitySet === 'A_MaterialDocumentItem' && oData?.d?.results?.length === 0) {
                     // Devuelve null para que el Controller decida qué mostrar
                     return null;
-                }
+                }/* else if (sEntitySet === 'A_Product' && oData?.d?.results?.length === 0) {
+                    // Devuelve null para que el Controller decida qué mostrar
+                    this.getOwnerComponent().getModel("localModel").setProperty("/DataPosition/um", oProduct.BaseUnit);
+                } */
 
                 console.log(sEntitySet, oData);
                 return oData;
@@ -735,10 +1132,18 @@ sap.ui.define([
             } else if (sEntitySet === 'PurchaseOrderItem') {
                 sFilterStr = `PurchaseOrder eq '${sKey}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
-            }else if (sEntitySet === 'PurchaseOrder' && oClaveMov === '541') {
+            } else if (sEntitySet === 'PurchaseOrder' && oClaveMov === '541') {
                 sFilterStr = `PurchaseOrder eq '${sKey}'`;
                 sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
+            } else if (sEntitySet === '/A_Product') {
+                sFilterStr = `Product eq '${sMaterial}'`;
+                sUrl = `?$format=json&$filter=${encodeURIComponent(sFilterStr)}`;
             }
+
+
+
+
+
 
 
             // Para entidades normales, construir con Filter UI5

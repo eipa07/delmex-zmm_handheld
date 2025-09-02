@@ -89,13 +89,27 @@
                     text="{i18n>position.centro}"
                     width="7em"
                 />
-                <Input
+                <!-- <Input
                     id="centroInput"
                     placeholder="{i18n>position.centro.placeholder}"
                     width="10em"
                     value="{localModel>/DataPosition/centro}"
-                     editable="{oDisplayModel>/Posiciones/centro}"
-                />
+                    editable="{oDisplayModel>/Posiciones/centro}"
+                /> -->
+                <Select
+                    id="centroInput"
+                    width="10em"
+                    items="{PlantModel>/}"
+                    selectedKey="{localModel>/DataPosition/centro}"
+                    tooltip="{localModel>/DataPosition/centro} - {localModel>/DataPosition/centro}"
+                    editable="{oDisplayModel>/Posiciones/centro}"
+                    change="onchangeCentro"
+                >
+                    <core:Item
+                        key="{PlantModel>Plant}"
+                        text="{PlantModel>Plant} - {PlantModel>Name}"
+                    />
+                </Select>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -103,13 +117,30 @@
                     text="{i18n>position.almacen}"
                     width="7em"
                 />
-                <Input
+                <!-- <Input
                     id="almacenInput"
                     placeholder="{i18n>position.almacen.placeholder}"
                     width="10em"
                     value="{localModel>/DataPosition/almacen}"
-                     editable="{oDisplayModel>/Posiciones/almacen}"
-                />
+                    editable="{oDisplayModel>/Posiciones/almacen}"
+                /> -->
+
+                <Select
+                    id="almacenInput"
+                    width="10em"
+                    items="{LocationModel>/}"
+                    selectedKey="{localModel>/DataPosition/almacen}"
+                    tooltip="{localModel>/DataPosition/almacen} - {localModel>/DataPosition/almacen}"
+                    required="true"
+                    editable="{oDisplayModel>/Posiciones/almacen}"
+                    change="onchangeAlmacen"
+                >
+                    <core:Item
+                        key="{LocationModel>StorageLocation}"
+                        text="{LocationModel>StorageLocation} - {LocationModel>StorageLocationName}"
+                    />
+                </Select>
+
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -117,13 +148,28 @@
                     text="{i18n>position.ceco}"
                     width="7em"
                 />
-                <Input
+                <!-- <Input
                     id="cecoInput"
                     placeholder="{i18n>position.ceco.placeholder}"
                     width="10em"
                     value="{localModel>/DataPosition/ceco}"
                     editable="{oDisplayModel>/Posiciones/ceco}"
-                />
+                /> -->
+                <Select
+                    id="cecoInput"
+                    width="10em"
+                    items="{costCenterList>/}"
+                    selectedKey="{localModel>/DataPosition/ceco}"
+                    tooltip="{localModel>/DataPosition/ceco} - {localModel>/DataPosition/ceco}"
+                    required="true"
+                    change="onCecoChange"
+                    editable="{oDisplayModel>/Posiciones/ceco}"
+                >
+                    <core:Item
+                        key="{costCenterList>CostCenter}"
+                        text="{costCenterList>CostCenter} - {costCenterList>CostCenterDescription}"
+                    />
+                </Select>
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -147,11 +193,6 @@
                         text="{MotivoList>DescMotivo}"
                     />
                 </Select>
-                <!--  <Input id="motivoInput"
-                       placeholder="{i18n>position.motivo.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/motivo}"
-                       editable="{oDisplayModel>/Posiciones/motivo}"/> -->
             </HBox>
 
             <HBox class="sapUiSmallMarginBottom">
@@ -179,7 +220,7 @@
                     width="10em"
                     value="{localModel>/DataPosition/txt_posicion}"
                     rows="3"
-                    editable="true"
+                    editable="{oDisplayModel>/Posiciones/txt_posicion}"
                     maxLength="40"
                 />
             </HBox>

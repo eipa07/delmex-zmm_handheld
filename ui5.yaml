@@ -37,6 +37,12 @@ server:
           - path: /sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001
             url: https://my413406.s4hana.cloud.sap
             destination: HandHeld_purchaseorder
+          - path: /sap/opu/odata4/sap/api_cost_center/srvd_a2x/sap/costcenter/0001
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_cecos
+          - path: /sap/opu/odata/sap/API_PRODUCT_SRV
+            url: https://my413406.s4hana.cloud.sap
+            destination: HandHeld_product_bu
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:

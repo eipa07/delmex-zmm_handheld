@@ -52,6 +52,20 @@
         "csrfProtection": false
       },
       {
+        "source": "^/sap/opu/odata4/sap/api_cost_center/srvd_a2x/sap/costcenter/0001/(.*)$",
+        "target": "$1",
+        "destination": "HandHeld_cecos",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
+        "source": "^/sap/opu/odata/sap/API_PRODUCT_SRV/(.*)$",
+        "target": "$1",
+        "destination": "HandHeld_product_bu",
+        "authenticationType": "xsuaa",
+        "csrfProtection": false
+      },
+      {
         "source": "^/resources/(.*)$",
         "target": "/resources/$1",
         "authenticationType": "none",

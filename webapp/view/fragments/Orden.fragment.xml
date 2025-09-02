@@ -74,7 +74,7 @@
                 <ColumnListItem>
                     <cells>
                         <!-- <Text text="{localModel>tipoMovTraspaso}" /> -->
-                        <tnt:InfoLabel id="ordenEsTraspaso" text="{localModel>tipoMovTraspaso}" renderMode="Narrow" colorScheme="{localModel>color_tipo}"/>
+                        <tnt:InfoLabel id="ordenEsTraspaso" text="{localModel>tipoMovTraspaso}" renderMode="Narrow" colorScheme="{localModel>color_tipo}" visible="{oDisplayModel>/Columna/esTraspaso}"/>
                         <Text text="{localModel>material}" />
                         <Text text="{localModel>txt_material}" />
                         <Text text="{localModel>cantidad}" />

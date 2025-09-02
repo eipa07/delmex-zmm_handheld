@@ -10,19 +10,47 @@
             
             <HBox class="sapUiResponsiveMargin sapUiSizeCompact"> 
                 <Label text="{i18n>position.IssuingOrReceivingPlant}" width="10em"/>
-                <Input id="centroInput_Destino"
+                <!-- <Input id="centroInput_Destino"
                        placeholder="{i18n>position.centro.placeholder}"
                        width="15em"
                        value="{localModel>/DataPosition/IssuingOrReceivingPlant}"
-                       editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"/>      
+                       editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"/>    -->  
+                       <Select
+                    id="centroInput_Destino"
+                    width="15em"
+                    items="{PlantDestinoModel>/}"
+                    selectedKey="{localModel>/DataPosition/IssuingOrReceivingPlant}"
+                    tooltip="{localModel>/DataPosition/IssuingOrReceivingPlant} - {localModel>/DataPosition/IssuingOrReceivingPlant}"
+                    editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"
+                    change="onchangeCentroDestino"
+                >
+                    <core:Item
+                        key="{PlantDestinoModel>Plant}"
+                        text="{PlantDestinoModel>Plant} - {PlantDestinoModel>Name}"
+                    />
+                </Select> 
             </HBox>
 
           <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
                 <Label text="{i18n>position.IssuingOrReceivingStorageLoc}" width="10em"/>
-                <Input id="almacenInput_Destino"
+                <!-- <Input id="almacenInput_Destino"
                        placeholder="{i18n>position.almacen.placeholder}"
                        width="15em"
-                       value="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"/>
+                       value="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"/> -->
+                 <Select
+                    id="almacenInput_Destino"
+                    width="15em"
+                    items="{LocationModel>/}"
+                    selectedKey="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"
+                    tooltip="{localModel>/DataPosition/IssuingOrReceivingStorageLoc} - {localModel>/DataPosition/IssuingOrReceivingStorageLoc}"
+                    required="true"
+                    editable="{oDisplayModel>/Posiciones/IssuingOrReceivingStorageLoc}"
+                >
+                    <core:Item
+                        key="{LocationModel>StorageLocation}"
+                        text="{LocationModel>StorageLocation} - {LocationModel>StorageLocationName}"
+                    />
+                </Select>
             </HBox>
 
          <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
