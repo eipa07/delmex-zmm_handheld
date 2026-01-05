@@ -1,91 +1,74 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <Dialog
-        id="ReceiveDataDialog"
-        title="{i18n>position.materialDestination}"
-        contentHeight="auto"
-        contentWidth="auto"
-        afterClose="">
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:form="sap.ui.layout.form"
+  xmlns:l="sap.ui.layout">
 
-        <VBox class="sapUiSmallMargin">
-            
-            <HBox class="sapUiResponsiveMargin sapUiSizeCompact"> 
-                <Label text="{i18n>position.IssuingOrReceivingPlant}" width="10em"/>
-                <!-- <Input id="centroInput_Destino"
-                       placeholder="{i18n>position.centro.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/IssuingOrReceivingPlant}"
-                       editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"/>    -->  
-                       <Select
-                    id="centroInput_Destino"
-                    width="15em"
-                    items="{PlantDestinoModel>/}"
-                    selectedKey="{localModel>/DataPosition/IssuingOrReceivingPlant}"
-                    tooltip="{localModel>/DataPosition/IssuingOrReceivingPlant} - {localModel>/DataPosition/IssuingOrReceivingPlant}"
-                    editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"
-                    change="onchangeCentroDestino"
-                >
-                    <core:Item
-                        key="{PlantDestinoModel>Plant}"
-                        text="{PlantDestinoModel>Plant} - {PlantDestinoModel>Name}"
-                    />
-                </Select> 
-            </HBox>
+  <Dialog
+      id="ReceiveDataDialog"
+      title="{i18n>position.materialDestination}"
+      contentWidth="auto"
+      contentHeight="auto">
 
-          <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
-                <Label text="{i18n>position.IssuingOrReceivingStorageLoc}" width="10em"/>
-                <!-- <Input id="almacenInput_Destino"
-                       placeholder="{i18n>position.almacen.placeholder}"
-                       width="15em"
-                       value="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"/> -->
-                 <Select
-                    id="almacenInput_Destino"
-                    width="15em"
-                    items="{LocationModel>/}"
-                    selectedKey="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"
-                    tooltip="{localModel>/DataPosition/IssuingOrReceivingStorageLoc} - {localModel>/DataPosition/IssuingOrReceivingStorageLoc}"
-                    required="true"
-                    editable="{oDisplayModel>/Posiciones/IssuingOrReceivingStorageLoc}"
-                >
-                    <core:Item
-                        key="{LocationModel>StorageLocation}"
-                        text="{LocationModel>StorageLocation} - {LocationModel>StorageLocationName}"
-                    />
-                </Select>
-            </HBox>
+    <form:SimpleForm
+        id="receiveDataSimpleForm"
+        class="sapUiSmallMargin"
+        editable="true"
+        layout="ResponsiveGridLayout"
+        labelSpanS="12" labelSpanM="12" labelSpanL="12"
+        adjustLabelSpan="false"
+        emptySpanS="0" emptySpanM="0" emptySpanL="0"
+        columnsS="1" columnsM="1" columnsL="1">
 
-         <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
-            <Label text="{i18n>position.material}" width="9.5em"/>
-            <Input id="materialInput_Destino"
-                placeholder="{= ${localModel>/ReferenceItemSelected/material} ? ${localModel>/ReferenceItemSelected/material} : ${i18n>position.material.placeholder}}"
-                class="sapUiTinyMarginBeginEnd"
-                value="{localModel>/DataPosition/IssgOrRcvgMaterial}"
-                width="15em"
-                submit="onBuscarDetalleDestino"
-                liveChange="onLiveChangeMaterialDestino"/>
-            </HBox>
+      <!-- Centro destino -->
+      <Label text="{i18n>position.IssuingOrReceivingPlant}"/>
+      <Select id="centroInput_Destino"
+              width="90%"
+              items="{PlantDestinoModel>/}"
+              selectedKey="{localModel>/DataPosition/IssuingOrReceivingPlant}"
+              tooltip="{localModel>/DataPosition/IssuingOrReceivingPlant} - {localModel>/DataPosition/IssuingOrReceivingPlant}"
+              editable="{oDisplayModel>/Posiciones/IssuingOrReceivingPlant}"
+              change="onchangeCentroDestino">
+        <core:Item key="{PlantDestinoModel>Plant}" text="{PlantDestinoModel>Plant} - {PlantDestinoModel>Name}"/>
+      </Select>
 
-             <HBox class="sapUiResponsiveMargin sapUiSizeCompact">
-                <Label text="{i18n>position.lote}" width="9.5em"/>
-                <Input id="loteInput_Destino"
-                       placeholder="{i18n>position.lote.placeholder}"
-                       class="sapUiTinyMarginBeginEnd"
-                       width="15em"
-                       value="{localModel>/DataPosition/IssgOrRcvgBatch}"
-                       submit="onBuscarDetalleDestino"
-                       liveChange="onLiveChangeLoteDestino"
-                       editable="{oDisplayModel>/Posiciones/lote}"/>
-            </HBox>
+      <!-- Almacén destino -->
+      <Label text="{i18n>position.IssuingOrReceivingStorageLoc}"/>
+      <Select id="almacenInput_Destino"
+              width="90%"
+              items="{LocationModel>/}"
+              selectedKey="{localModel>/DataPosition/IssuingOrReceivingStorageLoc}"
+              tooltip="{localModel>/DataPosition/IssuingOrReceivingStorageLoc} - {localModel>/DataPosition/IssuingOrReceivingStorageLoc}"
+              required="true"
+              editable="{oDisplayModel>/Posiciones/IssuingOrReceivingStorageLoc}">
+        <core:Item key="{LocationModel>StorageLocation}" text="{LocationModel>StorageLocation} - {LocationModel>StorageLocationName}"/>
+      </Select>
 
-        </VBox>
+      <!-- Material -->
+      <Label text="{i18n>position.material}"/>
+      <Input id="materialInput_Destino"
+             width="90%"
+             placeholder="{= ${localModel>/ReferenceItemSelected/material} ? ${localModel>/ReferenceItemSelected/material} : ${i18n>position.material.placeholder}}"
+             value="{localModel>/DataPosition/IssgOrRcvgMaterial}"
+             submit="onBuscarDetalleDestino"
+             liveChange="onLiveChangeMaterialDestino"/>
 
-        <beginButton>
+      <!-- Lote -->
+      <Label text="{i18n>position.lote}"/>
+      <Input id="loteInput_Destino"
+             width="90%"
+             placeholder="{i18n>position.lote.placeholder}"
+             value="{localModel>/DataPosition/IssgOrRcvgBatch}"
+             submit="onBuscarDetalleDestino"
+             liveChange="onLiveChangeLoteDestino"
+             editable="{oDisplayModel>/Posiciones/lote}"/>
+    </form:SimpleForm>
 
-           <Button  text="{i18n>position.contabilizar}" press=".onCreateMov" type="Accept" />
-        </beginButton>
-        <endButton>
-           <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseDestinationDialog"/>
-
-        </endButton>
-
-    </Dialog>
+    <beginButton>
+      <Button text="{i18n>position.contabilizar}" type="Accept" press=".onCreateMov"/>
+    </beginButton>
+    <endButton>
+      <Button text="{i18n>referenceItemsDialogClose}" press=".onCloseDestinationDialog"/>
+    </endButton>
+  </Dialog>
 </core:FragmentDefinition>

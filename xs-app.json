@@ -5,63 +5,63 @@
       {
         "source": "^/sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_apiproduct_dev",
+        "destination": "HandHeld_apiproduct_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
-        "source": "^/sap/opu/odata/sap/ZSB_HANDHELD_V2/(.*)$",
+        "source": "^/sap/opu/odata/sap/ZSB_HANDHELD_SB_V2/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_dev",
+        "destination": "HandHeld_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_BATCH_SRV/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_Batch_dev",
+        "destination": "HandHeld_Batch_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_orders_dev",
+        "destination": "HandHeld_orders_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_movmat",
+        "destination": "HandHeld_movmat_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_delivery",
+        "destination": "HandHeld_delivery_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_purchaseorder",
+        "destination": "HandHeld_purchaseorder_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata4/sap/api_cost_center/srvd_a2x/sap/costcenter/0001/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_cecos",
+        "destination": "HandHeld_cecos_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },
       {
         "source": "^/sap/opu/odata/sap/API_PRODUCT_SRV/(.*)$",
         "target": "$1",
-        "destination": "HandHeld_product_bu",
+        "destination": "HandHeld_product_bu_test",
         "authenticationType": "xsuaa",
         "csrfProtection": false
       },

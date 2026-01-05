@@ -1,120 +1,93 @@
 <core:FragmentDefinition
-    xmlns="sap.m"
-    xmlns:core="sap.ui.core"
-    xmlns:i18n="sap.ui.model.resource.ResourceModel"
-    xmlns:tnt="sap.tnt"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:i18n="sap.ui.model.resource.ResourceModel"
+  xmlns:form="sap.ui.layout.form"
+  xmlns:l="sap.ui.layout"
 >
-    <VBox class="sapUiSmallMargin">
-        <HBox class="sapUiSmallMarginBottom">
-            <Label
-                text="{i18n>header.operacion_almacen}"
-                width="7em"
-            />
-            <Select
-            id="header_select_clasemov"
-                width="17em"
-                items="{ClaseMovList>/}"
-                selectedKey="{localModel>/Header/claveMov}"
-                change="onClaseMovChange"
-                beforeOpen="onGetClaseMovList"
-                editable="{oDisplayModel>/Header/operacion_almacen}"
-                tooltip="{localModel>/Header/claseMov} - {localModel>/selectedKeys/textClaseMov}"
-                required="true"
-            >
-                <core:Item
-                    key="{ClaseMovList>ClaveMov}"
-                    text="{ClaseMovList>Descripcion}"
-                />
-            </Select>
+  <!-- Contenedor responsivo: 1 columna en S; 1 en M; 1 en L (puedes subir a 2 si quieres en tablet/desktop) -->
+  <form:SimpleForm
+      id="headerSimpleForm"
+      editable="true"
+      layout="ResponsiveGridLayout"
+      class="sapUiSmallMargin"
+      labelSpanL="12" labelSpanM="12" labelSpanS="12"
+      adjustLabelSpan="false"
+      emptySpanL="0" emptySpanM="0" emptySpanS="0"
+      columnsL="1" columnsM="1" columnsS="1">
 
+    <!-- Operación de almacén -->
+    <Label text="{i18n>header.operacion_almacen}"/>
+    <Select id="header_select_clasemov"
+            width="90%"
+            items="{ClaseMovList>/}"
+            selectedKey="{localModel>/Header/claveMov}"
+            change="onClaseMovChange"
+            beforeOpen="onGetClaseMovList"
+            editable="{oDisplayModel>/Header/operacion_almacen}"
+            tooltip="{localModel>/Header/claseMov} - {localModel>/selectedKeys/textClaseMov}"
+            required="true">
+      <core:Item key="{ClaseMovList>ClaveMov}" text="{ClaseMovList>Descripcion}"/>
+    </Select>
 
-        </HBox>
+    <!-- Clase de movimiento (solo lectura / helper) -->
+    <Label text="{i18n>header.clase_movimiento}"/>
+<!--     <Input id="header_input_clasemov"
+           width="90%"
+           editable="{oDisplayModel>/Header/claseMov}"
+           placeholder="{i18n>header.clase_movimiento_placeholder}"
+           value="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
+           tooltip="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"/> -->
 
-        <HBox class="sapUiSmallMarginBottom">
-            <Label
-                text="{i18n>header.clase_movimiento}"
-                width="7em"
-            />
-            <Input
-                id="header_input_clasemov"
-                placeholder="{i18n>header.clase_movimiento_placeholder}"
-                width="17em"
-                editable="{oDisplayModel>/Header/claseMov}"
-                value="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
-                tooltip="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/claseMov} + ' - ' + ${localModel>/Header/textClaseMov} }"
-            />
-        </HBox>
+               <Input id="header_input_clasemov"
+           width="90%"
+           editable="{oDisplayModel>/Header/claseMov}"
+           placeholder="{i18n>header.clase_movimiento_placeholder}"
+           value="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/textClaseMov} }"
+           tooltip="{= ${localModel>/Header/claseMov} === '0' ? '' : ${localModel>/Header/textClaseMov} }"/>
 
-        <HBox class="sapUiSmallMarginBottom">
-            <Label
-                text="{i18n>header.fecha_documento}"
-                width="7em"
-            />
-            <DatePicker
-                id="header_input_fecha_doc"
+    <!-- Fecha documento -->
+    <Label text="{i18n>header.fecha_documento}"/>
+    <DatePicker id="header_input_fecha_doc"
+                width="90%"
                 value="{path: 'localModel>/Header/fecha_doc'}"
                 valueFormat="yyyy-MM-dd"
                 displayFormat="MMM dd, yyyy"
-                width="17em"
-                editable="{oDisplayModel>/Header/fecha_doc}"
-            />
-        </HBox>
+                editable="{oDisplayModel>/Header/fecha_doc}"/>
 
-        <HBox class="sapUiSmallMarginBottom">
-            <Label
-                text="{i18n>header.fecha_contabilizacion}"
-                width="7em"
-            />
-            <DatePicker
-                id="header_input_fecha_cont"
+    <!-- Fecha contabilización -->
+    <Label text="{i18n>header.fecha_contabilizacion}"/>
+    <DatePicker id="header_input_fecha_cont"
+                width="90%"
                 value="{path: 'localModel>/Header/fecha_cont'}"
                 valueFormat="yyyy-MM-dd"
                 displayFormat="MMM dd, yyyy"
-                width="17em"
-                editable="{oDisplayModel>/Header/fecha_cont}"
-            />
-        </HBox>
+                editable="{oDisplayModel>/Header/fecha_cont}"/>
 
-        <HBox class="sapUiSmallMarginBottom">
-            <Label
-                text="{i18n>header.referencia}"
-                width="7em"
-            />
-            <Input
-                id="header_input_referencia"
-                width="17em"
-                value="{localModel>/Header/referencia}"
-                editable="{oDisplayModel>/Header/referencia}"
-                submit="onContinueHeader"
-            />
-        </HBox>
+    <!-- Referencia -->
+    <Label text="{i18n>header.referencia}"/>
+    <Input id="header_input_referencia"
+           width="90%"
+           value="{localModel>/Header/referencia}"
+           editable="{oDisplayModel>/Header/referencia}"
+           submit="onContinueHeader"/>
 
-        <HBox class="sapUiSmallMarginBottom">
-            <Label
-                text="{i18n>header.texto_cabecera}"
-                width="7em"
-            />
-            <TextArea
-                id="header_input_fecha_texto_cabecera"
-                width="17em"
-                value="{localModel>/Header/texto_cabecera}"
-                editable="{oDisplayModel>/Header/texto_cabecera}"
-                rows="2"
-                maxLength="25"
-            />
-        </HBox>
-    </VBox>
+    <!-- Texto cabecera -->
+    <Label text="{i18n>header.texto_cabecera}"/>
+    <TextArea id="header_input_fecha_texto_cabecera"
+              width="90%"
+              value="{localModel>/Header/texto_cabecera}"
+              editable="{oDisplayModel>/Header/texto_cabecera}"
+              rows="3"
+              growing="true"
+              growingMaxLines="5"
+              maxLength="25"/>
+  </form:SimpleForm>
 
-    <Toolbar class="sapUiSmallMarginTop">
-        <Button
-            text="{i18n>header.continuar}"
-            type="Accept"
-            press=".onContinueHeader"
-        />
-        <Button
-            text="{i18n>header.cancelar}"
-            type="Reject"
-            press=".onRestartProcess"
-        />
-    </Toolbar>
+  <!-- Sugerencia: si esta toolbar va en un Page, muévela al "footer" del Page -->
+  <Toolbar class="sapUiSmallMarginTop">
+    <ToolbarSpacer/>
+    <Button text="{i18n>header.cancelar}" type="Reject" press=".onRestartProcess"/>
+    <Button text="{i18n>header.continuar}" type="Accept" press=".onContinueHeader"/>
+  </Toolbar>
 </core:FragmentDefinition>

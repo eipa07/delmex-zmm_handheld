@@ -17,8 +17,8 @@ server:
           url: https://ui5.sap.com
         backend:
           - path: /sap
-            url: https://my413406-api.s4hana.cloud.sap
-            destination: HandHeld_dev
+            url: https://my416137-api.s4hana.cloud.sap
+            destination: HandHeld_test
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
@@ -35,7 +35,7 @@ server:
       configuration:
         mountPath: /
         services:
-          - urlPath: /sap/opu/odata/sap/ZSB_HANDHELD_V2
+          - urlPath: /sap/opu/odata/sap/ZSB_HANDHELD_SB_V2
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
             generateMockData: true

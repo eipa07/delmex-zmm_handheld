@@ -17,8 +17,8 @@ server:
           url: https://ui5.sap.com
         backend:
           - path: /sap
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_apiproduct_dev
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_apiproduct_test
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:

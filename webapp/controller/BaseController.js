@@ -6,8 +6,9 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
-], function (Controller, History, UIComponent, MessageToast, MessageBox, JSONModel, Filter, FilterOperator) {
+    "sap/ui/model/FilterOperator",
+    "sap/ui/core/BusyIndicator"
+], function (Controller, History, UIComponent, MessageToast, MessageBox, JSONModel, Filter, FilterOperator, BusyIndicator) {
     "use strict";
 
 
@@ -19,10 +20,10 @@ sap.ui.define([
     const c_202 = '202-03'; // Anulación salida de mercancia cargo ceco
     const c_261 = '261-03'; // Orden de producción - correcto
     const c_262 = '262-03'; // Anulación Orden de producción
-    const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order
-    const c_102_01 = '102-01'; // Anul. entrada / orden compra
-    const c_101_02 = '101-02'; // Entrada / orden produccion
-    const c_102_02 = '102-02'; // Anulación entrada / orden produccion
+    const c_101_01 = '101-01'; // Entrada / orden compra o Purchase Order   //InventoryUsabilityCode -- buscar 531 desde 261
+    const c_102_01 = '102-01'; // Anul. entrada / orden compra              // InventoryUsabilityCode
+    const c_101_02 = '101-02'; // Entrada / orden produccion                // InventoryUsabilityCode
+    const c_102_02 = '102-02'; // Anulación entrada / orden produccion      // InventoryUsabilityCode
     const c_303 = '303-04'; // Pendiente
     const c_304 = '304-04'; // Pendiente
     const c_306 = '306-04'; // Pendiente
@@ -67,7 +68,8 @@ sap.ui.define([
                     esEntrega: false,
                     GoodsMovementRefDocType: "",
                     esTraspaso: false,
-                    esCoproducto: false
+                    esCoproducto: false,
+                    GoodsMovementType: ''
                 },
                 DataPosition: {
                     material: "",
@@ -187,49 +189,49 @@ sap.ui.define([
                     },
                     {
                         ClaseMovimiento: "201",
-                        Descripcion: "Salida de mercancia cargo ceco",
+                        Descripcion: "Salida de mercancia cargo Ceco 201",
                         GoodMovType: '03',
                         ClaveMov: "201-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "202",
-                        Descripcion: "Anul. salida de mercancia cargo ceco",
+                        Descripcion: "Anul. salida de mercancia cargo Ceco 202",
                         GoodMovType: '03',
                         ClaveMov: "202-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "261",
-                        Descripcion: "Consumo / orden de producción",
+                        Descripcion: "Consumo 261/Ent. Coproducto 531 Ord. Produc.",
                         GoodMovType: '03',
                         ClaveMov: "261-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "262",
-                        Descripcion: "Anul. / consumo de producción",
+                        Descripcion: "Anul. Consumo 262/Ent. Coproducto 532 Ord. Produc.",
                         GoodMovType: '03',
                         ClaveMov: "262-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "551",
-                        Descripcion: "Desguace",
+                        Descripcion: "Desguace 551",
                         GoodMovType: '03',
                         ClaveMov: "551-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "552",
-                        Descripcion: "Anul. desguace",
+                        Descripcion: "Anul. desguace 552",
                         GoodMovType: '03',
                         ClaveMov: "552-03",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "601",
-                        Descripcion: "Salida / ent. vs ord. venta", // Entrega
+                        Descripcion: "Salida / ent. vs ord. venta 601", // Entrega
                         GoodMovType: '03',
                         ClaveMov: "601-03",
                         GoodsMovementRefDocType: ''
@@ -241,28 +243,28 @@ sap.ui.define([
                     }, */
                     {
                         ClaseMovimiento: "101",
-                        Descripcion: "Entrada / orden compra", // Purchase Order
+                        Descripcion: "Entrada / orden compra 101", // Purchase Order
                         GoodMovType: '01',
                         ClaveMov: "101-01",
                         GoodsMovementRefDocType: 'B'
                     },
                     {
                         ClaseMovimiento: "102",
-                        Descripcion: "Anul. entrada / orden compra",
+                        Descripcion: "Anul. entrada / orden compra 102",
                         GoodMovType: '01',
                         ClaveMov: "102-01",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "101",
-                        Descripcion: "Entrada / orden produccion",
+                        Descripcion: "Entrada / orden produccion 101",
                         GoodMovType: '02',
                         ClaveMov: "101-02",
                         GoodsMovementRefDocType: 'F'
                     },
                     {
                         ClaseMovimiento: "102",
-                        Descripcion: "Anul. entrada / orden produccion",
+                        Descripcion: "Anul. entrada / orden produccion 102",
                         GoodMovType: '02',
                         ClaveMov: "102-02",
                         GoodsMovementRefDocType: ''
@@ -311,28 +313,36 @@ sap.ui.define([
                     },
                     {
                         ClaseMovimiento: "321",
-                        Descripcion: "Traspaso Calidad / lib. utilización",
+                        Descripcion: "Traspaso Calidad / lib. utilización 321",
                         GoodMovType: '04',
                         ClaveMov: "321-04",
                         GoodsMovementRefDocType: ''
                     },
+                    
                     {
                         ClaseMovimiento: "322",
-                        Descripcion: "Anul. Traspaso Calidad / lib. utilización",
+                        Descripcion: "Anul. Traspaso Calidad / lib. utilización 321/322",
                         GoodMovType: '04',
-                        ClaveMov: "322-04",
+                        ClaveMov: "322-04", // 4 dic 2025 Agregar modificacion -A (anulacion) Valor inicial ClaveMov: "322-04-A"
+                        GoodsMovementRefDocType: ''
+                    },
+                    {
+                        ClaseMovimiento: "322", // 4 dic 2025 Nuevo movimiento, Colocar el mismo flujo de 321
+                        Descripcion: "Traspaso Lib. utilización / Calidad 322",
+                        GoodMovType: '04',
+                        ClaveMov: "322-04-borrar",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "343",
-                        Descripcion: "Traspaso 343",
+                        Descripcion: "Traspaso Bloq. a Lib. Utl.  343",
                         GoodMovType: '04',
                         ClaveMov: "343-04",
                         GoodsMovementRefDocType: ''
                     },
                     {
                         ClaseMovimiento: "344",
-                        Descripcion: "Anul. Traspaso 343",
+                        Descripcion: "Anul. Traspaso Bloq. a Lib. Utl. 343",
                         GoodMovType: '04',
                         ClaveMov: "344-04-A",
                         GoodsMovementRefDocType: ''
@@ -344,7 +354,7 @@ sap.ui.define([
                         ClaveMov: "344-04",
                         GoodsMovementRefDocType: ''
                     },
-                    {
+                    /* {
                         ClaseMovimiento: "543",
                         Descripcion: "Entrada / subcontratación 543",
                         GoodMovType: '04',
@@ -364,7 +374,7 @@ sap.ui.define([
                         GoodMovType: '04',
                         ClaveMov: "541-04",
                         GoodsMovementRefDocType: ''
-                    },
+                    }, */
                     /* {
                         ClaseMovimiento: "999",
                         Descripcion: "Entrada manual de movimiento",
@@ -938,12 +948,12 @@ sap.ui.define([
                         method: "GET",
                         success: (data) => {
                             resolve(parseInt(data, 10));
-                            this.getView().setBusy(false);
+                            this.hideBusy(); // Ocultar Busy
                         },
                         error: (jqXHR) => {
                             let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
                             this._showErrorMessage(sMessage, oBundle);
-                            this.getView().setBusy(false);
+                            this.hideBusy(); // Ocultar Busy
                             reject(jqXHR);
                         }
                     });
@@ -975,7 +985,7 @@ sap.ui.define([
                         dataType: "json",
                         success: (oData) => {
                             resolve(oData || []),
-                                this.getView().setBusy(false);
+                                this.hideBusy(); // Ocultar Busy
                         },
                         error: (jqXHR) => {
                             console.log("fetchBlock: ", jqXHR);
@@ -1031,7 +1041,8 @@ sap.ui.define([
             let sUrl = `${sBaseUrl}${sEntitySet}${oFilters}`;
 
             try {
-                this.getView().setBusy(true);
+                // Mostrar Busy
+                this.showBusy();
                 let oData = await $.ajax({
                     url: sUrl,
                     method: "GET",
@@ -1039,7 +1050,7 @@ sap.ui.define([
                     dataType: "json"
                 });
 
-                this.getView().setBusy(false);
+                this.hideBusy(); // Ocultar Busy
 
                 if (sEntitySet === 'A_MaterialDocumentItem' && oData?.d?.results?.length === 0) {
                     // Devuelve null para que el Controller decida qué mostrar
@@ -1056,7 +1067,7 @@ sap.ui.define([
                 console.log(`Error en ${sEntitySet}:`, jqXHR);
                 let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle) || oBundle.getText("error_ajax_generic");
                 this._showErrorMessage(sMessage, oBundle);
-                this.getView().setBusy(false);
+                this.hideBusy(); // Ocultar Busy
                 throw jqXHR;
             }
         },
@@ -1260,12 +1271,12 @@ sap.ui.define([
                     data: JSON.stringify(oPayload),
                     success: (oData) => {
                         resolve(oData);
-                        this.getView().setBusy(false);
+                        this.hideBusy(); // Ocultar Busy
                     },
                     error: (jqXHR) => {
                         let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
                         this._showErrorMessage(sMessage, oBundle);
-                        this.getView().setBusy(false);
+                        this.hideBusy(); // Ocultar Busy
                         reject(jqXHR);
                     }
                 });
@@ -1299,13 +1310,13 @@ sap.ui.define([
                     },
                     success: (data, textStatus, jqXHR) => {
                         let sToken = jqXHR.getResponseHeader("X-CSRF-Token");
-                        this.getView().setBusy(false);
+                        //this.hideBusy(); // Ocultar Busy
                         resolve(sToken);
                     },
                     error: (jqXHR) => {
                         let sMessage = this._getAjaxErrorMessage(jqXHR, oBundle);
                         this._showErrorMessage(sMessage, oBundle);
-                        this.getView().setBusy(false);
+                        this.hideBusy(); // Ocultar Busy
                         reject(jqXHR);
                     }
                 });
@@ -1362,7 +1373,7 @@ sap.ui.define([
 
         readOneAjax2: function () {
 
-            let sUrl = "https://api.ejemplo.com/https://my413406-api.s4hana.cloud.sap/sap/opu/odata/sap/ZSB_HANDHELD_V2/$metadata";
+            let sUrl = "https://api.ejemplo.com/https://my416137-api.s4hana.cloud.sap/sap/opu/odata/sap/ZSB_HANDHELD_SB_V2/$metadata";
 
             let sAuth = 'Basic SEFORF9IRUxEOktjOUF2ZHd2anlQaWdHZWtFZ1FKSlFhWk5nQlNxYmtxVl16bWpYa3M=';
 
@@ -1412,24 +1423,25 @@ sap.ui.define([
             };
         },
 
+        
         /**
- * Verifica si todos los ítems tienen PickingStatus 'C' (completamente tratado)
- * y actualiza la visibilidad de un botón o propiedad de modelo en consecuencia.
- *
- * @param {string} sReferencia - Folio de referencia del documento
- * @param {string} sModelName - Nombre del modelo OData (ej: "API_OUTBOUND_DELIVERY_SRV")
- * @param {string} sEntity - Nombre de la entidad (ej: "/A_OutbDeliveryItem")
- * @param {string} sButtonId - ID del botón a mostrar/ocultar (opcional)
- * @param {string} sDisplayPath - Ruta en oDisplayModel para setProperty (opcional)
- */
+         * Verifica si todos los ítems tienen PickingStatus 'C' (completamente tratado)
+         * y actualiza la visibilidad de un botón o propiedad de modelo en consecuencia.
+         *
+         * @param {string} sReferencia - Folio de referencia del documento
+         * @param {string} sModelName - Nombre del modelo OData (ej: "API_OUTBOUND_DELIVERY_SRV")
+         * @param {string} sEntity - Nombre de la entidad (ej: "/A_OutbDeliveryItem")
+         * @param {string} sButtonId - ID del botón a mostrar/ocultar (opcional)
+         * @param {string} sDisplayPath - Ruta en oDisplayModel para setProperty (opcional)
+         */
+
         checkPickingAndToggleButton: async function (sReferencia, sModelName, sEntity, sDisplayPath, claseMov) {
             try {
-                let oBundle = this.getResourceBundle();
-                let oView = this.getView();
-                let oComponent = this.getOwnerComponent();
-                let iPageSize = "5000";
+                const oBundle = this.getResourceBundle();
+                const oComponent = this.getOwnerComponent();
+                const iPageSize = "5000"; // para readAllPagedAjax
 
-                // Validar referencia
+                // 0) Validaciones básicas
                 if (!sReferencia) {
                     console.warn(oBundle.getText("error.no_referencia"));
                     return;
@@ -1437,34 +1449,47 @@ sap.ui.define([
 
                 console.log(oBundle.getText("log.picking_check", [sReferencia]));
 
-                // Llamada OData para obtener todos los ítems relacionados al folio
-                let oResponse = await this.readAllPagedAjax(sModelName, sEntity, iPageSize, sReferencia, claseMov);
-                let aItems = oResponse?.d?.results || [];
+                // 1) Leer todos los ítems del delivery (paginado)
+                const oResponse = await this.readAllPagedAjax(sModelName, sEntity, iPageSize, sReferencia, claseMov);
+                const aItems = oResponse?.d?.results || [];
 
-                // Validar si todos los ítems ya fueron completamente tratados ('C')
-                let isAllPicked = aItems.every(item => item.PickingStatus === 'C');
+                // 2) Normalización y regla de negocio
+                //    OK_STATUSES: estatus que consideras "listos" (permiten contabilizar)
+                const OK_STATUSES = new Set(["", "C"]);
+                const norm = (s) => (s ?? "").toString().trim().toUpperCase();
+                const hasItems = Array.isArray(aItems) && aItems.length > 0;
 
-                // Mostrar u ocultar botón según resultado
-                if (isAllPicked) {
-                    oComponent.getModel("oDisplayModel").setProperty("/Header/btnPicking", false);
-                    oComponent.getModel("oDisplayModel").setProperty("/Header/btnContabilizar", true);
+                // true sólo si hay ítems y TODOS están en OK_STATUSES
+                const isAllPicked = hasItems && aItems.every(item => OK_STATUSES.has(norm(item.PickingStatus)));
 
+                // métricas para diagnóstico
+                if (hasItems) {
+                    const total = aItems.length;
+                    const okCount = aItems.filter(i => OK_STATUSES.has(norm(i.PickingStatus))).length;
+                    const pendingList = aItems.filter(i => !OK_STATUSES.has(norm(i.PickingStatus)));
+                    console.log("[PickingStatus] total:", total, "ok:", okCount, "pending:", total - okCount, "samplePending:", pendingList.slice(0, 3));
                 } else {
-                    oComponent.getModel("oDisplayModel").setProperty("/Header/btnPicking", true);
-                    oComponent.getModel("oDisplayModel").setProperty("/Header/btnContabilizar", false);
+                    console.warn("[PickingStatus] No hay ítems para la referencia:", sReferencia);
                 }
 
-                // Actualizar propiedad en el modelo para visibilidad por binding
+                // 3) Toggle de visibilidad (header)
+                //    - Si todos están OK → ocultar Picking, mostrar Contabilizar
+                //    - Si hay pendientes → mostrar Picking, ocultar Contabilizar
+                oComponent.getModel("oDisplayModel").setProperty("/Header/btnPicking", !isAllPicked);
+                oComponent.getModel("oDisplayModel").setProperty("/Header/btnContabilizar", isAllPicked);
+
+                // 4) Path extra opcional enviado por parámetro 
                 if (sDisplayPath) {
                     oComponent.getModel("oDisplayModel").setProperty(sDisplayPath, !isAllPicked);
                 }
 
             } catch (err) {
                 console.error("Error en checkPickingAndToggleButton:", err);
-                let oBundle = this.getResourceBundle();
+                const oBundle = this.getResourceBundle();
                 this._showErrorMessage(oBundle.getText("error.picking_status"));
             }
         },
+
 
         /**
          * Elimina uno o más campos específicos de un objeto dentro de un array si se cumple una condición.
@@ -1485,7 +1510,136 @@ sap.ui.define([
                     delete aItems[iIndex][sField];
                 }
             });
+        },
+
+        /**
+        * Muestra el BusyIndicator global
+        * @param {int} iDelay Milisegundos de retardo (default: 0 → inmediato)
+        */
+        showBusy: function (iDelay) {
+            BusyIndicator.show(iDelay || 0);
+        },
+
+        /**
+         * Oculta el BusyIndicator global
+         */
+        hideBusy: function () {
+            BusyIndicator.hide();
+        },
+
+        onOpenReferenceItemsDialog: function () {
+            const oView = this.getView();
+            const oDialog = oView.byId("ReferenceItemsDialog")
+                || sap.ui.xmlfragment(oView.getId(), "delmex.zmmhandheld.view.fragments.ReferenceItemsDialog", this);
+
+            // Obtén los valores
+            const oLocalModel = this.getOwnerComponent().getModel("localModel").getData();
+            const oClaveMov = oLocalModel.Header.claveMov;
+            const sNumeroDoc = oLocalModel.Header.referencia;
+
+            // Define títulos por clave
+            let sTitulo = "";
+            switch (oClaveMov) {
+                case c_202:
+                    sTitulo = "Anulación de entrada 201 Doc.: " + sNumeroDoc;
+                    break;
+                case c_262:
+                    sTitulo = "Anulación de consumo de producción 261 Doc.: " + sNumeroDoc;
+                    break;
+                case c_261:
+                    sTitulo = "Orden de producción: " + sNumeroDoc;
+                    break;
+                case c_601:
+                    sTitulo = "Número de entrega: " + sNumeroDoc;
+                    break;
+                case c_552:
+                    sTitulo = "Anulación de desguace 551 Doc.: " + sNumeroDoc;
+                    break;
+
+                case c_102_01:
+                    sTitulo = "Anulación recibo de material O.C. 101 Doc.: " + sNumeroDoc;
+                    break;
+                case c_101_01:
+                    sTitulo = "Entrada rrden de rompra: " + sNumeroDoc;
+                    break;
+                case c_102_02:
+                    sTitulo = "Anulación recibo de material producción 102 Doc.: " + sNumeroDoc;
+                    break;
+                case c_101_02:
+                    sTitulo = "Orden de producción: " + sNumeroDoc;
+                    break;
+                case c_304:
+                    sTitulo = "Anulación traspaso 303 Doc.:" + sNumeroDoc;
+                    break;
+
+                case c_305:
+                    sTitulo = "Documento de referencia (303):" + sNumeroDoc;
+                    break;
+
+                case c_306:
+                    sTitulo = "Anulación traspaso 305 Doc.: " + sNumeroDoc;
+                    break;
+
+
+                case c_310:
+                    sTitulo = "Anulación traspaso material 309 Doc.: " + sNumeroDoc;
+                    break;
+
+
+                case c_322:
+                    sTitulo = "Anulación traspaso Calidad / lib. utilización 321 Doc.: " + sNumeroDoc;
+                    break;
+
+
+
+                case c_344_A:
+                    sTitulo = "Anulación Traspaso 343 Doc.: " + sNumeroDoc;
+                    break;
+
+
+                case c_543:
+                    sTitulo = "Orden de compra de subcontratación (543):" + sNumeroDoc;
+                    break;
+
+                case c_101_Sub:
+                    sTitulo = "Orden de compra de subcontratación (101):" + sNumeroDoc;
+                    break;
+
+                case c_541:
+                    sTitulo = "Orden de compra de subcontratación salida de componente (541):" + sNumeroDoc;
+                    break;
+
+
+                // ⚡️ Agregas más casos según tu catálogo
+                default:
+                    sTitulo = "Documento: " + sNumeroDoc;
+                    break;
+            }
+
+            return sTitulo;
+        },
+
+        _parseODataError: function (oError) {
+            try {
+                // v2 suele traer responseText
+                const txt = oError?.responseText || oError?.response?.responseText;
+                if (!txt) return null;
+
+                // Intentar JSON primero
+                try {
+                    const j = JSON.parse(txt);
+                    return j?.error?.message?.value || j?.error?.message || null;
+                } catch (_) { /* no JSON */ }
+
+                // Fallback XML (muy simple)
+                const m = txt.match(/<message[^>]*>([\s\S]*?)<\/message>/i);
+                return m ? m[1] : null;
+            } catch {
+                return null;
+            }
         }
+
+
 
 
 

@@ -17,32 +17,32 @@ server:
           url: https://ui5.sap.com
         backend:
           - path: /sap/opu/odata4/sap/api_product/srvd_a2x/sap/product/0002
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_apiproduct_dev
-          - path: /sap/opu/odata/sap/ZSB_HANDHELD_V2
-            url: https://my413406-api.s4hana.cloud.sap
-            destination: HandHeld_dev
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_apiproduct_test
+          - path: /sap/opu/odata/sap/ZSB_HANDHELD_SB_V2
+            url: https://my416137-api.s4hana.cloud.sap
+            destination: HandHeld_test
           - path: /sap/opu/odata/sap/API_BATCH_SRV
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_Batch_dev
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_Batch_test
           - path: /sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_orders_dev
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_orders_test
           - path: /sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_movmat
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_movmat_test
           - path: /sap/opu/odata/sap/API_OUTBOUND_DELIVERY_SRV;v=0002
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_delivery
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_delivery_test
           - path: /sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_purchaseorder
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_purchaseorder_test
           - path: /sap/opu/odata4/sap/api_cost_center/srvd_a2x/sap/costcenter/0001
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_cecos
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_cecos_test
           - path: /sap/opu/odata/sap/API_PRODUCT_SRV
-            url: https://my413406.s4hana.cloud.sap
-            destination: HandHeld_product_bu
+            url: https://my416137.s4hana.cloud.sap
+            destination: HandHeld_product_bu_test
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:

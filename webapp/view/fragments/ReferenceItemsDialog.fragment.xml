@@ -89,6 +89,13 @@
 
            <Button  text="{i18n>anularItemsDialog}" press=".onCreateMov" type="Accept" visible="{localModel>/Header/esAnulacion}"/>
            <Button  text="{i18n>continuar305}" press=".onContinueTraspasoEntrada_305" type="Accept" visible="{oDisplayModel>/TablaReferenciaItems/esTraspasoEntrada_305}"/>
+           <Button
+                id="btnContabilizar_reference"
+                text="{i18n>position.contabilizar}"
+                type="Accept"
+                press=".onCreateMov"
+                visible="{oDisplayModel>/Header/btnContabilizar}"
+            />
        </Toolbar>
         <endButton>
            <Button  text="{i18n>referenceItemsDialogClose}" press=".onCloseItemsDialog"/>

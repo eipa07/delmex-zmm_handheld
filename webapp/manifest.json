@@ -17,7 +17,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/sap/opu/odata/sap/ZSB_HANDHELD_V2/",
+        "uri": "/sap/opu/odata/sap/ZSB_HANDHELD_SB_V2/",
         "type": "OData",
         "settings": {
           "annotations": [],
@@ -156,7 +156,7 @@
           "bundleName": "delmex.zmmhandheld.i18n.i18n"
         }
       },
-      "ZSB_HANDHELD_V2": {
+      "ZSB_HANDHELD_SB_V2": {
         "dataSource": "mainService",
         "preload": true,
         "settings": {
